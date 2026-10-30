@@ -1,0 +1,43 @@
+{
+  "root": "testdata/roms",
+  "inline_rst": {"30": 1, "08": "1!", "18": "bit7/05=1"},
+  "page3": {"1": "sys22", "3": "ext2x"},
+  "page0": {"0": "sys22lo"},
+  "images": {
+    "sys22lo": {
+      "file": "sys22.bin", "origin": "0000",
+      "entries": {"0000": "reset"}
+    },
+    "sys22": {
+      "file": "sys22.bin", "origin": "c000",
+      "entries": {"f7db": "rst18_interp", "f9d6": "bas_error", "fbaa": "bas_putc", "c21c": "reboot", "c55c": "bkin_loop",
+                  "fff5": "bridge_to_ext", "fffe": "jp_hl_sys"},
+      "bridge": {"fff5": "ext2x"},
+      "inline_call": {"fb78": "len"},
+      "tables": [{"addr": "c538", "count": 8, "kind": "devtab", "name": "dev"},
+                 {"addr": "c023", "count": 99, "name": "bas_tok"}]
+    },
+    "ext2x": {
+      "file": "ext2x.bin", "origin": "e000",
+      "entries": {"fff5": "bridge_to_sys", "fffe": "jp_hl_ext"},
+      "links": {"e171": "sys22lo:022d"},
+      "bridge": {"fff5": "sys22"},
+      "tables": [
+        {"addr": "f192", "count": 15, "name": "vid_fn"},
+        {"addr": "eb13", "count": 5, "name": "ed_fn"},
+        {"addr": "ff40", "count": 4, "name": "snd_fn"},
+        {"addr": "e415", "count": 6, "name": "cas_fn"},
+        {"addr": "e2bd", "kind": "counted", "name": "ser_fn"}
+      ]
+    },
+    "ram0030": {
+      "file": "ext2x.bin", "offset": "0269", "length": "10", "origin": "0030",
+      "entries": {"0030": "rst30", "0038": "irq"},
+      "links": {"0030": "ram0b23:0b23"}
+    },
+    "ram0b23": {
+      "file": "ext2x.bin", "offset": "0279", "length": "26", "origin": "0b23",
+      "entries": {"0b23": "rst30_ram", "0b37": "rst30_ret", "0b41": "irq_ret"}
+    }
+  }
+}

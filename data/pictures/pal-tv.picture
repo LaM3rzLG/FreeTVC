@@ -1,0 +1,19 @@
+; A colour TV on the TVC's RF/composite output (docs/design/ui.md "Picture"). Every key is listed here.
+name = pal-tv
+signal = pal              ; sharp, rgb, pal or mono
+luma.bandwidth = 3.5      ; MHz: the set's luma path after its chroma trap
+chroma.bandwidth = 1.3    ; MHz: U and V after demodulation
+delay.line = yes          ; PAL: each line's chroma averaged with the line before
+chroma.phase.error = 0    ; degrees; without the delay line it shows as Hanover bars
+saturation = 1.0
+beam.min = 0.30           ; the beam's vertical sigma in line pitches, for black
+beam.max = 0.48           ; and for full white: bright lines are wider
+spot = 0.55               ; horizontal sigma in TVC pixels (rgb only)
+mask = shadow             ; none, grille or shadow
+mask.strength = 0.30
+mask.pitch = 3            ; window pixels per triad
+glow = 0.12
+curvature = 0.04
+vignette = 0.25
+gamma.crt = 2.4
+brightness = 1.15

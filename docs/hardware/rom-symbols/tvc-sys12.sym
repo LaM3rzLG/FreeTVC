@@ -1,0 +1,103 @@
+; freeTVC symbols: SYS ROM 1.2 in page 3 (C000-FFFF; port 02h b7-6 = 01)
+; Format: label = 0xADDR  ; comment   Evidence: docs/hardware/rom.md §11 (evidence tags there)
+; Upper-case names are [OS] function names (same class/function numbers as 2.2); stmt_* and bas_op_* are not named yet.
+; Checked by tools/re/check_rom_syms12.py against the trace of tools/re/tvc_roms12.json.
+
+; --- tables and data ---
+bas_stmt_table   = 0xC067  ; 63 words: 48 statement tokens FFh..D0h, then the RST 18h op table
+bas_op_table     = 0xC0C7  ; RST 18h ops 00h-0Eh (word = C0C7h + 2 * (op & 7Fh)); 2.2 has 47 ops
+copyright        = 0xC0E5  ; "Copyright (c..." text
+kernel_fn_table  = 0xC4AC  ; class 7: count 5, then words
+crtc_init_table  = 0xC545  ; 16 bytes, R15..R0 (same values as 2.2's C20Ch)
+dev_init_table   = 0xC555  ; 4 words called at boot (C2EFh): video, keyboard, sound, cassette
+dev_table        = 0xC55D  ; 8 pointers to "count, words" tables (class 6 = 0000h: card class)
+font             = 0xC5B4  ; 96 characters x 10 bytes
+vid_fn_table     = 0xC974  ; class 0: count 13 (2.2: 15, no 0Dh/0Eh)
+ed_fn_table      = 0xCF98  ; class 2: count 5
+vec_b86_table    = 0xCBDB  ; 4 words, loaded into the JP (IX) vector 0B86h
+vec_b84_table    = 0xCBE3  ; 4 words loaded into the JP (IX) vector 0B84h; CBEBh-CBF2h 4 more words, same use ❓
+mode_vec_table   = 0xD007  ; 3 x 4 bytes copied after "JP" to 0E68h: routine, columns, bytes per character
+ed_ctl_table     = 0xD170  ; 11 x (control code, handler)
+kbd_fn_table     = 0xD5E3  ; class 1: count 4 (2.2: 5, no function key)
+kbd_tables       = 0xD7BF  ; 320 bytes keyboard code tables
+prt_fn_table     = 0xD8FF  ; class 4: count 3
+snd_fn_table     = 0xD92A  ; class 3: count 4
+cas_fn_table     = 0xD9BB  ; class 5: count 6 (stubs into EXT 1.x)
+bas_keywords     = 0xDE6D  ; keyword table, last character + 80h (starts like 2.2's D73Ah)
+bas_vectors_src  = 0xFB5B  ; 27h bytes copied to 0008h by BASIC init (DA0Bh)
+bas_err_msgs     = 0xFDC6  ; error messages: number, length, text
+
+; --- boot (page-3 part; the page-0 part is in tvc-sys12-page0.sym) ---
+boot_page3       = 0xC241  ; OUT (2),50h, palette 60h-63h <- 0, CRTC from crtc_init_table
+dev_init_loop    = 0xC2EF  ; calls the 4 dev_init_table words through C321h
+basic_start      = 0xC329  ; OUT (2),70h, P_SAVE = 70h, EI, JP basic_cold
+basic_cold       = 0xD9EF  ; BASIC cold start (2.2: CEC2h)
+
+; --- system calls (RST 30h) ---
+jp_hl            = 0xC321  ; JP (HL): dispatcher exit and init-loop call
+syscall_entry    = 0xC363  ; target of INFUNC (0B34h): saves IX, IY, HL, alternate set
+syscall_decode   = 0xC37E  ; class/function decode; IN_TABLE[1] = 2 is first turned into 1 (C384h)
+irq_entry        = 0xC412  ; target of IT_ENTRY (003Dh)
+bridge_to_ext    = 0xFFF0  ; PUSH AF / LD A,F0h / LD (P_SAVE),A / OUT (2),A / POP AF / JP (HL) (2.2: FFF5h)
+
+; --- class handlers (dev tables) ---
+vid_irq          = 0xC9A9
+VID_CHOUT        = 0xCC94
+VID_BKOUT        = 0xCC86
+BTEXT            = 0xCF4B
+VMODE            = 0xC9F4
+CLS              = 0xCA49
+BABS             = 0xCADA
+BREL             = 0xCAD7
+BON              = 0xCBF3
+BOFF             = 0xCBFF
+FILL             = 0xCD48
+DEFC             = 0xCF2C
+PAL              = 0xCA38
+kbd_irq          = 0xD62D
+KBD_CHIN         = 0xD618
+kbd_bkin         = 0xD62C
+KBD_STATUS       = 0xD612
+ED_INT           = 0xCFA3
+ED_CH            = 0xD052
+ED_BK            = 0xD041
+CPOS             = 0xD01D
+CFIX             = 0xD013
+snd_irq          = 0xD933
+snd_nop          = 0xD960  ; functions 1 and 2
+TONE_SET         = 0xD961
+prt_irq          = 0xD929
+PAR_CHOUT        = 0xD90C
+PAR_BKOUT        = 0xD906
+cas_irq          = 0xD9E7  ; RET
+cas_open_stub    = 0xD9C8  ; LD HL,F3E2h -> EXT
+cas_close_stub   = 0xD9CD  ; LD HL,F3E7h -> EXT
+cas_ch_stub      = 0xD9D2  ; LD HL,F3D8h -> EXT
+cas_bk_stub      = 0xD9D7  ; LD HL,F3DDh -> EXT
+cas_verify_stub  = 0xD9DC  ; LD HL,F3ECh -> EXT
+cas_reset_stub   = 0xD9E2  ; LD HL,F3F1h -> EXT; dev_init_table entry 3
+kernel_fn0       = 0xC509
+HI_MEM_SET       = 0xC4B7
+EXP_DIRECT       = 0xC4D0
+IO_DIRECT        = 0xC4E2
+SLOT_NUM         = 0xC50E
+vid_init         = 0xC9F2  ; dev_init_table entry 0
+kbd_init         = 0xD5EC  ; dev_init_table entry 1
+snd_init         = 0xD960  ; dev_init_table entry 2 (= snd_nop)
+
+; --- video and editor internals ---
+chr_put_mode0    = 0xD3AD  ; 0E68h vector, 2-colour mode (64 columns)
+chr_put_mode1    = 0xD3BC  ; 4-colour mode (32 columns)
+chr_put_mode2    = 0xD3D9  ; 16-colour mode (16 columns)
+word_at_hl_a     = 0xC9AA  ; DE = word at HL + 2*A
+ed_ctl_dispatch  = 0xD157  ; searches ed_ctl_table, JP (HL) at D16Fh
+
+; --- BASIC ---
+stmt_dispatch    = 0xDB92  ; token >= CAh: word at C067h + 2*(FFh - token), JP (HL) at DBADh
+rst18_interp     = 0xFB82  ; threaded-code interpreter (2.2: F7DBh)
+bas_op_05        = 0xEA82  ; reads one operand byte at BAS_IP
+bas_error        = 0xFD5C  ; RST 10h target (2.2: F9D6h)
+print_inline     = 0xFE79  ; prints the length-prefixed string after the CALL (2.2: FB78h)
+bas_check_err    = 0xFE9A  ; RST 10h on the result of FEA6h, caller's flags restored
+bas_ext_fmt1     = 0xE647  ; "JP NZ,FFF0h" with HL = FF9Ch: number output continues in EXT 1.x
+bas_ext_fmt2     = 0xE66D  ; "JP NZ,FFF0h" with HL = FCB5h

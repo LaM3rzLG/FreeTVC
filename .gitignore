@@ -1,0 +1,22 @@
+# ROM images are never committed
+*.rom
+*.ROM
+
+# local tool installs (sjasmplus, gdb, DeZog)
+/.tools/
+
+# python
+.venv*/
+__pycache__/
+
+# build output
+/build*/
+/out/
+
+# local test data (docs/developer-guide.md "Test data")
+/testdata/
+
+# per-machine settings
+/.vscode/
+/CMakeUserPresets.json
+.claude/settings.local.json

@@ -1,0 +1,146 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "dezog",
+            "request": "launch",
+            "name": "freeTVC (DZRP, TVC banks)",
+            "remoteType": "dzrp",
+            "dzrp": {
+                "hostname": "127.0.0.1",
+                "port": 6582,
+                "customMemory": {
+                    "slots": [
+                        {
+                            "range": ["0x0000", "0x3FFF"],
+                            "initialBank": 3,
+                            "banks": [
+                                {"index": 0, "name": "SYS", "shortName": "SYS", "rom": true},
+                                {"index": 1, "name": "CART", "shortName": "CART", "rom": true},
+                                {"index": 3, "name": "U0", "shortName": "U0"},
+                                {"index": 6, "name": "U3", "shortName": "U3"},
+                                {"index": 15, "name": "OPEN", "shortName": "OPEN"}
+                            ]
+                        },
+                        {
+                            "range": ["0x4000", "0x7FFF"],
+                            "initialBank": 4,
+                            "banks": [
+                                {"index": 4, "name": "U1", "shortName": "U1"},
+                                {"index": 7, "name": "VID0", "shortName": "VID0"},
+                                {"index": 8, "name": "VID1", "shortName": "VID1"},
+                                {"index": 9, "name": "VID2", "shortName": "VID2"},
+                                {"index": 10, "name": "VID3", "shortName": "VID3"},
+                                {"index": 15}
+                            ]
+                        },
+                        {
+                            "range": ["0x8000", "0xBFFF"],
+                            "initialBank": 5,
+                            "banks": [
+                                {"index": 5, "name": "U2", "shortName": "U2"},
+                                {"index": 7}, {"index": 8}, {"index": 9}, {"index": 10},
+                                {"index": 15}
+                            ]
+                        },
+                        {
+                            "range": ["0xC000", "0xDFFF"],
+                            "initialBank": 0,
+                            "banks": [
+                                {"index": 0, "bankSize": "0x4000"},
+                                {"index": 1, "bankSize": "0x4000"},
+                                {"index": 6, "bankSize": "0x4000"},
+                                {"index": 11, "name": "CARD0", "shortName": "CARD0"},
+                                {"index": 12, "name": "CARD1", "shortName": "CARD1"},
+                                {"index": 13, "name": "CARD2", "shortName": "CARD2"},
+                                {"index": 14, "name": "CARD3", "shortName": "CARD3"},
+                                {"index": 15, "bankSize": "0x4000"}
+                            ]
+                        },
+                        {
+                            "range": ["0xE000", "0xFFFF"],
+                            "initialBank": 0,
+                            "banks": [
+                                {"index": 0, "bankSize": "0x4000", "bankOffset": "0x2000"},
+                                {"index": 1, "bankSize": "0x4000", "bankOffset": "0x2000"},
+                                {"index": 6, "bankSize": "0x4000", "bankOffset": "0x2000"},
+                                {"index": 2, "name": "EXT", "shortName": "EXT", "rom": true},
+                                {"index": 15, "bankSize": "0x4000", "bankOffset": "0x2000"}
+                            ]
+                        }
+                    ]
+                }
+            },
+            "sjasmplus": [
+                {
+                    "path": "hello.sld"
+                }
+            ],
+            "loadObjs": [
+                {
+                    "path": "hello.bin",
+                    "start": "0x6000"
+                }
+            ],
+            "execAddress": "start",
+            "startAutomatically": false,
+            "rootFolder": "${workspaceFolder}",
+            "history": {
+                "reverseDebugInstructionCount": 10000,
+                "spotCount": 10
+            }
+        },
+        {
+            "type": "dezog",
+            "request": "launch",
+            "name": "freeTVC (GDB stub)",
+            "remoteType": "gdb",
+            "gdb": {
+                "hostname": "127.0.0.1",
+                "port": 6583
+            },
+            "sjasmplus": [
+                {
+                    "path": "hello.sld"
+                }
+            ],
+            "loadObjs": [
+                {
+                    "path": "hello.bin",
+                    "start": "0x6000"
+                }
+            ],
+            "execAddress": "start",
+            "startAutomatically": false,
+            "rootFolder": "${workspaceFolder}"
+        },
+        {
+            "type": "dezog",
+            "request": "launch",
+            "name": "freeTVC (DZRP, flat ZX48K)",
+            "remoteType": "dzrp",
+            "dzrp": {
+                "hostname": "127.0.0.1",
+                "port": 6582
+            },
+            "sjasmplus": [
+                {
+                    "path": "hello.sld"
+                }
+            ],
+            "loadObjs": [
+                {
+                    "path": "hello.bin",
+                    "start": "0x6000"
+                }
+            ],
+            "execAddress": "start",
+            "startAutomatically": false,
+            "rootFolder": "${workspaceFolder}",
+            "history": {
+                "reverseDebugInstructionCount": 10000,
+                "spotCount": 10
+            }
+        }
+    ]
+}

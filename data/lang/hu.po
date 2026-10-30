@@ -1,0 +1,3642 @@
+# Hungarian translation of the freeTVC GUI (docs/design/ui.md "Language").
+# Update: python3 -I tools/lang/po_check.py pot src freetvc.pot, then msgmerge -U --backup=none data/lang/hu.po freetvc.pot
+msgid ""
+msgstr ""
+"Project-Id-Version: freeTVC\n"
+"PO-Revision-Date: 2026-10-30\n"
+"Last-Translator: freeTVC\n"
+"Language-Team: freeTVC\n"
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Language-Name: Magyar\n"
+
+#: src/core/cards/floppy.cpp:45
+#, c-format
+msgid ""
+"%zu bytes is no disk of 9 × 512-byte sectors a track, up to 84 tracks a side"
+msgstr ""
+"%zu bájt nem lemez: sávonként 9 × 512 bájtos szektor, oldalanként legfeljebb "
+"84 sáv"
+
+#: src/core/media/cas.cpp:21
+msgid "shorter than the 128-byte CAS header"
+msgstr "rövidebb a 128 bájtos CAS-fejlécnél"
+
+#: src/core/media/cas.cpp:28
+#, c-format
+msgid "type byte %u is neither 01h nor 11h; read as unbuffered"
+msgstr "a típusbájt (%u) se nem 01h, se nem 11h; puffer nélküliként olvasva"
+
+#: src/core/media/cas.cpp:33
+msgid "record count does not match the file size (ignored)"
+msgstr "a rekordszám nem egyezik a fájl méretével (figyelmen kívül hagyva)"
+
+#: src/core/media/cas.cpp:37
+msgid "unbuffered file without its 16-byte program header"
+msgstr "puffer nélküli fájl a 16 bájtos programfejléce nélkül"
+
+#: src/core/media/cas.cpp:43
+#, c-format
+msgid "program header gives %zu bytes, the file holds %zu"
+msgstr "a programfejléc szerint %zu bájt, a fájlban %zu van"
+
+#: src/core/media/host_cassette.cpp:304 src/core/media/host_cassette.cpp:308
+#: src/core/media/host_cassette.cpp:321
+#, c-format
+msgid "OPEN \"%s\": %s"
+msgstr "OPEN \"%s\": %s"
+
+#: src/core/media/host_cassette.cpp:317
+#, c-format
+msgid "OPEN \"%s\": no such file"
+msgstr "OPEN \"%s\": nincs ilyen fájl"
+
+#: src/core/media/host_cassette.cpp:321
+msgid "(no name)"
+msgstr "(névtelen)"
+
+#: src/core/media/host_cassette.cpp:338
+#, c-format
+msgid "SAVE \"%s\": no cassette folder to write to (--cas-dir)"
+msgstr "SAVE \"%s\": nincs írható kazettamappa (--cas-dir)"
+
+#: src/core/media/host_cassette.cpp:362
+#, c-format
+msgid "SAVE \"%s\": %zu bytes"
+msgstr "SAVE \"%s\": %zu bájt"
+
+#: src/core/media/host_cassette.cpp:364
+#, c-format
+msgid "SAVE \"%s\": %s"
+msgstr "SAVE \"%s\": %s"
+
+#: src/core/media/media.cpp:47
+msgid "booting"
+msgstr "indulás"
+
+#: src/core/media/media.cpp:49
+msgid "waiting for the BASIC prompt"
+msgstr "várakozás a BASIC promptra"
+
+#: src/core/media/media.cpp:51
+msgid "loading"
+msgstr "betöltés"
+
+#: src/core/media/media.cpp:53
+msgid "waiting for READY"
+msgstr "várakozás a READY-re"
+
+#: src/core/media/media.cpp:55
+msgid "typing RUN"
+msgstr "RUN begépelése"
+
+#: src/core/media/media.cpp:57
+msgid "idle"
+msgstr "tétlen"
+
+#: src/core/media/media.cpp:104
+msgid "the tape"
+msgstr "a szalag"
+
+#: src/core/media/media.cpp:133
+msgid "cancelled"
+msgstr "megszakítva"
+
+#: src/core/media/media.cpp:153 src/core/media/media.cpp:155
+#: src/core/media/media.cpp:268 src/core/media/media.cpp:284
+#, c-format
+msgid "running %s"
+msgstr "fut: %s"
+
+#: src/core/media/media.cpp:157
+#, c-format
+msgid "timed out %s"
+msgstr "időtúllépés: %s"
+
+#: src/core/media/media.cpp:223
+msgid "LOAD stopped with an error; BASIC is back at the prompt"
+msgstr "a LOAD hibával megállt; a BASIC visszatért a prompthoz"
+
+#: src/core/media/media.cpp:264
+msgid "LOAD closed the tape before the end of the program (a read error?)"
+msgstr "a LOAD a program vége előtt lezárta a szalagot (olvasási hiba?)"
+
+#: src/core/media/media.cpp:266
+msgid ""
+"LOAD ended, but the program is not in memory as it is on the tape (a read "
+"error?)"
+msgstr ""
+"a LOAD véget ért, de a program nem úgy van a memóriában, ahogy a szalagon "
+"(olvasási hiba?)"
+
+#: src/core/media/media.cpp:282
+msgid "LOAD closed the file without reading the program (Bad file?)"
+msgstr "a LOAD a program beolvasása nélkül zárta le a fájlt (Bad file?)"
+
+#: src/core/media/tape_signal.cpp:198
+msgid "not a TTP file (no TTP0 at the start)"
+msgstr "nem TTP-fájl (nem TTP0-val kezdődik)"
+
+#: src/core/media/tape_signal.cpp:205
+#, c-format
+msgid "no block start (00h 6Ah) at offset %zu"
+msgstr "nincs blokkezdet (00h 6Ah), eltolás: %zu"
+
+#: src/core/media/tape_signal.cpp:215
+#, c-format
+msgid "the file ends inside a sector at offset %zu"
+msgstr "a fájl egy szektor közepén ér véget, eltolás: %zu"
+
+#: src/core/media/tape_signal.cpp:234
+#, c-format
+msgid "CRC error in sector %u at offset %zu"
+msgstr "CRC-hiba, szektor: %u, eltolás: %zu"
+
+#: src/core/media/tape_signal.cpp:240
+#, c-format
+msgid "a header block without a name at offset %zu"
+msgstr "név nélküli fejlécblokk, eltolás: %zu"
+
+#: src/core/media/tape_signal.cpp:251
+#, c-format
+msgid "a data block before any header block at offset %zu"
+msgstr "adatblokk fejlécblokk előtt, eltolás: %zu"
+
+#: src/core/media/tape_signal.cpp:268
+msgid "no blocks after TTP0"
+msgstr "nincs blokk a TTP0 után"
+
+#: src/core/media/tape_signal.cpp:276
+msgid "not a RIFF WAVE file"
+msgstr "nem RIFF WAVE fájl"
+
+#: src/core/media/tape_signal.cpp:290
+#, c-format
+msgid "only PCM WAV files are read (format %u)"
+msgstr "csak PCM WAV-fájl olvasható (formátum: %u)"
+
+#: src/core/media/tape_signal.cpp:302
+msgid "a WAV file needs 8- or 16-bit PCM samples and a data chunk"
+msgstr "a WAV-fájlhoz 8 vagy 16 bites PCM-minták és adatblokk kell"
+
+#: src/core/snapshot/machine_state.cpp:26
+msgid "the snapshot has no CONF chunk"
+msgstr "a pillanatképben nincs CONF blokk"
+
+#: src/core/snapshot/machine_state.cpp:40
+msgid "the snapshot's CONF chunk is damaged"
+msgstr "a pillanatkép CONF blokkja sérült"
+
+#: src/core/snapshot/machine_state.cpp:51
+msgid "the snapshot has a card this version does not know"
+msgstr "a pillanatképben olyan kártya van, amelyet ez a verzió nem ismer"
+
+#: src/core/snapshot/machine_state.cpp:58
+msgid "the snapshot's SLOT chunk is damaged"
+msgstr "a pillanatkép SLOT blokkja sérült"
+
+#: src/core/snapshot/machine_state.cpp:68
+#: src/core/snapshot/machine_state.cpp:473
+msgid "the snapshot's SIDC chunk is damaged"
+msgstr "a pillanatkép SIDC blokkja sérült"
+
+#: src/core/snapshot/machine_state.cpp:343
+msgid "the snapshot was taken on another board, ROM set or cartridge"
+msgstr ""
+"a pillanatkép másik alaplapon, ROM-készlettel vagy cartridge-dzsel készült"
+
+#: src/core/snapshot/machine_state.cpp:350
+#, c-format
+msgid "the snapshot has no %s chunk"
+msgstr "a pillanatképből hiányzik egy blokk: %s"
+
+#: src/core/snapshot/machine_state.cpp:418
+msgid "the snapshot's LPT chunk is damaged"
+msgstr "a pillanatkép LPT blokkja sérült"
+
+#: src/core/snapshot/machine_state.cpp:433
+msgid "the snapshot's CARD chunk is damaged"
+msgstr "a pillanatkép CARD blokkja sérült"
+
+#: src/core/snapshot/machine_state.cpp:446
+msgid "the snapshot's MCRT chunk is damaged"
+msgstr "a pillanatkép MCRT blokkja sérült"
+
+#: src/core/snapshot/machine_state.cpp:458
+msgid "the snapshot's SDDC chunk is damaged"
+msgstr "a pillanatkép SDDC blokkja sérült"
+
+#: src/core/snapshot/machine_state.cpp:486
+msgid "the snapshot is damaged (a chunk is too short)"
+msgstr "a pillanatkép sérült (egy blokk túl rövid)"
+
+#: src/core/snapshot/snapshot.cpp:210
+msgid "not a freeTVC snapshot (no TVCS at the start)"
+msgstr "nem freeTVC-pillanatkép (nem TVCS-sel kezdődik)"
+
+#: src/core/snapshot/snapshot.cpp:215
+#, c-format
+msgid "snapshot format version %u is not supported (this build reads %u)"
+msgstr ""
+"a pillanatkép formátumverziója (%u) nem támogatott (ez a változat ezt "
+"olvassa: %u)"
+
+#: src/core/snapshot/snapshot.cpp:223
+#, c-format
+msgid "the snapshot ends inside a chunk header at offset %zu"
+msgstr "a pillanatkép egy blokkfejléc közepén ér véget, eltolás: %zu"
+
+#: src/core/snapshot/snapshot.cpp:232
+#, c-format
+msgid "chunk %s runs past the end of the snapshot"
+msgstr "egy blokk (%s) túlnyúlik a pillanatkép végén"
+
+#: src/core/snapshot/tvs_import.cpp:33
+#, c-format
+msgid "not a WinTVC snapshot (%zu bytes, a .tvs has %zu)"
+msgstr "nem WinTVC-pillanatkép (%zu bájt, egy .tvs mérete %zu)"
+
+#: src/core/snapshot/tvs_import.cpp:38
+#, c-format
+msgid "not a WinTVC snapshot (no %s section)"
+msgstr "nem WinTVC-pillanatkép (hiányzó szakasz: %s)"
+
+#: src/frontend/sdl/bench_view.cpp:47 src/frontend/sdl/bench_view.cpp:1686
+msgid "2-colour"
+msgstr "2 színű"
+
+#: src/frontend/sdl/bench_view.cpp:47 src/frontend/sdl/bench_view.cpp:1686
+msgid "4-colour"
+msgstr "4 színű"
+
+#: src/frontend/sdl/bench_view.cpp:47 src/frontend/sdl/bench_view.cpp:1686
+msgid "16-colour"
+msgstr "16 színű"
+
+#: src/frontend/sdl/bench_view.cpp:127 src/frontend/sdl/bench_view.cpp:170
+#: src/frontend/sdl/bench_view.cpp:172
+msgid "unused"
+msgstr "nem használt"
+
+#: src/frontend/sdl/bench_view.cpp:131 src/frontend/sdl/bench_view.cpp:1689
+msgid "border"
+msgstr "keret"
+
+#: src/frontend/sdl/bench_view.cpp:132
+msgid "printer data"
+msgstr "nyomtatóadat"
+
+#: src/frontend/sdl/bench_view.cpp:133
+msgid "paging"
+msgstr "lapozás"
+
+#: src/frontend/sdl/bench_view.cpp:134
+msgid "IOMEM slot, keyboard row"
+msgstr "IOMEM kártyahely, billentyűzetsor"
+
+#: src/frontend/sdl/bench_view.cpp:135
+msgid "pitch low"
+msgstr "hangmagasság, alsó bájt"
+
+#: src/frontend/sdl/bench_view.cpp:136
+msgid "sound control, pitch high"
+msgstr "hangvezérlés, hangmagasság felső bitjei"
+
+#: src/frontend/sdl/bench_view.cpp:137
+msgid "video mode, amplitude"
+msgstr "videómód, hangerő"
+
+#: src/frontend/sdl/bench_view.cpp:138
+msgid "IRQ acknowledge"
+msgstr "IRQ nyugtázása"
+
+#: src/frontend/sdl/bench_view.cpp:142
+msgid "video paging"
+msgstr "videólapozás"
+
+#: src/frontend/sdl/bench_view.cpp:145 src/frontend/sdl/bench_view.cpp:172
+#: src/frontend/sdl/bench_view.cpp:1680
+msgid "slot"
+msgstr "kártyahely"
+
+#: src/frontend/sdl/bench_view.cpp:148
+msgid "tape out"
+msgstr "magnó ki"
+
+#: src/frontend/sdl/bench_view.cpp:151
+msgid "slot IRQ enable"
+msgstr "kártyahely IRQ engedélyezése"
+
+#: src/frontend/sdl/bench_view.cpp:154 src/frontend/sdl/bench_view.cpp:1691
+msgid "palette"
+msgstr "paletta"
+
+#: src/frontend/sdl/bench_view.cpp:156
+msgid "CRTC select"
+msgstr "CRTC regiszterválasztás"
+
+#: src/frontend/sdl/bench_view.cpp:159
+msgid "tape in"
+msgstr "magnó be"
+
+#: src/frontend/sdl/bench_view.cpp:163
+msgid "keyboard"
+msgstr "billentyűzet"
+
+#: src/frontend/sdl/bench_view.cpp:164
+msgid "status"
+msgstr "állapot"
+
+#: src/frontend/sdl/bench_view.cpp:165
+msgid "card IDs"
+msgstr "kártyaazonosítók"
+
+#: src/frontend/sdl/bench_view.cpp:166
+msgid "INSTART"
+msgstr "INSTART"
+
+#: src/frontend/sdl/bench_view.cpp:178
+#, c-format
+msgid "line %u col %u: interrupt, handler at %04X"
+msgstr "sor %u, oszlop %u: megszakítás, kezelő: %04X"
+
+#: src/frontend/sdl/bench_view.cpp:180 src/frontend/sdl/bench_view.cpp:224
+#: src/frontend/sdl/bench_view.cpp:1470 src/frontend/sdl/bench_view.cpp:2681
+msgid "line"
+msgstr "sor"
+
+#: src/frontend/sdl/bench_view.cpp:180
+msgid "col"
+msgstr "oszlop"
+
+#: src/frontend/sdl/bench_view.cpp:182
+msgid "from"
+msgstr "innen:"
+
+#: src/frontend/sdl/bench_view.cpp:216
+msgid "exec"
+msgstr "futás"
+
+#: src/frontend/sdl/bench_view.cpp:216 src/frontend/sdl/bench_view.cpp:217
+#: src/frontend/sdl/bench_view.cpp:218 src/frontend/sdl/bench_view.cpp:219
+msgid "[bank:]start [end]"
+msgstr "[bank:]cím [vég]"
+
+#: src/frontend/sdl/bench_view.cpp:217
+msgid "load"
+msgstr "olvas"
+
+#: src/frontend/sdl/bench_view.cpp:218
+msgid "store"
+msgstr "ír"
+
+#: src/frontend/sdl/bench_view.cpp:219
+msgid "load + store"
+msgstr "olvas + ír"
+
+#: src/frontend/sdl/bench_view.cpp:220 src/frontend/sdl/bench_view.cpp:274
+msgid "in"
+msgstr "IN"
+
+#: src/frontend/sdl/bench_view.cpp:220 src/frontend/sdl/bench_view.cpp:221
+#: src/frontend/sdl/bench_view.cpp:222
+msgid "port [port]"
+msgstr "port [port]"
+
+#: src/frontend/sdl/bench_view.cpp:221
+msgid "out"
+msgstr "OUT"
+
+#: src/frontend/sdl/bench_view.cpp:222
+msgid "in + out"
+msgstr "IN + OUT"
+
+#: src/frontend/sdl/bench_view.cpp:223 src/frontend/sdl/bench_view.cpp:2342
+msgid "irq"
+msgstr "IRQ"
+
+#: src/frontend/sdl/bench_view.cpp:223
+msgid "handler address, empty: any"
+msgstr "kezelő címe, üresen: bármelyik"
+
+#: src/frontend/sdl/bench_view.cpp:224
+msgid "#row [#row]"
+msgstr "#sor [#sor]"
+
+#: src/frontend/sdl/bench_view.cpp:263
+msgid "any handler"
+msgstr "bármely kezelő"
+
+#: src/frontend/sdl/bench_view.cpp:283
+#, c-format
+msgid "exec at %04X"
+msgstr "futás: %04X"
+
+#: src/frontend/sdl/bench_view.cpp:287
+#, c-format
+msgid "%s %04X = %02X from PC %04X"
+msgstr "%s %04X = %02X, PC: %04X"
+
+#: src/frontend/sdl/bench_view.cpp:292
+#, c-format
+msgid "%s %02Xh = %02X from PC %04X"
+msgstr "%s %02Xh = %02X, PC: %04X"
+
+#: src/frontend/sdl/bench_view.cpp:296
+#, c-format
+msgid "irq, handler at %04X"
+msgstr "IRQ, kezelő: %04X"
+
+#: src/frontend/sdl/bench_view.cpp:299
+#, c-format
+msgid "line #%u, PC %04X"
+msgstr "sor: #%u, PC: %04X"
+
+#: src/frontend/sdl/bench_view.cpp:439
+msgid "value"
+msgstr "érték"
+
+#: src/frontend/sdl/bench_view.cpp:439
+msgid "bytes"
+msgstr "bájtok"
+
+#: src/frontend/sdl/bench_view.cpp:439
+msgid "text"
+msgstr "szöveg"
+
+#: src/frontend/sdl/bench_view.cpp:473 src/frontend/sdl/bench_view.cpp:1145
+msgid "this machine has no such bank"
+msgstr "ennek a gépnek nincs ilyen bankja"
+
+#: src/frontend/sdl/bench_view.cpp:646
+#, c-format
+msgid "checkpoint #%u"
+msgstr "töréspont #%u"
+
+#: src/frontend/sdl/bench_view.cpp:676
+msgid "Run"
+msgstr "Futtatás"
+
+#: src/frontend/sdl/bench_view.cpp:677
+msgid "Leave the monitor and run (F5)"
+msgstr "Kilépés a monitorból és futtatás (F5)"
+
+#: src/frontend/sdl/bench_view.cpp:679 src/frontend/sdl/play_view.cpp:117
+msgid "Pause"
+msgstr "Szünet"
+
+#: src/frontend/sdl/bench_view.cpp:680
+msgid "Stop at the next instruction (Pause)"
+msgstr "Megállás a következő utasításnál (Pause)"
+
+#: src/frontend/sdl/bench_view.cpp:683
+msgid "Step"
+msgstr "Lépés"
+
+#: src/frontend/sdl/bench_view.cpp:684
+msgid "Step into one instruction (F6)"
+msgstr "Egy utasítás, a hívásokba belépve (F6)"
+
+#: src/frontend/sdl/bench_view.cpp:685
+msgid "Over"
+msgstr "Átlépés"
+
+#: src/frontend/sdl/bench_view.cpp:686
+msgid "Step over CALL, RST, block repeats and HALT (F7)"
+msgstr "A CALL, RST, blokkismétlés és HALT átlépése (F7)"
+
+#: src/frontend/sdl/bench_view.cpp:687
+msgid "Out"
+msgstr "Kifelé"
+
+#: src/frontend/sdl/bench_view.cpp:688
+msgid "Run until a return leaves this stack frame (F8)"
+msgstr "Futtatás, amíg egy visszatérés el nem hagyja ezt a veremkeretet (F8)"
+
+#: src/frontend/sdl/bench_view.cpp:689
+msgid "To cursor"
+msgstr "Kurzorig"
+
+#: src/frontend/sdl/bench_view.cpp:692
+msgid "Run to the listing's cursor line (F4)"
+msgstr "Futtatás a Lista kurzoros soráig (F4)"
+
+#: src/frontend/sdl/bench_view.cpp:694
+msgid "Back 5 s"
+msgstr "Vissza 5 mp"
+
+#: src/frontend/sdl/bench_view.cpp:697
+msgid ""
+"Rewind 5 seconds of machine time; press again to go further (hold F10 to "
+"step back a second at a time)"
+msgstr ""
+"5 másodpercnyi gépidő visszatekerése; újabb nyomásra tovább megy (az F10 "
+"nyomva tartásával másodpercenként lép vissza)"
+
+#: src/frontend/sdl/bench_view.cpp:698 src/frontend/sdl/play_view.cpp:118
+msgid "Reset"
+msgstr "Reset"
+
+#: src/frontend/sdl/bench_view.cpp:703
+#, c-format
+msgid "stopped at %s"
+msgstr "megállt: %s"
+
+#: src/frontend/sdl/bench_view.cpp:712 src/frontend/sdl/play_view.cpp:427
+msgid "running"
+msgstr "fut"
+
+#: src/frontend/sdl/bench_view.cpp:719
+msgctxt "mode"
+msgid "Play"
+msgstr "Játék"
+
+#: src/frontend/sdl/bench_view.cpp:723
+msgid "Back to Play (F12)"
+msgstr "Vissza a Játék módba (F12)"
+
+#: src/frontend/sdl/bench_view.cpp:761
+#, c-format
+msgid "%s at %s: click to show it in Listing and Memory"
+msgstr ""
+"%s ezen a címen: %s; kattintás: megjelenítés a Listában és a Memóriában"
+
+#: src/frontend/sdl/bench_view.cpp:791
+msgid "Screen: keys go to the TVC"
+msgstr "Képernyő: a billentyűk a TVC-hez mennek"
+
+#: src/frontend/sdl/bench_view.cpp:791 src/frontend/sdl/play_view.cpp:90
+#: src/frontend/sdl/settings_view.cpp:236
+msgid "Screen"
+msgstr "Képernyő"
+
+#: src/frontend/sdl/bench_view.cpp:817
+msgid ""
+"Marks: port accesses and interrupt entries at the beam position where they "
+"happened"
+msgstr "Jelek: portelérések és megszakítások ott, ahol a sugár éppen járt"
+
+#: src/frontend/sdl/bench_view.cpp:879
+#, c-format
+msgid "%u marked, %u outside the picture"
+msgstr "%u jelölve, %u a képen kívül"
+
+#: src/frontend/sdl/bench_view.cpp:881
+#, c-format
+msgid "%u marked, %u outside the picture, more than %u in the frame"
+msgstr "%u jelölve, %u a képen kívül, több mint %u a képkockában"
+
+#: src/frontend/sdl/bench_view.cpp:900
+#, c-format
+msgid "beam on line %u, outside this area"
+msgstr "a sugár sora: %u, ezen a területen kívül"
+
+#: src/frontend/sdl/bench_view.cpp:954
+msgid "Listing"
+msgstr "Lista"
+
+#: src/frontend/sdl/bench_view.cpp:965
+msgid "Go to: address or label"
+msgstr "Ugrás: cím vagy címke"
+
+#: src/frontend/sdl/bench_view.cpp:972
+msgid "the listing takes a CPU address"
+msgstr "a Lista CPU-címet vár"
+
+#: src/frontend/sdl/bench_view.cpp:979 src/frontend/sdl/bench_view.cpp:2986
+#: src/frontend/sdl/bench_view.cpp:3000
+msgid "Follow PC"
+msgstr "PC követése"
+
+#: src/frontend/sdl/bench_view.cpp:1097
+msgid "Memory"
+msgstr "Memória"
+
+#: src/frontend/sdl/bench_view.cpp:1120 src/frontend/sdl/bench_view.cpp:1121
+#: src/frontend/sdl/bench_view.cpp:1346
+msgid "CPU"
+msgstr "CPU"
+
+#: src/frontend/sdl/bench_view.cpp:1133
+msgid "CPU: what is paged in now; a bank: its bytes wherever it is paged"
+msgstr ""
+"CPU: ami most be van lapozva; egy bank: a saját bájtjai, bárhová is van "
+"lapozva"
+
+#: src/frontend/sdl/bench_view.cpp:1137
+msgid "Go to: [bank:]address"
+msgstr "Ugrás: [bank:]cím"
+
+#: src/frontend/sdl/bench_view.cpp:1189
+#, c-format
+msgid "%s is read-only"
+msgstr "%s: csak olvasható"
+
+#: src/frontend/sdl/bench_view.cpp:1404 src/frontend/sdl/bench_view.cpp:1979
+msgid "Double-click to edit"
+msgstr "Dupla kattintás: szerkesztés"
+
+#: src/frontend/sdl/bench_view.cpp:1404 src/frontend/sdl/bench_view.cpp:1438
+msgid "Stop the machine to edit registers"
+msgstr "A regiszterek szerkesztéséhez állítsd meg a gépet"
+
+#: src/frontend/sdl/bench_view.cpp:1438
+msgid "Click to toggle the flag"
+msgstr "Kattintás: a jelzőbit átváltása"
+
+#: src/frontend/sdl/bench_view.cpp:1454
+msgid "HALT"
+msgstr "HALT"
+
+#: src/frontend/sdl/bench_view.cpp:1458
+msgid "IRQ pending"
+msgstr "IRQ függőben"
+
+#: src/frontend/sdl/bench_view.cpp:1469
+msgid "frame"
+msgstr "képkocka"
+
+#: src/frontend/sdl/bench_view.cpp:1471
+msgid "column"
+msgstr "oszlop"
+
+#: src/frontend/sdl/bench_view.cpp:1472
+msgid "T-states"
+msgstr "T-ciklus"
+
+#: src/frontend/sdl/bench_view.cpp:1505
+msgid "Console"
+msgstr "Konzol"
+
+#: src/frontend/sdl/bench_view.cpp:1542 src/frontend/sdl/main.cpp:2446
+msgid "(running) "
+msgstr "(fut) "
+
+#: src/frontend/sdl/bench_view.cpp:1567
+msgid "monitor command (help lists them)"
+msgstr "monitorparancs (a help kilistázza őket)"
+
+#: src/frontend/sdl/bench_view.cpp:1589
+msgid "Agent"
+msgstr "Ügynök"
+
+#: src/frontend/sdl/bench_view.cpp:1597
+msgid ""
+"No MCP server: switch it on in Settings, Remote, or start freeTVC with --mcp-"
+"http, and an agent's tool calls show here live."
+msgstr ""
+"Nincs MCP-szerver: kapcsold be a Beállítások, Távoli elérés részben, vagy "
+"indítsd a freeTVC-t az --mcp-http kapcsolóval, és egy ügynök eszközhívásai "
+"élőben itt jelennek meg."
+
+#: src/frontend/sdl/bench_view.cpp:1606
+#, c-format
+msgid "%s · %llu calls"
+msgstr "%s · %llu hívás"
+
+#: src/frontend/sdl/bench_view.cpp:1643 src/frontend/sdl/play_view.cpp:105
+#: src/frontend/sdl/settings_view.cpp:61
+msgid "Machine"
+msgstr "Gép"
+
+#: src/frontend/sdl/bench_view.cpp:1672
+msgid "Paging"
+msgstr "Lapozás"
+
+#: src/frontend/sdl/bench_view.cpp:1674
+msgid "port 02h"
+msgstr "port 02h"
+
+#: src/frontend/sdl/bench_view.cpp:1676
+msgid "video 0Fh"
+msgstr "videó 0Fh"
+
+#: src/frontend/sdl/bench_view.cpp:1677
+msgid "shows VID"
+msgstr "látható VID"
+
+#: src/frontend/sdl/bench_view.cpp:1679
+msgid "IOMEM"
+msgstr "IOMEM"
+
+#: src/frontend/sdl/bench_view.cpp:1684 src/frontend/sdl/bench_view.cpp:2505
+msgid "Video"
+msgstr "Videó"
+
+#: src/frontend/sdl/bench_view.cpp:1687
+msgid "mode"
+msgstr "mód"
+
+#: src/frontend/sdl/bench_view.cpp:1711 src/frontend/sdl/settings_view.cpp:65
+#: src/frontend/sdl/settings_view.cpp:255
+msgid "Sound"
+msgstr "Hang"
+
+#: src/frontend/sdl/bench_view.cpp:1713
+msgid "pitch"
+msgstr "hangmagasság"
+
+#: src/frontend/sdl/bench_view.cpp:1715 src/frontend/sdl/bench_view.cpp:2739
+#: src/frontend/common/host_tape.cpp:347
+msgid "stopped"
+msgstr "leállítva"
+
+#: src/frontend/sdl/bench_view.cpp:1719
+msgid "tone"
+msgstr "hanggenerátor"
+
+#: src/frontend/sdl/bench_view.cpp:1720 src/frontend/sdl/bench_view.cpp:1724
+msgid "on"
+msgstr "be"
+
+#: src/frontend/sdl/bench_view.cpp:1720 src/frontend/sdl/bench_view.cpp:1724
+msgid "off"
+msgstr "ki"
+
+#: src/frontend/sdl/bench_view.cpp:1721
+msgid "amplitude"
+msgstr "hangerő"
+
+#: src/frontend/sdl/bench_view.cpp:1723
+msgid "sound IRQ"
+msgstr "hang-IRQ"
+
+#: src/frontend/sdl/bench_view.cpp:1725
+msgid "IRQ line"
+msgstr "IRQ-vonal"
+
+#: src/frontend/sdl/bench_view.cpp:1726
+msgid "pending"
+msgstr "függőben"
+
+#: src/frontend/sdl/bench_view.cpp:1726
+msgid "clear"
+msgstr "nincs"
+
+#: src/frontend/sdl/bench_view.cpp:1731 src/frontend/sdl/play_view.cpp:63
+msgid "Keyboard"
+msgstr "Billentyűzet"
+
+#: src/frontend/sdl/bench_view.cpp:1793
+msgid "Checkpoints"
+msgstr "Töréspontok"
+
+#: src/frontend/sdl/bench_view.cpp:1828 src/frontend/sdl/bench_view.cpp:1839
+msgid "Log only"
+msgstr "Csak napló"
+
+#: src/frontend/sdl/bench_view.cpp:1828 src/frontend/sdl/bench_view.cpp:1844
+msgid "Add"
+msgstr "Hozzáad"
+
+#: src/frontend/sdl/bench_view.cpp:1836
+msgid "if: condition (optional)"
+msgstr "if: feltétel (opció)"
+
+#: src/frontend/sdl/bench_view.cpp:1841
+msgid "Count and log the hits without stopping (the monitor's trace command)"
+msgstr ""
+"A találatok számlálása és naplózása megállás nélkül (a monitor trace "
+"parancsa)"
+
+#: src/frontend/sdl/bench_view.cpp:1866
+msgid ""
+"No checkpoints. Add one here, click the Listing's gutter (F9), or type break "
+"in the Console."
+msgstr ""
+"Nincs töréspont. Itt adhatsz hozzá egyet, a Lista margójára kattintva (F9), "
+"vagy a Konzolban a break paranccsal."
+
+#: src/frontend/sdl/bench_view.cpp:1874
+#, c-format
+msgid "%zu checkpoint(s)"
+msgstr "%zu töréspont"
+
+#: src/frontend/sdl/bench_view.cpp:1879
+msgid "Click again to delete all"
+msgstr "Kattints újra az összes törléséhez"
+
+#: src/frontend/sdl/bench_view.cpp:1879
+msgid "Delete all"
+msgstr "Összes törlése"
+
+#: src/frontend/sdl/bench_view.cpp:1895
+msgid "On"
+msgstr "Be"
+
+#: src/frontend/sdl/bench_view.cpp:1897
+msgid "Kind"
+msgstr "Fajta"
+
+#: src/frontend/sdl/bench_view.cpp:1898
+msgid "Place"
+msgstr "Hely"
+
+#: src/frontend/sdl/bench_view.cpp:1899
+msgid "Condition"
+msgstr "Feltétel"
+
+#: src/frontend/sdl/bench_view.cpp:1900
+msgid "Ignore"
+msgstr "Kihagyás"
+
+#: src/frontend/sdl/bench_view.cpp:1901
+msgid "Hits"
+msgstr "Találat"
+
+#: src/frontend/sdl/bench_view.cpp:1918
+msgid "This checkpoint stopped the machine"
+msgstr "Ez a töréspont állította meg a gépet"
+
+#: src/frontend/sdl/bench_view.cpp:1925
+msgid "log"
+msgstr "napló"
+
+#: src/frontend/sdl/bench_view.cpp:1925
+msgid "once"
+msgstr "egyszeri"
+
+#: src/frontend/sdl/bench_view.cpp:1944
+msgid "Click to show it in the Listing"
+msgstr "Kattintás: megjelenítés a Listában"
+
+#: src/frontend/sdl/bench_view.cpp:1944 src/frontend/sdl/bench_view.cpp:2694
+msgid "Click to show it in the Memory panel"
+msgstr "Kattintás: megjelenítés a Memória panelen"
+
+#: src/frontend/sdl/bench_view.cpp:2005
+msgid "Last hit:"
+msgstr "Utolsó találat:"
+
+#: src/frontend/sdl/bench_view.cpp:2007
+msgid "Hits counted; the latest is no longer in the hit log"
+msgstr "A találatok számlálva; a legutóbbi már nincs a találatnaplóban"
+
+#: src/frontend/sdl/bench_view.cpp:2007
+msgid "No hits yet"
+msgstr "Még nincs találat"
+
+#: src/frontend/sdl/bench_view.cpp:2016
+msgid "Delete"
+msgstr "Törlés"
+
+#: src/frontend/sdl/bench_view.cpp:2048
+msgid "Watch"
+msgstr "Figyelő"
+
+#: src/frontend/sdl/bench_view.cpp:2067
+msgid "Add: HL, {SP}, [0B00], VID0:0000 or a label"
+msgstr "Új: HL, {SP}, [0B00], VID0:0000 vagy egy címke"
+
+#: src/frontend/sdl/bench_view.cpp:2083
+msgid ""
+"Expressions are evaluated every frame; a value that changed between the last "
+"two stops is yellow. Right-click a row for its format, Memory and a "
+"checkpoint on writes."
+msgstr ""
+"A kifejezések minden képkockában kiértékelődnek; a két utolsó megállás "
+"között megváltozott érték sárga. Jobb kattintás egy soron: formátum, Memória "
+"és töréspont írásra."
+
+#: src/frontend/sdl/bench_view.cpp:2141
+msgid "Show in Memory"
+msgstr "Megjelenítés a Memóriában"
+
+#: src/frontend/sdl/bench_view.cpp:2144
+msgid "Show in Listing"
+msgstr "Megjelenítés a Listában"
+
+#: src/frontend/sdl/bench_view.cpp:2148
+msgid "Stop on write"
+msgstr "Megállás íráskor"
+
+#: src/frontend/sdl/bench_view.cpp:2157
+msgid "Remove"
+msgstr "Eltávolítás"
+
+#: src/frontend/sdl/bench_view.cpp:2233
+msgid "History"
+msgstr "Előzmények"
+
+#: src/frontend/sdl/bench_view.cpp:2250
+msgid "The instruction history is off: type chis on in the Console."
+msgstr ""
+"Az utasítás-előzmények ki vannak kapcsolva: írd be a Konzolba: chis on."
+
+#: src/frontend/sdl/bench_view.cpp:2256
+#, c-format
+msgid "Pause to read the history: the last %zu instructions before the stop."
+msgstr ""
+"Állítsd meg a gépet az előzmények olvasásához: a megállás előtti utolsó %zu "
+"utasítás."
+
+#: src/frontend/sdl/bench_view.cpp:2265
+msgid "Filter: address, bank or instruction"
+msgstr "Szűrő: cím, bank vagy utasítás"
+
+#: src/frontend/sdl/bench_view.cpp:2294
+#, c-format
+msgid "%zu of %zu instructions"
+msgstr "%zu / %zu utasítás"
+
+#: src/frontend/sdl/bench_view.cpp:2303
+msgid "T before"
+msgstr "T előtte"
+
+#: src/frontend/sdl/bench_view.cpp:2304
+msgid "Bank"
+msgstr "Bank"
+
+#: src/frontend/sdl/bench_view.cpp:2306 src/frontend/sdl/bench_view.cpp:2858
+msgid "Instruction"
+msgstr "Utasítás"
+
+#: src/frontend/sdl/bench_view.cpp:2307
+msgid "Changed"
+msgstr "Változott"
+
+#: src/frontend/sdl/bench_view.cpp:2336
+#, c-format
+msgid ""
+"Click to show it in the Listing.\n"
+"After it: AF %04X BC %04X DE %04X HL %04X\n"
+"IX %04X IY %04X SP %04X"
+msgstr ""
+"Kattintás: megjelenítés a Listában.\n"
+"Utána: AF %04X BC %04X DE %04X HL %04X\n"
+"IX %04X IY %04X SP %04X"
+
+#: src/frontend/sdl/bench_view.cpp:2373
+msgid "I/O log"
+msgstr "I/O napló"
+
+#: src/frontend/sdl/bench_view.cpp:2391
+msgid "Off at start: the keyboard scan reads port 58h ten times a frame"
+msgstr ""
+"Induláskor ki: a billentyűzet letapogatása képkockánként tízszer olvassa az "
+"58h portot"
+
+#: src/frontend/sdl/bench_view.cpp:2397
+msgid "Ports: 70 71 60-63"
+msgstr "Port: 70 71 60-63"
+
+#: src/frontend/sdl/bench_view.cpp:2399
+msgid "Follow"
+msgstr "Követés"
+
+#: src/frontend/sdl/bench_view.cpp:2401 src/frontend/sdl/bench_view.cpp:2734
+msgid "Clear"
+msgstr "Ürítés"
+
+#: src/frontend/sdl/bench_view.cpp:2408
+msgid "ports are hex numbers or ranges, e.g. 70 71 60-63"
+msgstr "a portok hexadecimális számok vagy tartományok, pl. 70 71 60-63"
+
+#: src/frontend/sdl/bench_view.cpp:2422
+#, c-format
+msgid "%zu shown of %zu kept"
+msgstr "%zu látható a megőrzött %zu közül"
+
+#: src/frontend/sdl/bench_view.cpp:2426
+msgid "(events are recorded while this panel or the Screen panel is visible)"
+msgstr ""
+"(az események rögzítése akkor fut, amikor ez a panel vagy a Képernyő panel "
+"látható)"
+
+#: src/frontend/sdl/bench_view.cpp:2433
+msgid "Frame"
+msgstr "Kocka"
+
+#: src/frontend/sdl/bench_view.cpp:2434
+msgid "Line"
+msgstr "Sor"
+
+#: src/frontend/sdl/bench_view.cpp:2435
+msgid "Col"
+msgstr "Oszlop"
+
+#: src/frontend/sdl/bench_view.cpp:2437
+msgid "Port"
+msgstr "Port"
+
+#: src/frontend/sdl/bench_view.cpp:2438
+msgid "Value"
+msgstr "Érték"
+
+#: src/frontend/sdl/bench_view.cpp:2439
+msgid "What"
+msgstr "Mi"
+
+#: src/frontend/sdl/bench_view.cpp:2464
+msgid "Click to show the instruction in the Listing"
+msgstr "Kattintás: az utasítás megjelenítése a Listában"
+
+#: src/frontend/sdl/bench_view.cpp:2476
+msgid "interrupt, handler"
+msgstr "megszakítás, kezelő"
+
+#: src/frontend/sdl/bench_view.cpp:2528 src/frontend/sdl/bench_view.cpp:2530
+#: src/frontend/sdl/bench_view.cpp:2533
+#, c-format
+msgid "shown: VID%u"
+msgstr "látható: VID%u"
+
+#: src/frontend/sdl/bench_view.cpp:2546
+msgid ""
+"shown: the bank port 0Fh puts on the screen now; a VIDn: that bank whatever "
+"is shown"
+msgstr ""
+"látható: a bank, amelyet a 0Fh port most a képernyőre tesz; egy VIDn: az a "
+"bank, bármi látszik is"
+
+#: src/frontend/sdl/bench_view.cpp:2549 src/frontend/sdl/bench_view.cpp:2550
+#: src/frontend/sdl/bench_view.cpp:2553
+#, c-format
+msgid "machine: %s"
+msgstr "gép: %s"
+
+#: src/frontend/sdl/bench_view.cpp:2578
+#, c-format
+msgid "palette %u = IGRB %X; click to choose another"
+msgstr "paletta %u = IGRB %X; kattintás: másik választása"
+
+#: src/frontend/sdl/bench_view.cpp:2602
+msgid "machine palette"
+msgstr "a gép palettája"
+
+#: src/frontend/sdl/bench_view.cpp:2610
+#, c-format
+msgid ""
+"start %04Xh   %u x %u characters, %u lines each   cursor %04Xh   %zu bytes "
+"on screen"
+msgstr ""
+"kezdet %04Xh   %u x %u karakter, %u soros   kurzor %04Xh   %zu bájt a képen"
+
+#: src/frontend/sdl/bench_view.cpp:2612
+msgid "dim off-screen"
+msgstr "képen kívül halvány"
+
+#: src/frontend/sdl/bench_view.cpp:2614
+msgid "Darken the bytes the 6845 does not show with its current registers"
+msgstr ""
+"Sötétebbek azok a bájtok, amelyeket a 6845 a mostani regisztereivel nem "
+"jelenít meg"
+
+#: src/frontend/sdl/bench_view.cpp:2682
+msgid "byte"
+msgstr "bájt"
+
+#: src/frontend/sdl/bench_view.cpp:2682
+msgid "dot"
+msgstr "képpont"
+
+#: src/frontend/sdl/bench_view.cpp:2688
+#, c-format
+msgid ""
+"\n"
+"on screen: character row %u, column %u, line %u of the row"
+msgstr ""
+"\n"
+"a képernyőn: %u. karaktersor, %u. oszlop, a sor %u. képsora"
+
+#: src/frontend/sdl/bench_view.cpp:2692
+msgid "not on screen with these CRTC values"
+msgstr "ezekkel a CRTC-értékekkel nincs a képernyőn"
+
+#: src/frontend/sdl/bench_view.cpp:2714
+msgid "Profiler"
+msgstr "Profilozó"
+
+#: src/frontend/sdl/bench_view.cpp:2727 src/frontend/sdl/play_view.cpp:327
+#: src/frontend/sdl/play_view.cpp:468
+msgid "Stop"
+msgstr "Leállítás"
+
+#: src/frontend/sdl/bench_view.cpp:2727
+msgid "Record"
+msgstr "Felvétel"
+
+#: src/frontend/sdl/bench_view.cpp:2731
+msgid "Stop recording; the counts are kept"
+msgstr "A felvétel leállítása; a számlálók megmaradnak"
+
+#: src/frontend/sdl/bench_view.cpp:2731
+msgid "Time every instruction from now on (costs about 11 %)"
+msgstr "Mostantól minden utasítás időzítése (kb. 11 százalékkal lassabb)"
+
+#: src/frontend/sdl/bench_view.cpp:2739
+#, c-format
+msgid "%s   %llu instructions, %llu T = %.2f s of TVC time"
+msgstr "%s   %llu utasítás, %llu T = %.2f s TVC-idő"
+
+#: src/frontend/sdl/bench_view.cpp:2739 src/frontend/common/host_tape.cpp:347
+msgid "recording"
+msgstr "felvétel"
+
+#: src/frontend/sdl/bench_view.cpp:2744
+msgid "Routines"
+msgstr "Rutinok"
+
+#: src/frontend/sdl/bench_view.cpp:2748
+msgid "Instructions"
+msgstr "Utasítások"
+
+#: src/frontend/sdl/bench_view.cpp:2752
+msgid ""
+"routines are CALL/RST targets and interrupt entries; click one for the "
+"Listing"
+msgstr "CALL/RST-célok és megszakítások; kattintás: Lista"
+
+#: src/frontend/sdl/bench_view.cpp:2753
+msgid "the 500 busiest; click one for the Listing"
+msgstr "az 500 leggyakoribb; kattintás: Lista"
+
+#: src/frontend/sdl/bench_view.cpp:2756
+msgid ""
+"No profile yet. Record times every instruction: exclusive T-states are a "
+"routine's own instructions, inclusive ones add the routines it calls."
+msgstr ""
+"Még nincs profil. A Felvétel minden utasítást időzít: a saját T-ciklusok a "
+"rutin saját utasításaié, a teljesek a hívott rutinokét is tartalmazzák."
+
+#: src/frontend/sdl/bench_view.cpp:2780
+msgid "Routine"
+msgstr "Rutin"
+
+#: src/frontend/sdl/bench_view.cpp:2781
+msgid "Calls"
+msgstr "Hívás"
+
+#: src/frontend/sdl/bench_view.cpp:2782
+msgid "Exclusive T"
+msgstr "Saját T"
+
+#: src/frontend/sdl/bench_view.cpp:2783
+msgid "Excl."
+msgstr "Saját"
+
+#: src/frontend/sdl/bench_view.cpp:2784
+msgid "Inclusive T"
+msgstr "Teljes T"
+
+#: src/frontend/sdl/bench_view.cpp:2785
+msgid "Incl."
+msgstr "Telj."
+
+#: src/frontend/sdl/bench_view.cpp:2813
+msgid "(outside any call)"
+msgstr "(minden híváson kívül)"
+
+#: src/frontend/sdl/bench_view.cpp:2818
+msgid ""
+"Time before the first call seen, or after returning from calls that started "
+"before recording"
+msgstr ""
+"Az első látott hívás előtti idő, vagy a felvétel előtt kezdődött hívásokból "
+"visszatérés utáni"
+
+#: src/frontend/sdl/bench_view.cpp:2857
+msgid "Address"
+msgstr "Cím"
+
+#: src/frontend/sdl/bench_view.cpp:2859
+msgid "Count"
+msgstr "Darab"
+
+#: src/frontend/sdl/bench_view.cpp:2861
+msgid "Share"
+msgstr "Arány"
+
+#: src/frontend/sdl/bench_view.cpp:2930
+msgid "Source"
+msgstr "Forrás"
+
+#: src/frontend/sdl/bench_view.cpp:2942
+msgid "Load symbols..."
+msgstr "Szimbólumok betöltése..."
+
+#: src/frontend/sdl/bench_view.cpp:2944
+msgid ""
+"Labels and source lines: sjasmplus --sld, --lst, --sym; SDCC .noi, .cdb, ."
+"map; z88dk .map; name = value"
+msgstr ""
+"Címkék és forrássorok: sjasmplus --sld, --lst, --sym; SDCC .noi, .cdb, .map; "
+"z88dk .map; név = érték"
+
+#: src/frontend/sdl/bench_view.cpp:2948
+msgid "Line in"
+msgstr "Sor be"
+
+#: src/frontend/sdl/bench_view.cpp:2950
+msgid ""
+"Run until the PC is on another source line (Shift+F6, the monitor's lstep)"
+msgstr ""
+"Futtatás, amíg a PC egy másik forrássorra nem ér (Shift+F6, a monitor lstep "
+"parancsa)"
+
+#: src/frontend/sdl/bench_view.cpp:2953
+msgid "Line over"
+msgstr "Sor át"
+
+#: src/frontend/sdl/bench_view.cpp:2955
+msgid "The same with calls run through (Shift+F7, the monitor's lnext)"
+msgstr ""
+"Ugyanez, a hívásokat végigfuttatva (Shift+F7, a monitor lnext parancsa)"
+
+#: src/frontend/sdl/bench_view.cpp:2962
+msgid ""
+"No source lines. Load an assembler's or compiler's debug file: sjasmplus --"
+"sld or --lst, SDCC .noi, .cdb or .map, z88dk .map (or ll in the Console)."
+msgstr ""
+"Nincsenek forrássorok. Tölts be egy assembler vagy fordító hibakeresési "
+"fájlját: sjasmplus --sld vagy --lst, SDCC .noi, .cdb vagy .map, z88dk .map "
+"(vagy ll a Konzolban)."
+
+#: src/frontend/sdl/bench_view.cpp:3004
+msgid "cannot read"
+msgstr "nem olvasható"
+
+#: src/frontend/sdl/bench_view.cpp:3056
+#, c-format
+msgid "Click: checkpoint at %04X"
+msgstr "Kattintás: töréspont itt: %04X"
+
+#: src/frontend/sdl/bench_view.cpp:3071
+#, c-format
+msgid "%04X; double-click to show it in the Listing"
+msgstr "%04X; dupla kattintás: megjelenítés a Listában"
+
+#: src/frontend/sdl/deck.cpp:107
+#, c-format
+msgid "Slot %zu (ports %zu0h-%zuFh): %s"
+msgstr "%zu. kártyahely (%zu0h-%zuFh portok): %s"
+
+#: src/frontend/sdl/deck.cpp:107 src/frontend/sdl/play_view.cpp:508
+msgid "empty"
+msgstr "üres"
+
+#: src/frontend/sdl/keyboard_editor.cpp:229
+#, c-format
+msgid "Key layout: %s"
+msgstr "Billentyűkiosztás: %s"
+
+#: src/frontend/sdl/keyboard_editor.cpp:240
+#, c-format
+msgid "Press the host key for %s; a click on it again stops"
+msgstr "Nyomd meg a gazdagép billentyűjét ehhez: %s; újabb kattintás rá leállítja"
+
+#: src/frontend/sdl/keyboard_editor.cpp:242
+msgid "Click a key, then press the host key for it; a right click clears it"
+msgstr "Kattints egy billentyűre, aztán nyomd meg hozzá a gazdagép billentyűjét; jobb kattintás törli"
+
+#: src/frontend/sdl/keyboard_editor.cpp:243
+msgid ""
+"Symbolic mapping: only the host keys that type no character use this layout"
+msgstr "Szimbolikus kiosztás: csak a karaktert nem adó gazdagép-billentyűk követik ezt a kiosztást"
+
+#: src/frontend/sdl/keyboard_editor.cpp:257
+#: src/frontend/sdl/settings_view.cpp:451
+msgid "Close"
+msgstr "Bezárás"
+
+#: src/frontend/sdl/keyboard_editor.cpp:264
+msgid "Back to the shipped layout"
+msgstr "Vissza a gyári kiosztásra"
+
+#: src/frontend/sdl/keyboard_editor.cpp:294
+msgid "Joystick 1"
+msgstr "1. botkormány"
+
+#: src/frontend/sdl/keyboard_editor.cpp:295
+msgid "Joystick 2"
+msgstr "2. botkormány"
+
+#: src/frontend/sdl/keymap.cpp:240 src/frontend/sdl/picture.cpp:119
+#, c-format
+msgid "line %d: %s"
+msgstr "%d. sor: %s"
+
+#: src/frontend/sdl/keymap.cpp:243 src/frontend/sdl/picture.cpp:116
+#: src/frontend/common/settings.cpp:79
+msgid "expected key = value"
+msgstr "kulcs = érték várt"
+
+#: src/frontend/sdl/keymap.cpp:250 src/frontend/sdl/picture.cpp:55
+msgid "expected a value"
+msgstr "érték kell"
+
+#: src/frontend/sdl/keymap.cpp:258
+#, c-format
+msgid "unknown host key '%s'"
+msgstr "ismeretlen gazdagép-billentyű: %s"
+
+#: src/frontend/sdl/keymap.cpp:275
+#, c-format
+msgid "unknown TVC key '%s'"
+msgstr "ismeretlen TVC-billentyű: %s"
+
+#: src/frontend/sdl/keymap.cpp:286 src/frontend/sdl/picture.cpp:131
+#: src/frontend/common/card256_host.cpp:326
+#: src/frontend/common/serial_host.cpp:152
+#, c-format
+msgid "cannot read '%s'"
+msgstr "nem olvasható: '%s'"
+
+#: src/frontend/sdl/keymap.cpp:295 src/frontend/sdl/picture.cpp:139
+#, c-format
+msgid "%s %s"
+msgstr "%s %s"
+
+#: src/frontend/sdl/main.cpp:281
+msgid ""
+"freeTVC needs the TV Computer's ROMs and found none (the places searched are "
+"on stderr)."
+msgstr ""
+"A freeTVC-nek szüksége van a TV Computer ROM-jaira, de egyet sem talált (a "
+"végigkeresett helyek a stderr-en vannak)."
+
+#: src/frontend/sdl/main.cpp:283
+#, c-format
+msgid "It can download them from tvc.homeserver.hu, but %s."
+msgstr "Le tudja tölteni őket a tvc.homeserver.hu oldalról, de: %s."
+
+#: src/frontend/sdl/main.cpp:284 src/frontend/sdl/main.cpp:292
+msgid "freeTVC: no ROMs"
+msgstr "freeTVC: nincsenek ROM-ok"
+
+#: src/frontend/sdl/main.cpp:287
+#, c-format
+msgid ""
+"Download them from tvc.homeserver.hu into\n"
+"%s ?\n"
+"\n"
+"Every file is checked against a pinned SHA-256 sum. It takes a few seconds "
+"and uses %s."
+msgstr ""
+"Letöltöd őket a tvc.homeserver.hu oldalról ide:\n"
+"%s ?\n"
+"\n"
+"Minden fájlt egy rögzített SHA-256 összeggel ellenőriz. Néhány másodpercig "
+"tart, a letöltést ez végzi: %s."
+
+#: src/frontend/sdl/main.cpp:290 src/frontend/sdl/play_view.cpp:101
+msgid "Quit"
+msgstr "Kilépés"
+
+#: src/frontend/sdl/main.cpp:291
+msgid "Download"
+msgstr "Letöltés"
+
+#: src/frontend/sdl/main.cpp:301
+msgid "freeTVC: ROM download failed"
+msgstr "freeTVC: a ROM-ok letöltése nem sikerült"
+
+#: src/frontend/sdl/main.cpp:863
+#, c-format
+msgid "skin '%s' not found; using the built-in bronze"
+msgstr "nincs ilyen kinézet: '%s'; a beépített bronze marad"
+
+#: src/frontend/sdl/main.cpp:881
+#, c-format
+msgid "picture '%s' not found; sharp pixels"
+msgstr "nincs ilyen kép: %s; éles képpontok"
+
+#: src/frontend/sdl/main.cpp:887
+#, c-format
+msgid "freetvc.ini: unknown preset '%s'; using 64k+-2.2"
+msgstr "freetvc.ini: ismeretlen gép: '%s'; a 64k+-2.2 indul"
+
+#: src/frontend/sdl/main.cpp:890
+#, c-format
+msgid "freetvc.ini: no translation '%s'; using English"
+msgstr "freetvc.ini: nincs ilyen fordítás: '%s'; angol nyelv marad"
+
+#: src/frontend/sdl/main.cpp:937
+#, c-format
+msgid "key layout '%s' not found; the built-in hungarian"
+msgstr "nincs ilyen billentyűkiosztás: %s; a beépített hungarian"
+
+#: src/frontend/sdl/main.cpp:949 src/frontend/sdl/main.cpp:2371
+#: src/frontend/common/printer_host.cpp:79
+#: src/frontend/common/printer_host.cpp:86
+#: src/frontend/common/serial_host.cpp:174 src/frontend/common/settings.cpp:264
+#: src/frontend/common/wav.cpp:50 src/frontend/common/wav.cpp:55
+#, c-format
+msgid "cannot write '%s'"
+msgstr "nem írható: '%s'"
+
+#: src/frontend/sdl/main.cpp:982
+#, c-format
+msgid "disk card left out: %s"
+msgstr "a lemezkártya kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1009
+#, c-format
+msgid "GameCard left out: %s"
+msgstr "a GameCard kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1025
+#, c-format
+msgid "Multichip sound card left out: %s"
+msgstr "a Multichip hangkártya kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1043
+#, c-format
+msgid "printer left out: %s"
+msgstr "a nyomtató kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1051
+#, c-format
+msgid "serial card left out: %s"
+msgstr "a soros kártya kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1066
+#, c-format
+msgid "serial cable left unplugged: %s"
+msgstr "a soros kábel nincs bedugva: %s"
+
+#: src/frontend/sdl/main.cpp:1099
+#, c-format
+msgid "NanoSD's SD card left out: %s"
+msgstr "a NanoSD SD-kártyája kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1111
+#, c-format
+msgid "NanoSD left out: %s"
+msgstr "a NanoSD kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1128
+#, c-format
+msgid "TVC256k++ flash drive left out: %s"
+msgstr "a TVC256k++ flash meghajtója kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1135
+#, c-format
+msgid "TVC256k++ pendrive left out: %s"
+msgstr "a TVC256k++ pendrive-ja kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1151
+#, c-format
+msgid "TVC256k++ left out: %s"
+msgstr "a TVC256k++ kimaradt: %s"
+
+#: src/frontend/sdl/main.cpp:1488
+msgid "the disk card has its new EPROM; the machine powered on"
+msgstr "a lemezkártyán az új EPROM van; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:1510 src/frontend/sdl/main.cpp:2488
+#: src/frontend/sdl/main.cpp:2787
+#, c-format
+msgid "%s (the places searched are on stderr)"
+msgstr "%s (a végigkeresett helyek a stderr-en)"
+
+#: src/frontend/sdl/main.cpp:1554
+#, c-format
+msgid "%s; powered on"
+msgstr "%s; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:1573
+#, c-format
+msgid "%c: %s; disk card in, powered on"
+msgstr "%c: %s; lemezkártya behelyezve, hidegindítás"
+
+#: src/frontend/sdl/main.cpp:1581 src/frontend/sdl/main.cpp:2645
+#, c-format
+msgid "SD Dual: %s"
+msgstr "SD Dual: %s"
+
+#: src/frontend/sdl/main.cpp:1597
+#, c-format
+msgid "%s: %s; SD Dual in, powered on"
+msgstr "%s: %s; SD Dual behelyezve, hidegindítás"
+
+#: src/frontend/sdl/main.cpp:1608
+#, c-format
+msgid "snapshot saved: %s"
+msgstr "pillanatkép mentve: %s"
+
+#: src/frontend/sdl/main.cpp:1623
+#, c-format
+msgid "snapshot loaded: %s"
+msgstr "pillanatkép betöltve: %s"
+
+#: src/frontend/sdl/main.cpp:1653
+#, c-format
+msgid "starting %s from A:"
+msgstr "indítás: %s, az A: meghajtóról"
+
+#: src/frontend/sdl/main.cpp:1659 src/frontend/sdl/main.cpp:2838
+#, c-format
+msgid "starting %s"
+msgstr "indítás: %s"
+
+#: src/frontend/sdl/main.cpp:1722
+#, c-format
+msgid "skin %s"
+msgstr "kinézet: %s"
+
+#: src/frontend/sdl/main.cpp:1746
+msgid "mouse released"
+msgstr "egér elengedve"
+
+#: src/frontend/sdl/main.cpp:1748
+msgid "mouse released (Ctrl+Alt)"
+msgstr "egér elengedve (Ctrl+Alt)"
+
+#: src/frontend/sdl/main.cpp:1771
+msgid "mouse captured by the TVC256k++; Ctrl+Alt lets it go"
+msgstr "az egeret a TVC256k++ fogja; a Ctrl+Alt elengedi"
+
+#: src/frontend/sdl/main.cpp:1796
+msgid "no quick snapshot yet (F9 saves one)"
+msgstr "még nincs gyorsmentés (az F9 készít egyet)"
+
+#: src/frontend/sdl/main.cpp:1852
+#, c-format
+msgid "monitor: stopped at %s"
+msgstr "monitor: megállt itt: %s"
+
+#: src/frontend/sdl/main.cpp:1854
+msgid "monitor: running"
+msgstr "monitor: fut"
+
+#: src/frontend/sdl/main.cpp:1874
+msgid "MultiCart images (*.bin)"
+msgstr "MultiCart-képfájlok (*.bin)"
+
+#: src/frontend/sdl/main.cpp:1883
+#, c-format
+msgid "MultiCart: %s"
+msgstr "MultiCart: %s"
+
+#: src/frontend/sdl/main.cpp:1890 src/frontend/sdl/main.cpp:2653
+msgid "SD card images (*.img)"
+msgstr "SD-kártya képfájlok (*.img)"
+
+#: src/frontend/sdl/main.cpp:1899
+#, c-format
+msgid "SD card image: %s"
+msgstr "SD-kártya képfájl: %s"
+
+#: src/frontend/sdl/main.cpp:1913
+#, c-format
+msgid "TVC256k++: pendrive %s"
+msgstr "TVC256k++: pendrive: %s"
+
+#: src/frontend/sdl/main.cpp:1920
+#, c-format
+msgid "printer to %s (text)"
+msgstr "nyomtató ide: %s (szöveg)"
+
+#: src/frontend/sdl/main.cpp:1920
+#, c-format
+msgid "printer to %s (raw bytes)"
+msgstr "nyomtató ide: %s (nyers bájtok)"
+
+#: src/frontend/sdl/main.cpp:1926
+#, c-format
+msgid "serial: %s queued for the TVC"
+msgstr "soros: %s várakozik a TVC-nek"
+
+#: src/frontend/sdl/main.cpp:1936
+#, c-format
+msgid "serial: capturing to %s"
+msgstr "soros: rögzítés ide: %s"
+
+#: src/frontend/sdl/main.cpp:1942
+#, c-format
+msgid "NanoSD: SD card %s"
+msgstr "NanoSD: SD-kártya: %s"
+
+#: src/frontend/sdl/main.cpp:1949
+#, c-format
+msgid "TVC256k++: flash drive %s"
+msgstr "TVC256k++: flash meghajtó: %s"
+
+#: src/frontend/sdl/main.cpp:1964
+#, c-format
+msgid "file dialog: %s"
+msgstr "fájlválasztó: %s"
+
+#: src/frontend/sdl/main.cpp:1970
+msgid "mouse released: no mouse on a TVC256k++"
+msgstr "egér elengedve: nincs egér a TVC256k++ kártyán"
+
+#: src/frontend/sdl/main.cpp:2155
+msgid "HBF disk card"
+msgstr "HBF lemezkártya"
+
+#: src/frontend/sdl/main.cpp:2158 src/frontend/sdl/play_view.cpp:133
+#: src/frontend/sdl/settings_view.cpp:128
+msgid "GameCard"
+msgstr "GameCard"
+
+#: src/frontend/sdl/main.cpp:2161 src/frontend/sdl/play_view.cpp:163
+#: src/frontend/sdl/settings_view.cpp:130
+msgid "TVC256k++"
+msgstr "TVC256k++"
+
+#: src/frontend/sdl/main.cpp:2164 src/frontend/sdl/play_view.cpp:143
+#: src/frontend/sdl/settings_view.cpp:129
+msgid "Multichip sound card"
+msgstr "Multichip hangkártya"
+
+#: src/frontend/sdl/main.cpp:2167 src/frontend/sdl/play_view.cpp:197
+#: src/frontend/sdl/settings_view.cpp:131
+msgid "NanoSD"
+msgstr "NanoSD"
+
+#: src/frontend/sdl/main.cpp:2170 src/frontend/sdl/settings_view.cpp:132
+msgid "Serial card"
+msgstr "Soros kártya"
+
+#: src/frontend/sdl/main.cpp:2260
+msgid "ROM images (*.rom, *.bin)"
+msgstr "ROM-képek (*.rom, *.bin)"
+
+#: src/frontend/sdl/main.cpp:2260 src/frontend/sdl/main.cpp:2434
+#: src/frontend/sdl/main.cpp:2526 src/frontend/sdl/main.cpp:2527
+#: src/frontend/sdl/main.cpp:2528 src/frontend/sdl/main.cpp:2547
+#: src/frontend/sdl/main.cpp:2589 src/frontend/sdl/main.cpp:2653
+#: src/frontend/sdl/main.cpp:2654 src/frontend/sdl/main.cpp:2668
+#: src/frontend/sdl/main.cpp:2669 src/frontend/sdl/main.cpp:2730
+#: src/frontend/sdl/main.cpp:2800
+msgid "All files"
+msgstr "Minden fájl"
+
+#: src/frontend/sdl/main.cpp:2393
+msgid "MCP token copied"
+msgstr "MCP-token a vágólapon"
+
+#: src/frontend/sdl/main.cpp:2433
+msgid "Debug and label files (*.sld, *.lst, *.sym, *.noi, *.cdb, *.map, *.txt)"
+msgstr ""
+"Hibakeresési és címkefájlok (*.sld, *.lst, *.sym, *.noi, *.cdb, *.map, *.txt)"
+
+#: src/frontend/sdl/main.cpp:2482
+#, c-format
+msgid "%s powered on, without the TVC256k++ (no other RAM card beside it)"
+msgstr ""
+"%s: hidegindítás, TVC256k++ nélkül (mellette nem lehet másik RAM-kártya)"
+
+#: src/frontend/sdl/main.cpp:2484
+#, c-format
+msgid "%s powered on"
+msgstr "%s: hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2496
+msgid "reset"
+msgstr "reset"
+
+#: src/frontend/sdl/main.cpp:2499
+msgid "downloading the ROMs from tvc.homeserver.hu..."
+msgstr "a ROM-ok letöltése a tvc.homeserver.hu oldalról..."
+
+#: src/frontend/sdl/main.cpp:2504
+msgid "ROMs downloaded into the user data folder"
+msgstr "a ROM-ok letöltve a felhasználói adatmappába"
+
+#: src/frontend/sdl/main.cpp:2513
+msgid "ROMs downloaded; the cards took theirs and the machine powered on"
+msgstr "a ROM-ok letöltve; a kártyák megkapták a sajátjukat, hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2523
+msgid "power cycled"
+msgstr "ki- és bekapcsolva"
+
+#: src/frontend/sdl/main.cpp:2526
+msgid "TVC programs (*.cas, *.wav, *.ttp, *.crt, *.rom, *.dsk, *.img)"
+msgstr "TVC-programok (*.cas, *.wav, *.ttp, *.crt, *.rom, *.dsk, *.img)"
+
+#: src/frontend/sdl/main.cpp:2527
+msgid "Tapes (*.wav, *.ttp, *.cas)"
+msgstr "Szalagok (*.wav, *.ttp, *.cas)"
+
+#: src/frontend/sdl/main.cpp:2528
+msgid "Cartridges (*.crt, *.rom, *.bin)"
+msgstr "Cartridge-ok (*.crt, *.rom, *.bin)"
+
+#: src/frontend/sdl/main.cpp:2529
+msgid "WAV files (*.wav)"
+msgstr "WAV-fájlok (*.wav)"
+
+#: src/frontend/sdl/main.cpp:2547
+msgid "Snapshots (*.tvcs, WinTVC *.tvs)"
+msgstr "Pillanatképek (*.tvcs, WinTVC *.tvs)"
+
+#: src/frontend/sdl/main.cpp:2572
+#, c-format
+msgid "TVC256k++ in slot %d (EXT %d); powered on"
+msgstr "TVC256k++: %d. kártyahely (EXT %d); hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2574
+msgid "TVC256k++ out; powered on"
+msgstr "TVC256k++ kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2585
+msgid "TVC256k++: mouse on the USB port; click the screen to capture it"
+msgstr "TVC256k++: egér az USB-porton; kattints a képre, hogy elkapja"
+
+#: src/frontend/sdl/main.cpp:2586
+msgid "TVC256k++: USB port empty"
+msgstr "TVC256k++: az USB-port üres"
+
+#: src/frontend/sdl/main.cpp:2589
+msgid "littlefs images (*.bin)"
+msgstr "littlefs-képfájlok (*.bin)"
+
+#: src/frontend/sdl/main.cpp:2608
+#, c-format
+msgid "GameCard in slot %d; powered on"
+msgstr "GameCard: %d. kártyahely; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2610
+msgid "GameCard out; powered on"
+msgstr "GameCard kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2626
+#, c-format
+msgid "NanoSD in slot %d; powered on"
+msgstr "NanoSD: %d. kártyahely; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2628
+msgid "NanoSD out; powered on"
+msgstr "NanoSD kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2643
+msgid "SD Dual in; powered on (EXT 2: VT-DOS CLI, EXT 3: file manager)"
+msgstr ""
+"SD Dual behelyezve; hidegindítás (EXT 2: VT-DOS parancssor, EXT 3: "
+"fájlkezelő)"
+
+#: src/frontend/sdl/main.cpp:2643
+msgid "SD Dual out; powered on"
+msgstr "SD Dual kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2650
+msgid "microSD card out"
+msgstr "microSD-kártya kivéve"
+
+#: src/frontend/sdl/main.cpp:2650
+msgid "SD card out"
+msgstr "SD-kártya kivéve"
+
+#: src/frontend/sdl/main.cpp:2668
+msgid "Printer output (*.prn raw, *.txt text)"
+msgstr "Nyomtatókimenet (*.prn nyers, *.txt szöveg)"
+
+#: src/frontend/sdl/main.cpp:2687
+msgid "no printer: an LPRINT waits after its first character until STOP"
+msgstr "nincs nyomtató: az LPRINT az első karaktere után a STOP-ig vár"
+
+#: src/frontend/sdl/main.cpp:2692
+msgid "serial: capture stopped"
+msgstr "soros: rögzítés leállítva"
+
+#: src/frontend/sdl/main.cpp:2697
+msgid "serial cable unplugged"
+msgstr "soros kábel kihúzva"
+
+#: src/frontend/sdl/main.cpp:2699
+#, c-format
+msgid "serial cable to TCP 127.0.0.1:%s"
+msgstr "soros kábel ide: TCP 127.0.0.1:%s"
+
+#: src/frontend/sdl/main.cpp:2702
+#, c-format
+msgid "serial: %s"
+msgstr "soros: %s"
+
+#: src/frontend/sdl/main.cpp:2716
+#, c-format
+msgid "serial card in slot %d; powered on"
+msgstr "soros kártya: %d. kártyahely; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2718
+msgid "serial card out; powered on"
+msgstr "soros kártya kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2726
+msgid "NanoSD: SD card out"
+msgstr "NanoSD: SD-kártya kivéve"
+
+#: src/frontend/sdl/main.cpp:2729
+msgid "Programs and carts (*.cas, *.crt, *.rom, *.bin)"
+msgstr "Programok és cartridge-ok (*.cas, *.crt, *.rom, *.bin)"
+
+#: src/frontend/sdl/main.cpp:2753
+msgid "SID card out; powered on"
+msgstr "SID-kártya kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2755
+#, c-format
+msgid "SID card (MOS %s) at ports E0h-FFh; powered on"
+msgstr "SID-kártya (MOS %s) az E0h-FFh portokon; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2768
+#, c-format
+msgid "Multichip sound card in slot %d; powered on"
+msgstr "Multichip hangkártya: %d. kártyahely; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2770
+msgid "Multichip sound card out; powered on"
+msgstr "Multichip hangkártya kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2784
+msgid "disk card in; powered on"
+msgstr "lemezkártya behelyezve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2784
+msgid "disk card out; powered on"
+msgstr "lemezkártya kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2794
+#, c-format
+msgid "%s ejected from %c:"
+msgstr "%s kivéve, meghajtó: %c:"
+
+#: src/frontend/sdl/main.cpp:2800
+msgid "Disk images (*.dsk, *.img)"
+msgstr "Lemezképek (*.dsk, *.img)"
+
+#: src/frontend/sdl/main.cpp:2814
+msgid "cartridge removed; powered on"
+msgstr "cartridge kivéve; hidegindítás"
+
+#: src/frontend/sdl/main.cpp:2817
+msgid "starting the tape"
+msgstr "a szalag indítása"
+
+#: src/frontend/sdl/main.cpp:2831
+msgid "fast disk: full speed while a drive works"
+msgstr "gyors lemez: teljes sebesség, amíg egy meghajtó dolgozik"
+
+#: src/frontend/sdl/main.cpp:2831
+msgid "fast disk off: the drives run at real speed"
+msgstr "gyors lemez ki: a meghajtók valós sebességgel mennek"
+
+#: src/frontend/sdl/main.cpp:2835
+msgid "fast tape: full speed while the tape moves"
+msgstr "gyors magnó: teljes sebesség, amíg a szalag mozog"
+
+#: src/frontend/sdl/main.cpp:2835
+msgid "fast tape off: the tape runs at real speed"
+msgstr "gyors magnó ki: a szalag valós sebességgel megy"
+
+#: src/frontend/sdl/main.cpp:2859
+msgid "full raster: sync and blanking shown, TV area outlined"
+msgstr "teljes raszter: szinkron és kioltás látható, a TV-terület bekeretezve"
+
+#: src/frontend/sdl/main.cpp:2859
+msgid "TV area"
+msgstr "TV-terület"
+
+#: src/frontend/sdl/main.cpp:2866
+#, c-format
+msgid "screenshot failed: %s"
+msgstr "a képernyőkép nem sikerült: %s"
+
+#: src/frontend/sdl/main.cpp:2868
+#, c-format
+msgid "saved %s"
+msgstr "mentve: %s"
+
+#: src/frontend/sdl/main.cpp:2880
+msgid "the built-in skin has no file to reload"
+msgstr "a beépített kinézetnek nincs újratölthető fájlja"
+
+#: src/frontend/sdl/picture.cpp:67
+msgid "signal is sharp, rgb, pal or mono"
+msgstr "a signal értéke sharp, rgb, pal vagy mono"
+
+#: src/frontend/sdl/picture.cpp:76
+msgid "mask is none, grille or shadow"
+msgstr "a mask értéke none, grille vagy shadow"
+
+#: src/frontend/sdl/picture.cpp:83
+msgid "expected yes or no"
+msgstr "yes vagy no kell"
+
+#: src/frontend/sdl/picture.cpp:92
+#, c-format
+msgid "%s is a number from %g to %g"
+msgstr "%s: szám %g és %g között"
+
+#: src/frontend/sdl/picture.cpp:97 src/frontend/common/settings.cpp:195
+#, c-format
+msgid "unknown key '%s'"
+msgstr "ismeretlen kulcs: '%s'"
+
+#: src/frontend/sdl/picture.cpp:123
+msgid "beam.max is below beam.min"
+msgstr "a beam.max kisebb a beam.min értékénél"
+
+#: src/frontend/sdl/play_view.cpp:47
+msgid "Program"
+msgstr "Program"
+
+#: src/frontend/sdl/play_view.cpp:48
+msgid "Load program..."
+msgstr "Program betöltése..."
+
+#: src/frontend/sdl/play_view.cpp:51
+#, c-format
+msgid "Run %s again"
+msgstr "%s újraindítása"
+
+#: src/frontend/sdl/play_view.cpp:52
+msgid "Run again"
+msgstr "Újraindítás"
+
+#: src/frontend/sdl/play_view.cpp:53
+#, c-format
+msgid "Eject %s"
+msgstr "%s kivétele"
+
+#: src/frontend/sdl/play_view.cpp:54
+msgid "Eject cassette"
+msgstr "Kazetta kivétele"
+
+#: src/frontend/sdl/play_view.cpp:57
+msgid "Snapshot"
+msgstr "Pillanatkép"
+
+#: src/frontend/sdl/play_view.cpp:58
+msgid "Quick save"
+msgstr "Gyorsmentés"
+
+#: src/frontend/sdl/play_view.cpp:59
+msgid "Quick load"
+msgstr "Gyorsbetöltés"
+
+#: src/frontend/sdl/play_view.cpp:60
+msgid "Save snapshot..."
+msgstr "Pillanatkép mentése..."
+
+#: src/frontend/sdl/play_view.cpp:61
+msgid "Load snapshot..."
+msgstr "Pillanatkép betöltése..."
+
+#: src/frontend/sdl/play_view.cpp:64 src/frontend/sdl/settings_view.cpp:277
+msgid "Symbolic"
+msgstr "Szimbolikus"
+
+#: src/frontend/sdl/play_view.cpp:67 src/frontend/sdl/settings_view.cpp:281
+msgid "Positional"
+msgstr "Pozíciós"
+
+#: src/frontend/sdl/play_view.cpp:71 src/frontend/sdl/settings_view.cpp:314
+msgid "Skin"
+msgstr "Kinézet"
+
+#: src/frontend/sdl/play_view.cpp:77 src/frontend/sdl/settings_view.cpp:321
+msgid "Reload skin"
+msgstr "Kinézet újratöltése"
+
+#: src/frontend/sdl/play_view.cpp:80 src/frontend/sdl/settings_view.cpp:303
+msgid "Language"
+msgstr "Nyelv"
+
+#: src/frontend/sdl/play_view.cpp:91 src/frontend/sdl/settings_view.cpp:241
+msgid "Full raster (debug)"
+msgstr "Teljes raszter (hibakereséshez)"
+
+#: src/frontend/sdl/play_view.cpp:93
+msgid ""
+"Show the whole beam path, sync and blanking included; the TV area is outlined"
+msgstr ""
+"A sugár teljes útja, a szinkronnal és a kioltással együtt; a TV-terület "
+"bekeretezve"
+
+#: src/frontend/sdl/play_view.cpp:95
+msgid "Screenshot"
+msgstr "Képernyőkép"
+
+#: src/frontend/sdl/play_view.cpp:96
+msgid "Full screen"
+msgstr "Teljes képernyő"
+
+#: src/frontend/sdl/play_view.cpp:99
+msgid "Settings..."
+msgstr "Beállítások..."
+
+#: src/frontend/sdl/play_view.cpp:100
+msgid "Bench"
+msgstr "Munkapad"
+
+#: src/frontend/sdl/play_view.cpp:112 src/frontend/sdl/settings_view.cpp:106
+msgid "Download ROMs"
+msgstr "ROM-ok letöltése"
+
+#: src/frontend/sdl/play_view.cpp:114
+msgid ""
+"The TVC's ROMs from tvc.homeserver.hu and the cards' firmware from their "
+"authors' sites, with the system's curl, into the user data folder"
+msgstr ""
+"A TVC ROM-jai a tvc.homeserver.hu oldalról, a kártyák firmware-e a szerzőik "
+"oldaláról, a rendszer curl programjával, a felhasználói adatmappába"
+
+#: src/frontend/sdl/play_view.cpp:119
+msgid "Power cycle"
+msgstr "Ki- és bekapcsolás"
+
+#: src/frontend/sdl/play_view.cpp:124
+msgid "Cards"
+msgstr "Kártyák"
+
+#: src/frontend/sdl/play_view.cpp:125
+msgid "Disk card in slot 0"
+msgstr "Lemezkártya a 0. kártyahelyen"
+
+#: src/frontend/sdl/play_view.cpp:127
+msgid ""
+"HBF card in slot 0: LOAD and SAVE use the disks, not the cassette; the "
+"machine powers on"
+msgstr ""
+"HBF kártya a 0. kártyahelyen: a LOAD és a SAVE a lemezeket használja, nem a "
+"kazettát; hidegindítás"
+
+#: src/frontend/sdl/play_view.cpp:131
+#, c-format
+msgid "GameCard in slot %d"
+msgstr "GameCard (%d. kártyahely)"
+
+#: src/frontend/sdl/play_view.cpp:137
+msgid ""
+"dikdom's card: SN76489 sound, joysticks 3 and 4 on gamepads 3 and 4, a boot "
+"menu with four games; the machine powers on"
+msgstr ""
+"dikdom kártyája: SN76489 hang, a 3. és 4. botkormány a 3. és 4. gamepaden, "
+"indítómenü négy játékkal; hidegindítás"
+
+#: src/frontend/sdl/play_view.cpp:141
+#, c-format
+msgid "Multichip sound card in slot %d"
+msgstr "Multichip hangkártya (%d. kártyahely)"
+
+#: src/frontend/sdl/play_view.cpp:147
+msgid ""
+"Vass Sándor's card: SN76489, SAA1099 and YM3812 (OPL2) on the TV's sound; "
+"its start-up screen plays a demo on each chip after SPACE; the machine "
+"powers on"
+msgstr ""
+"Vass Sándor kártyája: SN76489, SAA1099 és YM3812 (OPL2) a TV hangján; az "
+"indítóképernyője SPACE után mindegyik chipen lejátszik egy demót; "
+"hidegindítás"
+
+#: src/frontend/sdl/play_view.cpp:152
+msgid "SID card, MOS 6581"
+msgstr "SID-kártya, MOS 6581"
+
+#: src/frontend/sdl/play_view.cpp:152
+msgid "SID card, MOS 8580"
+msgstr "SID-kártya, MOS 8580"
+
+#: src/frontend/sdl/play_view.cpp:156
+msgid ""
+"A SID chip at ports E0h-FFh, outside the slots, where WinTVC puts it (no "
+"real card's documentation is known); reSID on the TV's sound; the machine "
+"powers on"
+msgstr ""
+"Egy SID chip az E0h-FFh portokon, a kártyahelyeken kívül, ahová a WinTVC is "
+"teszi (valódi kártya dokumentációja nem ismert); reSID a TV hangján; "
+"hidegindítás"
+
+#: src/frontend/sdl/play_view.cpp:161
+#, c-format
+msgid "TVC256k++ in slot %d"
+msgstr "TVC256k++ (%d. kártyahely)"
+
+#: src/frontend/sdl/play_view.cpp:167
+msgid ""
+"dikdom's card: 256 KiB fast RAM in place of U2/U3, 8 MiB paged RAM, sprites "
+"and overlay graphics, drives for LOAD and SAVE, a mouse, its EXT command "
+"line (EXT and the slot number), its vSID sound; the machine powers on"
+msgstr ""
+"dikdom kártyája: 256 KiB gyors RAM az U2/U3 helyén, 8 MiB lapozható RAM, "
+"sprite-ok és rávetített grafika, meghajtók a LOAD és a SAVE számára, egér, "
+"saját EXT parancssor (EXT és a kártyahely száma), vSID hang; hidegindítás"
+
+#: src/frontend/sdl/play_view.cpp:175
+#, c-format
+msgid "Pendrive %s..."
+msgstr "Pendrive: %s..."
+
+#: src/frontend/sdl/play_view.cpp:176
+msgid "Pendrive folder..."
+msgstr "Pendrive-mappa..."
+
+#: src/frontend/sdl/play_view.cpp:179
+msgid ""
+"A host folder on the card's USB port as drive 0: LOAD and SAVE go there, "
+"files are written at once"
+msgstr ""
+"A gazdagép egy mappája a kártya USB-portján, 0-s meghajtóként: a LOAD és a "
+"SAVE oda megy, a fájlok azonnal kiíródnak"
+
+#: src/frontend/sdl/play_view.cpp:181
+msgid "Mouse"
+msgstr "Egér"
+
+#: src/frontend/sdl/play_view.cpp:183
+msgid ""
+"The host mouse on the card's USB port: click the screen to capture it, "
+"Ctrl+Alt lets it go"
+msgstr ""
+"A gazdagép egere a kártya USB-portján: kattints a képre, hogy elkapja; a "
+"Ctrl+Alt elengedi"
+
+#: src/frontend/sdl/play_view.cpp:185
+msgid "USB port empty"
+msgstr "Üres USB-port"
+
+#: src/frontend/sdl/play_view.cpp:187
+#, c-format
+msgid "Flash drive %s..."
+msgstr "Flash meghajtó: %s..."
+
+#: src/frontend/sdl/play_view.cpp:188
+msgid "Flash drive image..."
+msgstr "Flash meghajtó képfájlja..."
+
+#: src/frontend/sdl/play_view.cpp:190
+msgid ""
+"A littlefs image as drive 2, read only: the card's launcher and games "
+"(card256-flash.bin)"
+msgstr ""
+"Egy littlefs képfájl 2-es meghajtóként, csak olvasható: a kártya indítója és "
+"játékai (card256-flash.bin)"
+
+#: src/frontend/sdl/play_view.cpp:195
+#, c-format
+msgid "NanoSD in slot %d"
+msgstr "NanoSD (%d. kártyahely)"
+
+#: src/frontend/sdl/play_view.cpp:201
+msgid ""
+"Vass Sándor's card: an SD card through an Arduino Nano; LOAD and SAVE go to "
+"it, a file-select menu at power-on (ESC skips it), its command line with EXT "
+"0; the machine powers on"
+msgstr ""
+"Vass Sándor kártyája: SD-kártya egy Arduino Nanón át; a LOAD és a SAVE oda "
+"megy, bekapcsoláskor fájlválasztó menü (az ESC átugorja), saját parancssor "
+"EXT 0-val; hidegindítás"
+
+#: src/frontend/sdl/play_view.cpp:208 src/frontend/sdl/play_view.cpp:296
+#, c-format
+msgid "SD card %s..."
+msgstr "SD-kártya: %s..."
+
+#: src/frontend/sdl/play_view.cpp:209
+msgid "SD card folder..."
+msgstr "SD-kártya mappa..."
+
+#: src/frontend/sdl/play_view.cpp:211
+msgid ""
+"A host folder as the SD card: the card sees 8.3 names only, files are "
+"written at once"
+msgstr ""
+"A gazdagép egy mappája SD-kártyaként: a kártya csak 8.3-as neveket lát, a "
+"fájlok azonnal kiíródnak"
+
+#: src/frontend/sdl/play_view.cpp:213 src/frontend/sdl/play_view.cpp:306
+msgid "Take the SD card out"
+msgstr "SD-kártya kivétele"
+
+#: src/frontend/sdl/play_view.cpp:217
+#, c-format
+msgid "Serial card in slot %d"
+msgstr "Soros kártya (%d. kártyahely)"
+
+#: src/frontend/sdl/play_view.cpp:219
+msgid "Serial card (RS-232)"
+msgstr "Soros kártya (RS-232)"
+
+#: src/frontend/sdl/play_view.cpp:223
+msgid ""
+"Videoton's RS-232 card (an 8251A): BASIC's device #6 (LIST #6, SAVE #6, LOAD "
+"#6); the machine powers on"
+msgstr ""
+"A Videoton RS-232 kártyája (8251A): a BASIC #6-os eszköze (LIST #6, SAVE #6, "
+"LOAD #6); hidegindítás"
+
+#: src/frontend/sdl/play_view.cpp:228
+msgid "Cable unplugged"
+msgstr "Kábel kihúzva"
+
+#: src/frontend/sdl/play_view.cpp:230
+msgid "No peer: sending waits for DSR until STOP (CTRL+ESC)"
+msgstr "Nincs túloldal: a küldés DSR-re vár a STOP-ig (CTRL+ESC)"
+
+#: src/frontend/sdl/play_view.cpp:235
+#, c-format
+msgid "TCP port %s, connected"
+msgstr "TCP-port: %s, kapcsolódva"
+
+#: src/frontend/sdl/play_view.cpp:235
+#, c-format
+msgid "TCP port %s, waiting"
+msgstr "TCP-port: %s, várakozik"
+
+#: src/frontend/sdl/play_view.cpp:237
+msgid "Cable to TCP port 6585"
+msgstr "Kábel a 6585-ös TCP-portra"
+
+#: src/frontend/sdl/play_view.cpp:239
+msgid ""
+"A TCP client on 127.0.0.1 is the other end of the cable, such as another "
+"freeTVC started with --serial connect:6585"
+msgstr ""
+"Egy TCP-kliens a 127.0.0.1 címen a kábel másik vége, például egy másik, --"
+"serial connect:6585 kapcsolóval indított freeTVC"
+
+#: src/frontend/sdl/play_view.cpp:242
+msgid "Send a file..."
+msgstr "Fájl küldése..."
+
+#: src/frontend/sdl/play_view.cpp:244
+msgid "Its bytes arrive at the TVC while it reads (LOAD #6, INPUT #6)"
+msgstr "A bájtjai olvasás közben érkeznek a TVC-hez (LOAD #6, INPUT #6)"
+
+#: src/frontend/sdl/play_view.cpp:247
+#, c-format
+msgid "Capturing to %s"
+msgstr "Rögzítés ide: %s"
+
+#: src/frontend/sdl/play_view.cpp:249
+msgid "Capture to a file..."
+msgstr "Rögzítés fájlba..."
+
+#: src/frontend/sdl/play_view.cpp:254
+msgid ""
+"What the TVC sends is appended to the file (with no other peer the cable "
+"then goes to the host)"
+msgstr ""
+"Amit a TVC küld, a fájl végére kerül (más túloldal híján a kábel ekkor a "
+"gazdagéphez megy)"
+
+#: src/frontend/sdl/play_view.cpp:260
+msgid "Printer port"
+msgstr "Nyomtatóport"
+
+#: src/frontend/sdl/play_view.cpp:262
+#, c-format
+msgid "Printer to %s..."
+msgstr "Nyomtató ide: %s..."
+
+#: src/frontend/sdl/play_view.cpp:263
+msgid "Printer to a file..."
+msgstr "Nyomtató fájlba..."
+
+#: src/frontend/sdl/play_view.cpp:265
+msgid ""
+"LPRINT and LLIST go to the file: a .txt gets UTF-8 text, anything else the "
+"raw bytes"
+msgstr ""
+"Az LPRINT és az LLIST a fájlba megy: egy .txt UTF-8 szöveget kap, minden más "
+"a nyers bájtokat"
+
+#: src/frontend/sdl/play_view.cpp:267
+msgid "No printer"
+msgstr "Nincs nyomtató"
+
+#: src/frontend/sdl/play_view.cpp:269
+msgid ""
+"As on the real machine: an LPRINT waits after its first character until STOP "
+"(CTRL+ESC)"
+msgstr ""
+"Mint a valódi gépen: az LPRINT az első karaktere után a STOP-ig vár "
+"(CTRL+ESC)"
+
+#: src/frontend/sdl/play_view.cpp:273
+msgid "Cartridge"
+msgstr "Cartridge"
+
+#: src/frontend/sdl/play_view.cpp:274
+msgid "Insert cartridge..."
+msgstr "Cartridge behelyezése..."
+
+#: src/frontend/sdl/play_view.cpp:276
+msgid "A .crt, .rom or .bin image; the machine powers on"
+msgstr "Egy .crt, .rom vagy .bin képfájl; hidegindítás"
+
+#: src/frontend/sdl/play_view.cpp:279
+#, c-format
+msgid "Remove %s"
+msgstr "%s kivétele"
+
+#: src/frontend/sdl/play_view.cpp:280
+msgid "Remove cartridge"
+msgstr "Cartridge kivétele"
+
+#: src/frontend/sdl/play_view.cpp:281
+msgid "New MultiCart image..."
+msgstr "Új MultiCart-képfájl..."
+
+#: src/frontend/sdl/play_view.cpp:283
+msgid ""
+"Pick .cas programs and .crt carts, then where the image goes; it goes in and "
+"the machine powers on. The menu saves, deletes and renames into the image "
+"file."
+msgstr ""
+"Válassz .cas programokat és .crt cartridge-okat, aztán a képfájl helyét; "
+"behelyezés és hidegindítás következik. A menü a képfájlba ment, abban töröl "
+"és nevez át."
+
+#: src/frontend/sdl/play_view.cpp:287
+msgid "SD Dual cartridge"
+msgstr "SD Dual cartridge"
+
+#: src/frontend/sdl/play_view.cpp:289
+msgid ""
+"Sebestyén Pál's SD card cartridge with VT-DOS: in BASIC, EXT 2 starts the VT-"
+"DOS command line, EXT 3 the file manager; LOAD and SAVE use the card. The "
+"machine powers on."
+msgstr ""
+"Sebestyén Pál SD-kártyás cartridge-a VT-DOS-szal: BASIC-ben az EXT 2 a VT-"
+"DOS parancssort indítja, az EXT 3 a fájlkezelőt; a LOAD és a SAVE a kártyát "
+"használja. Hidegindítás."
+
+#: src/frontend/sdl/play_view.cpp:296
+#, c-format
+msgid "microSD card %s..."
+msgstr "microSD-kártya: %s..."
+
+#: src/frontend/sdl/play_view.cpp:297
+msgid "microSD card image..."
+msgstr "microSD-kártya képfájl..."
+
+#: src/frontend/sdl/play_view.cpp:297
+msgid "SD card image..."
+msgstr "SD-kártya képfájl..."
+
+#: src/frontend/sdl/play_view.cpp:302
+msgid ""
+"A raw image of a whole card (.img), written in place; its partitions are the "
+"first drives"
+msgstr ""
+"Egy teljes kártya nyers képfájlja (.img), helyben írva; a partíciói az első "
+"meghajtók"
+
+#: src/frontend/sdl/play_view.cpp:303
+msgid ""
+"A raw image of a whole card (.img), written in place; a read-only file sets "
+"the write-protect switch"
+msgstr ""
+"Egy teljes kártya nyers képfájlja (.img), helyben írva; a csak olvasható "
+"fájl bekapcsolja az írásvédelmet"
+
+#: src/frontend/sdl/play_view.cpp:306
+msgid "Take the microSD card out"
+msgstr "microSD-kártya kivétele"
+
+#: src/frontend/sdl/play_view.cpp:311
+msgid "New SD card image..."
+msgstr "Új SD-kártya képfájl..."
+
+#: src/frontend/sdl/play_view.cpp:313
+msgid ""
+"Pick files for its root, then where the image goes: a 64 MiB card with one "
+"FAT16 partition; it goes into the microSD socket, with the SD Dual"
+msgstr ""
+"Válassz fájlokat a gyökérkönyvtárába, aztán a képfájl helyét: 64 MiB-os "
+"kártya egy FAT16 partícióval; a microSD-foglalatba kerül, az SD Duallal "
+"együtt"
+
+#: src/frontend/sdl/play_view.cpp:320
+msgid "Tape"
+msgstr "Magnó"
+
+#: src/frontend/sdl/play_view.cpp:321
+msgid "Insert tape..."
+msgstr "Szalag behelyezése..."
+
+#: src/frontend/sdl/play_view.cpp:323
+msgid "A .wav or .ttp file, or a .cas played as a tape"
+msgstr "Egy .wav vagy .ttp fájl, vagy szalagként lejátszott .cas"
+
+#: src/frontend/sdl/play_view.cpp:325
+msgid "Run the tape"
+msgstr "A szalag futtatása"
+
+#: src/frontend/sdl/play_view.cpp:326 src/frontend/sdl/play_view.cpp:468
+msgid "Play"
+msgstr "Lejátszás"
+
+#: src/frontend/sdl/play_view.cpp:328
+msgid "Rewind"
+msgstr "Visszatekerés"
+
+#: src/frontend/sdl/play_view.cpp:329
+msgid "Record to WAV..."
+msgstr "Felvétel WAV-ba..."
+
+#: src/frontend/sdl/play_view.cpp:330
+msgid "Eject tape"
+msgstr "Szalag kivétele"
+
+#: src/frontend/sdl/play_view.cpp:331
+msgid "Fast tape"
+msgstr "Gyors magnó"
+
+#: src/frontend/sdl/play_view.cpp:333
+msgid "Run at full speed while the tape moves"
+msgstr "Teljes sebesség, amíg a szalag mozog"
+
+#: src/frontend/sdl/play_view.cpp:339
+msgid "Disk"
+msgstr "Lemez"
+
+#: src/frontend/sdl/play_view.cpp:345
+#, c-format
+msgid "%c: insert disk..."
+msgstr "%c: lemez behelyezése..."
+
+#: src/frontend/sdl/play_view.cpp:350
+#, c-format
+msgid "%c: eject %s"
+msgstr "%c: %s kivétele"
+
+#: src/frontend/sdl/play_view.cpp:357
+msgid "Fast disk"
+msgstr "Gyors lemez"
+
+#: src/frontend/sdl/play_view.cpp:359
+msgid ""
+"Run at full speed while a drive works; the machine's own timing stays real"
+msgstr ""
+"Teljes sebesség, amíg egy meghajtó dolgozik; a gép saját időzítése valós "
+"marad"
+
+#: src/frontend/sdl/play_view.cpp:419
+msgid "Machine and ROMs"
+msgstr "Gép és ROM-ok"
+
+#: src/frontend/sdl/play_view.cpp:425
+msgid "paused"
+msgstr "szünet"
+
+#: src/frontend/sdl/play_view.cpp:435
+msgid "Paused: click or Pause to resume"
+msgstr "Szünet: kattintás vagy Pause a folytatáshoz"
+
+#: src/frontend/sdl/play_view.cpp:436
+msgid "Speed in percent of a real TVC: click or Pause to pause"
+msgstr ""
+"Sebesség egy valódi TVC-hez képest, százalékban: kattintás vagy Pause a "
+"szüneteltetéshez"
+
+#: src/frontend/sdl/play_view.cpp:441
+msgid "symbolic keys"
+msgstr "szimbolikus kiosztás"
+
+#: src/frontend/sdl/play_view.cpp:441
+msgid "positional keys"
+msgstr "pozíciós kiosztás"
+
+#: src/frontend/sdl/play_view.cpp:445
+msgid "PC characters type the same TVC characters: click for positional"
+msgstr ""
+"A PC karakterei ugyanazokat a TVC-karaktereket írják: kattintás a pozíciós "
+"kiosztáshoz"
+
+#: src/frontend/sdl/play_view.cpp:446
+msgid "PC keys sit where the Hungarian TVC legends are: click for symbolic"
+msgstr ""
+"A PC billentyűi ott vannak, ahol a magyar TVC feliratai: kattintás a "
+"szimbolikus kiosztáshoz"
+
+#: src/frontend/sdl/play_view.cpp:450
+msgid "no sound"
+msgstr "nincs hang"
+
+#: src/frontend/sdl/play_view.cpp:450
+msgid "muted"
+msgstr "némítva"
+
+#: src/frontend/sdl/play_view.cpp:450
+msgid "sound"
+msgstr "hang"
+
+#: src/frontend/sdl/play_view.cpp:468
+msgid "Insert a tape and play it"
+msgstr "Szalag behelyezése és lejátszása"
+
+#: src/frontend/sdl/play_view.cpp:474
+msgid "tape"
+msgstr "magnó"
+
+#: src/frontend/sdl/play_view.cpp:481
+msgid "The tape moves: PLAY or RECORD is down and the motor is on"
+msgstr "A szalag mozog: a PLAY vagy a RECORD le van nyomva, és a motor jár"
+
+#: src/frontend/sdl/play_view.cpp:482
+msgid "The tape deck; the ROM turns the motor on and off"
+msgstr "A magnó; a ROM kapcsolja a motort be és ki"
+
+#: src/frontend/sdl/play_view.cpp:484 src/frontend/common/host_tape.cpp:345
+msgid "no tape"
+msgstr "nincs szalag"
+
+#: src/frontend/sdl/play_view.cpp:495 src/frontend/sdl/play_view.cpp:497
+msgid "disk"
+msgstr "lemez"
+
+#: src/frontend/sdl/settings_view.cpp:49
+#, c-format
+msgid "Set by %s for this run; a change here is saved"
+msgstr "Ebben a futásban ez adja meg: %s; az itteni változtatás mentődik"
+
+#: src/frontend/sdl/settings_view.cpp:63 src/frontend/sdl/settings_view.cpp:154
+msgid "Picture"
+msgstr "Kép"
+
+#: src/frontend/sdl/settings_view.cpp:67
+msgid "Keyboard and joysticks"
+msgstr "Billentyűzet és botkormányok"
+
+#: src/frontend/sdl/settings_view.cpp:69
+msgid "Interface"
+msgstr "Felület"
+
+#: src/frontend/sdl/settings_view.cpp:71
+msgid "Remote"
+msgstr "Távoli elérés"
+
+#: src/frontend/sdl/settings_view.cpp:77
+msgid "Model and ROMs"
+msgstr "Modell és ROM-ok"
+
+#: src/frontend/sdl/settings_view.cpp:85
+msgid "Switching powers the machine on; the cartridge and the cards stay in."
+msgstr "Váltáskor hidegindítás jön; a cartridge és a kártyák bent maradnak."
+
+#: src/frontend/sdl/settings_view.cpp:87
+msgid "ROM folder"
+msgstr "ROM-mappa"
+
+#: src/frontend/sdl/settings_view.cpp:88
+#, c-format
+msgid "In use: %s"
+msgstr "Használatban: %s"
+
+#: src/frontend/sdl/settings_view.cpp:90
+msgid ""
+"No folder chosen: roms/ next to the program, then roms/ in the user data "
+"folder."
+msgstr ""
+"Nincs mappa kiválasztva: a program melletti roms/, aztán a felhasználói "
+"adatmappa roms/ mappája."
+
+#: src/frontend/sdl/settings_view.cpp:98
+msgid "Choose folder..."
+msgstr "Mappa választása..."
+
+#: src/frontend/sdl/settings_view.cpp:102
+msgid "Default places"
+msgstr "Alapértelmezett helyek"
+
+#: src/frontend/sdl/settings_view.cpp:106
+msgid "Downloading..."
+msgstr "Letöltés..."
+
+#: src/frontend/sdl/settings_view.cpp:109
+msgid "Disk card"
+msgstr "Lemezkártya"
+
+#: src/frontend/sdl/settings_view.cpp:110
+msgid "HBF disk card in slot 0"
+msgstr "HBF lemezkártya a 0. kártyahelyen"
+
+#: src/frontend/sdl/settings_view.cpp:112
+msgid "VT-DOS 1.1 (hbf.rom)"
+msgstr "VT-DOS 1.1 (hbf.rom)"
+
+#: src/frontend/sdl/settings_view.cpp:115
+msgid "VT-DOS 1.2 (hbf12.rom)"
+msgstr "VT-DOS 1.2 (hbf12.rom)"
+
+#: src/frontend/sdl/settings_view.cpp:120
+#, c-format
+msgid "Image: %s"
+msgstr "Kép: %s"
+
+#: src/frontend/sdl/settings_view.cpp:120
+msgid "Image file..."
+msgstr "Képfájl..."
+
+#: src/frontend/sdl/settings_view.cpp:124
+msgid ""
+"The card's EPROM. A new one powers the machine on while the card is in. VT-"
+"DOS also needs its cartridge (vtdos11.rom or vtdos12.rom); either works with "
+"either EPROM."
+msgstr ""
+"A kártya EPROM-ja. Ha a kártya bent van, csere után hidegindítás jön. A VT-"
+"DOS-hoz a cartridge-e is kell (vtdos11.rom vagy vtdos12.rom); bármelyik "
+"működik bármelyik EPROM-mal."
+
+#: src/frontend/sdl/settings_view.cpp:127
+msgid "Other cards"
+msgstr "Többi kártya"
+
+#: src/frontend/sdl/settings_view.cpp:133
+msgid "SID card"
+msgstr "SID-kártya"
+
+#: src/frontend/sdl/settings_view.cpp:134
+msgid "none"
+msgstr "nincs"
+
+#: src/frontend/sdl/settings_view.cpp:141
+msgid ""
+"The same switches as the Cards menu; each powers the machine on. freeTVC "
+"starts with the cards that were in when it closed."
+msgstr ""
+"Ugyanazok a kapcsolók, mint a Kártyák menüben; mindegyik hidegindítással "
+"jár. A freeTVC azokkal a kártyákkal indul, amelyek kilépéskor bent voltak."
+
+#: src/frontend/sdl/settings_view.cpp:168
+msgid "Only sharp pixels here: the picture model needs OpenGL 3.3."
+msgstr "Itt csak éles képpontok vannak: a képmodellhez OpenGL 3.3 kell."
+
+#: src/frontend/sdl/settings_view.cpp:175
+msgid "Signal"
+msgstr "Jel"
+
+#: src/frontend/sdl/settings_view.cpp:176
+msgid "Luma bandwidth"
+msgstr "Fénysűrűség sávszélessége"
+
+#: src/frontend/sdl/settings_view.cpp:178
+msgid "Chroma bandwidth"
+msgstr "Színjel sávszélessége"
+
+#: src/frontend/sdl/settings_view.cpp:179
+msgid "Saturation"
+msgstr "Telítettség"
+
+#: src/frontend/sdl/settings_view.cpp:180
+msgid "Chroma phase error"
+msgstr "Színjel fázishibája"
+
+#: src/frontend/sdl/settings_view.cpp:181
+msgid "PAL delay line"
+msgstr "PAL késleltetővonal"
+
+#: src/frontend/sdl/settings_view.cpp:185
+msgid ""
+"Without the delay line a phase error shows as Hanover bars: lines of "
+"alternating hue."
+msgstr ""
+"Késleltetővonal nélkül a fázishiba Hanover-sávokként látszik: váltakozó "
+"árnyalatú sorokként."
+
+#: src/frontend/sdl/settings_view.cpp:187
+msgid ""
+"A black and white set has no chroma trap: the subcarrier shows as fine dots "
+"in coloured areas."
+msgstr ""
+"A fekete-fehér készülékben nincs színcsapda: a színsegédvivő finom "
+"pöttyökként látszik a színes részeken."
+
+#: src/frontend/sdl/settings_view.cpp:190
+msgid "Beam"
+msgstr "Sugár"
+
+#: src/frontend/sdl/settings_view.cpp:191
+msgid "Spot width"
+msgstr "Folt szélessége"
+
+#: src/frontend/sdl/settings_view.cpp:193
+msgid "Tube"
+msgstr "Képcső"
+
+#: src/frontend/sdl/settings_view.cpp:194
+msgid "Beam on black"
+msgstr "Sugár feketén"
+
+#: src/frontend/sdl/settings_view.cpp:195
+msgid "Beam on white"
+msgstr "Sugár fehéren"
+
+#: src/frontend/sdl/settings_view.cpp:197
+msgid "No mask"
+msgstr "Nincs maszk"
+
+#: src/frontend/sdl/settings_view.cpp:197
+msgid "Aperture grille"
+msgstr "Résrács"
+
+#: src/frontend/sdl/settings_view.cpp:197
+msgid "Shadow mask"
+msgstr "Árnyékmaszk"
+
+#: src/frontend/sdl/settings_view.cpp:208
+msgid "Mask strength"
+msgstr "Maszk erőssége"
+
+#: src/frontend/sdl/settings_view.cpp:209
+msgid "Mask pitch"
+msgstr "Maszk osztása"
+
+#: src/frontend/sdl/settings_view.cpp:211
+msgid "Glow"
+msgstr "Derengés"
+
+#: src/frontend/sdl/settings_view.cpp:212
+msgid "Curvature"
+msgstr "Görbület"
+
+#: src/frontend/sdl/settings_view.cpp:213
+msgid "Vignette"
+msgstr "Sarkok sötétítése"
+
+#: src/frontend/sdl/settings_view.cpp:214
+msgid "Tube gamma"
+msgstr "Képcső gammája"
+
+#: src/frontend/sdl/settings_view.cpp:215
+msgid "Brightness"
+msgstr "Fényerő"
+
+#: src/frontend/sdl/settings_view.cpp:221
+msgid "Your values are kept in the user data folder's copy of this picture."
+msgstr "Az értékeidet a kép felhasználói adatmappába tett másolata őrzi."
+
+#: src/frontend/sdl/settings_view.cpp:222
+msgid "Back to the shipped values"
+msgstr "Vissza a gyári értékekre"
+
+#: src/frontend/sdl/settings_view.cpp:226
+msgid "The TVC's rear switch"
+msgstr "A TVC hátsó kapcsolója"
+
+#: src/frontend/sdl/settings_view.cpp:227
+msgid "Colour"
+msgstr "Színes"
+
+#: src/frontend/sdl/settings_view.cpp:231
+msgid "Black and white"
+msgstr "Fekete-fehér"
+
+#: src/frontend/sdl/settings_view.cpp:234
+msgid ""
+"Off, the TVC sends no colour subcarrier: a TV shows grey. Programs can read "
+"it at port 59h."
+msgstr ""
+"Kikapcsolva a TVC nem küld színsegédvivőt: a tévé szürkét mutat. A programok "
+"az 59h porton olvashatják."
+
+#: src/frontend/sdl/settings_view.cpp:237
+msgid "Full screen (F11)"
+msgstr "Teljes képernyő (F11)"
+
+#: src/frontend/sdl/settings_view.cpp:238
+msgid "Start in full screen"
+msgstr "Indulás teljes képernyőn"
+
+#: src/frontend/sdl/settings_view.cpp:242
+msgid ""
+"Full raster shows the whole beam path, sync and blanking included, with the "
+"TV area outlined."
+msgstr ""
+"A teljes raszter a sugár teljes útját mutatja a szinkronnal és a kioltással "
+"együtt, a tévén látható részt körberajzolva."
+
+#: src/frontend/sdl/settings_view.cpp:244
+msgid "Drawing"
+msgstr "Rajzolás"
+
+#: src/frontend/sdl/settings_view.cpp:248
+msgid "Use SDL's renderer (no picture model)"
+msgstr "Az SDL rajzolójának használata (képmodell nélkül)"
+
+#: src/frontend/sdl/settings_view.cpp:251
+msgid ""
+"From the next start. For a graphics driver without OpenGL 3.3, which freeTVC "
+"also finds by itself."
+msgstr ""
+"A következő indítástól. OpenGL 3.3 nélküli grafikus meghajtóhoz; ezt a "
+"freeTVC magától is észreveszi."
+
+#: src/frontend/sdl/settings_view.cpp:257
+msgid "Mute"
+msgstr "Némítás"
+
+#: src/frontend/sdl/settings_view.cpp:260
+msgid "Volume"
+msgstr "Hangerő"
+
+#: src/frontend/sdl/settings_view.cpp:265
+msgid "No sound device is open in this run."
+msgstr "Ebben a futásban nincs megnyitva hangeszköz."
+
+#: src/frontend/sdl/settings_view.cpp:267
+msgid "Sound output"
+msgstr "Hangkimenet"
+
+#: src/frontend/sdl/settings_view.cpp:271
+msgid ""
+"From the next start. With sound the emulation keeps time by the sound "
+"device, without it by the clock."
+msgstr ""
+"A következő indítástól. Hanggal az emuláció a hangeszközhöz igazodik, "
+"nélküle az órához."
+
+#: src/frontend/sdl/settings_view.cpp:275
+msgid "Host keyboard"
+msgstr "Gazdagép billentyűzete"
+
+#: src/frontend/sdl/settings_view.cpp:280
+msgid ""
+"The character a host key gives is typed on the TVC, with SHIFT as the TVC "
+"needs it."
+msgstr ""
+"A gazdagép billentyűjének karaktere íródik be a TVC-n, a TVC-nek kellő SHIFT-"
+"tel."
+
+#: src/frontend/sdl/settings_view.cpp:284
+msgid "Each host key is the TVC key the layout below gives it; for games."
+msgstr "Minden billentyű az a TVC-billentyű, amelyet a lenti kiosztás ad neki; játékokhoz."
+
+#: src/frontend/sdl/settings_view.cpp:286
+msgid "Key layout"
+msgstr "Billentyűkiosztás"
+
+#: src/frontend/sdl/settings_view.cpp:293
+msgid "Edit the layout..."
+msgstr "Kiosztás szerkesztése..."
+
+#: src/frontend/sdl/settings_view.cpp:294
+msgid ""
+"hungarian: the keys by their place on a Hungarian PC keyboard, the TVC's "
+"extra keys on F1-F8. us: digits and letters by their legend on a US keyboard."
+msgstr "hungarian: a billentyűk a magyar PC-billentyűzeten elfoglalt helyük szerint, a TVC többletbillentyűi az F1–F8-on. us: a számok és betűk az amerikai billentyűzet feliratai szerint."
+
+#: src/frontend/sdl/settings_view.cpp:297
+msgid "Joysticks"
+msgstr "Botkormányok"
+
+#: src/frontend/sdl/settings_view.cpp:298
+msgid ""
+"Joystick 1: the arrow keys, fire on Right Ctrl. Joystick 2: keypad 8, 2, 4, "
+"6, fire on keypad 0. Gamepads 1 to 4 drive joysticks 1 to 4; 3 and 4 are the "
+"GameCard's."
+msgstr ""
+"1. botkormány: a nyílbillentyűk, tűz a jobb Ctrl. 2. botkormány: a "
+"számbillentyűzet 8, 2, 4, 6, tűz a számbillentyűzet 0. Az 1–4. játékvezérlő "
+"az 1–4. botkormány; a 3. és a 4. a GameCardé."
+
+#: src/frontend/sdl/settings_view.cpp:322
+msgid "A skin file is watched while in use: saving it in an editor applies it."
+msgstr ""
+"A használt kinézetfájlt a program figyeli: szerkesztőben mentve azonnal "
+"érvényes."
+
+#: src/frontend/sdl/settings_view.cpp:324
+msgid "Settings file"
+msgstr "Beállításfájl"
+
+#: src/frontend/sdl/settings_view.cpp:328
+msgid "Next to the program (portable): this folder keeps its own settings."
+msgstr "A program mellett (hordozható): ez a mappa a saját beállításait őrzi."
+
+#: src/frontend/sdl/settings_view.cpp:329
+msgid ""
+"In the user data folder. A freetvc.ini next to the program is used instead "
+"when there is one."
+msgstr ""
+"A felhasználói adatmappában. Ha a program mellett van freetvc.ini, az lesz "
+"érvényes helyette."
+
+#: src/frontend/sdl/settings_view.cpp:340
+msgid "port"
+msgstr "port"
+
+#: src/frontend/sdl/settings_view.cpp:360
+#, c-format
+msgid "Listening on 127.0.0.1:%d"
+msgstr "Figyel: 127.0.0.1:%d"
+
+#: src/frontend/sdl/settings_view.cpp:366
+msgid "Servers"
+msgstr "Kiszolgálók"
+
+#: src/frontend/sdl/settings_view.cpp:367
+msgid "Each listens on 127.0.0.1 only and starts or stops at once."
+msgstr "Mindegyik csak a 127.0.0.1-en figyel, és azonnal indul vagy leáll."
+
+#: src/frontend/sdl/settings_view.cpp:368
+msgid "Text monitor"
+msgstr "Szöveges monitor"
+
+#: src/frontend/sdl/settings_view.cpp:370
+msgid "MCP server (HTTP)"
+msgstr "MCP-kiszolgáló (HTTP)"
+
+#: src/frontend/sdl/settings_view.cpp:372
+msgid "Token"
+msgstr "Token"
+
+#: src/frontend/sdl/settings_view.cpp:378
+msgid "Copy"
+msgstr "Másolás"
+
+#: src/frontend/sdl/settings_view.cpp:379
+msgid ""
+"A new token each run, unless --mcp-token gives one. Clients send it as "
+"Authorization: Bearer."
+msgstr ""
+"Minden futás új tokent kap, hacsak a --mcp-token meg nem ad egyet. A "
+"kliensek Authorization: Bearer fejlécben küldik."
+
+#: src/frontend/sdl/settings_view.cpp:381
+msgid "Allow monitor commands over MCP"
+msgstr "Monitorparancsok engedése MCP-n át"
+
+#: src/frontend/sdl/settings_view.cpp:385
+msgid "DZRP for DeZog"
+msgstr "DZRP a DeZoghoz"
+
+#: src/frontend/sdl/settings_view.cpp:386
+msgid "TVC banks (needs freeTVC's DeZog patch)"
+msgstr "TVC-bankok (a freeTVC DeZog-foltja kell hozzá)"
+
+#: src/frontend/sdl/settings_view.cpp:390
+msgid "GDB stub"
+msgstr "GDB-csonk"
+
+#: src/frontend/sdl/settings_view.cpp:450
+msgid "Settings"
+msgstr "Beállítások"
+
+#: src/frontend/common/card256_host.cpp:274
+#, c-format
+msgid "'%s' is not a folder"
+msgstr "'%s' nem mappa"
+
+#: src/frontend/common/card256_host.cpp:310
+#, c-format
+msgid "'%s' holds more than the flash drive's 15 MiB"
+msgstr "'%s' több, mint a flash meghajtó 15 MiB-ja"
+
+#: src/frontend/common/card256_host.cpp:318
+#, c-format
+msgid "'%s' does not fit the flash drive"
+msgstr "'%s' nem fér el a flash meghajtón"
+
+#: src/frontend/common/card256_host.cpp:331
+#, c-format
+msgid "'%s' is not a littlefs image with 4 KiB blocks"
+msgstr "'%s' nem 4 KiB-os blokkokból álló littlefs képfájl"
+
+#: src/frontend/common/host_tape.cpp:77
+msgid "a tape is a .wav, .ttp or .cas file"
+msgstr "szalag lehet .wav, .ttp vagy .cas fájl"
+
+#: src/frontend/common/host_tape.cpp:127
+msgid "the cassette folder is read only"
+msgstr "a kazettamappa csak olvasható"
+
+#: src/frontend/common/host_tape.cpp:138
+msgid "no usable file name"
+msgstr "nincs használható fájlnév"
+
+#: src/frontend/common/host_tape.cpp:148 src/frontend/common/host_tape.cpp:334
+#: src/frontend/common/host_tape.cpp:650
+#: src/frontend/common/multicart_image.cpp:275
+#: src/frontend/common/rom_fetch.cpp:397 src/frontend/common/sd_image.cpp:178
+#: src/frontend/common/sd_image.cpp:213
+#, c-format
+msgid "cannot write %s"
+msgstr "nem írható: %s"
+
+#: src/frontend/common/host_tape.cpp:191 src/frontend/common/host_tape.cpp:1204
+#, c-format
+msgid "'%s' is not a directory"
+msgstr "'%s' nem könyvtár"
+
+#: src/frontend/common/host_tape.cpp:211 src/frontend/common/host_tape.cpp:216
+#: src/frontend/common/host_tape.cpp:269 src/frontend/common/host_tape.cpp:672
+#: src/frontend/common/host_tape.cpp:684 src/frontend/common/host_tape.cpp:715
+#: src/frontend/common/host_tape.cpp:1389
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: src/frontend/common/host_tape.cpp:226
+#, c-format
+msgid "tape ejected for the cassette %s"
+msgstr "szalag kivéve a kazetta miatt: %s"
+
+#: src/frontend/common/host_tape.cpp:276
+#, c-format
+msgid "cassette %s detached for the tape"
+msgstr "kazetta leválasztva a szalag miatt: %s"
+
+#: src/frontend/common/host_tape.cpp:281
+#, c-format
+msgid "tape %s in (%s)"
+msgstr "szalag behelyezve: %s (%s)"
+
+#: src/frontend/common/host_tape.cpp:304
+#, c-format
+msgid "recording to %s"
+msgstr "felvétel ide: %s"
+
+#: src/frontend/common/host_tape.cpp:338
+#, c-format
+msgid "recording saved: %s (%s)"
+msgstr "felvétel mentve: %s (%s)"
+
+#: src/frontend/common/host_tape.cpp:347
+msgid "playing"
+msgstr "lejátszás"
+
+#: src/frontend/common/host_tape.cpp:349
+#, c-format
+msgid "tape %s, %s, %s / %s, motor on"
+msgstr "szalag: %s, %s, %s / %s, motor be"
+
+#: src/frontend/common/host_tape.cpp:349
+#, c-format
+msgid "tape %s, %s, %s / %s, motor off"
+msgstr "szalag: %s, %s, %s / %s, motor ki"
+
+#: src/frontend/common/host_tape.cpp:350
+msgid "(blank)"
+msgstr "(üres)"
+
+#: src/frontend/common/host_tape.cpp:384
+#, c-format
+msgid "%s: empty file"
+msgstr "%s: üres fájl"
+
+#: src/frontend/common/host_tape.cpp:395
+#, c-format
+msgid ""
+"unknown cartridge type '%s' (plain, kilocart, megacart, multicart, sddual)"
+msgstr ""
+"ismeretlen cartridge-típus: '%s' (plain, kilocart, megacart, multicart, "
+"sddual)"
+
+#: src/frontend/common/host_tape.cpp:402
+#, c-format
+msgid "%s: a MultiCart image needs the host's flash"
+msgstr "%s: a MultiCart-képfájlhoz a gazdagép flash-e kell"
+
+#: src/frontend/common/host_tape.cpp:414
+#, c-format
+msgid "%s: %zu bytes is larger than the SD Dual's 64 KiB flash"
+msgstr "%s: %zu bájt nagyobb az SD Dual 64 KiB-os flash-énél"
+
+#: src/frontend/common/host_tape.cpp:419
+#, c-format
+msgid "%s: %zu bytes is too large for a %s"
+msgstr "%s: %zu bájt túl nagy ehhez a típushoz: %s"
+
+#: src/frontend/common/host_tape.cpp:424
+#, c-format
+msgid "%s: bank %u is past the image (%zu banks)"
+msgstr "%s: bank %u: a képfájlon túl van (%zu bank)"
+
+#: src/frontend/common/host_tape.cpp:493
+#, c-format
+msgid "cannot write the MultiCart's flash to %s"
+msgstr "a MultiCart flash-e nem írható ide: %s"
+
+#: src/frontend/common/host_tape.cpp:500
+#, c-format
+msgid "cannot write the MultiCart's flash to %s: %s"
+msgstr "a MultiCart flash-e nem írható ide: %s: %s"
+
+#: src/frontend/common/host_tape.cpp:519
+#, c-format
+msgid "%s is the MultiCart in the machine"
+msgstr "%s a gépben lévő MultiCart"
+
+#: src/frontend/common/host_tape.cpp:539
+msgid "no cartridge"
+msgstr "nincs cartridge"
+
+#: src/frontend/common/host_tape.cpp:542
+msgid "image"
+msgstr "képfájl"
+
+#: src/frontend/common/host_tape.cpp:545
+#, c-format
+msgid "register %02Xh (%s page %u%s), %s"
+msgstr "regiszter: %02Xh (%s, lap: %u%s), %s"
+
+#: src/frontend/common/host_tape.cpp:546
+msgid ", at E000h"
+msgstr ", E000h-n"
+
+#: src/frontend/common/host_tape.cpp:547
+msgid "a read of C000h resets it"
+msgstr "a C000h olvasása reseteli"
+
+#: src/frontend/common/host_tape.cpp:547
+msgid "no reset on read"
+msgstr "olvasáskor nincs reset"
+
+#: src/frontend/common/host_tape.cpp:549
+#, c-format
+msgid "cartridge %s: multicart, %s, %zu file%s"
+msgstr "cartridge: %s, multicart, %s, %zu fájl%s"
+
+#: src/frontend/common/host_tape.cpp:549
+#, c-format
+msgid "cartridge %s: multicart, %s, %zu files%s"
+msgstr "cartridge: %s, multicart, %s, %zu fájl%s"
+
+#: src/frontend/common/host_tape.cpp:550
+msgid ", flash changed (not yet saved)"
+msgstr ", a flash megváltozott (még nincs mentve)"
+
+#: src/frontend/common/host_tape.cpp:553
+#, c-format
+msgid "cartridge %s: sddual, firmware %s, flash page %u%s"
+msgstr "cartridge: %s, sddual, firmware: %s, flash lap: %u%s"
+
+#: src/frontend/common/host_tape.cpp:554
+msgid ", flash write jumper on"
+msgstr ", flash-írás jumper be"
+
+#: src/frontend/common/host_tape.cpp:556
+#, c-format
+msgid "cartridge %s: %s, %zu bytes, page %u of %u"
+msgstr "cartridge: %s, %s, %zu bájt, lap: %u / %u"
+
+#: src/frontend/common/host_tape.cpp:657
+#: src/frontend/common/multicart_image.cpp:282
+#: src/frontend/common/sd_image.cpp:190 src/frontend/common/sd_image.cpp:220
+#, c-format
+msgid "cannot write %s: %s"
+msgstr "nem írható: %s: %s"
+
+#: src/frontend/common/host_tape.cpp:706
+#, c-format
+msgid "%s: no ROM set with SYS %08X, EXT %08X for that board was found"
+msgstr ""
+"%s: nem található ROM-készlet SYS %08X, EXT %08X CRC-vel ehhez az alaplaphoz"
+
+#: src/frontend/common/host_tape.cpp:736
+msgid "none named"
+msgstr "nincs megnevezve"
+
+#: src/frontend/common/host_tape.cpp:740
+#, c-format
+msgid "snapshot: MultiCart image left out: %s"
+msgstr "pillanatkép: a MultiCart-képfájl kimaradt: %s"
+
+#: src/frontend/common/host_tape.cpp:757
+#, c-format
+msgid "snapshot: %s"
+msgstr "pillanatkép: %s"
+
+#: src/frontend/common/host_tape.cpp:761
+#, c-format
+msgid "snapshot: disk left out: %s"
+msgstr "pillanatkép: a lemez kimaradt: %s"
+
+#: src/frontend/common/host_tape.cpp:777
+#, c-format
+msgid "snapshot: SD card left out: %s"
+msgstr "pillanatkép: az SD-kártya kimaradt: %s"
+
+#: src/frontend/common/host_tape.cpp:786
+#, c-format
+msgid "snapshot: tape left out: %s"
+msgstr "pillanatkép: a szalag kimaradt: %s"
+
+#: src/frontend/common/host_tape.cpp:793
+#, c-format
+msgid "snapshot: folder left out: %s"
+msgstr "pillanatkép: a mappa kimaradt: %s"
+
+#: src/frontend/common/host_tape.cpp:798
+#, c-format
+msgid "snapshot: cassette left out: %s"
+msgstr "pillanatkép: a kazetta kimaradt: %s"
+
+#: src/frontend/common/host_tape.cpp:856
+msgid "nothing kept to rewind to yet"
+msgstr "még nincs mire visszatekerni"
+
+#: src/frontend/common/host_tape.cpp:856
+msgid "rewind is off in this front end"
+msgstr "a visszatekerés ebben a felületben ki van kapcsolva"
+
+#: src/frontend/common/host_tape.cpp:860
+msgid "rewind"
+msgstr "visszatekerés"
+
+#: src/frontend/common/host_tape.cpp:869
+msgid "rewind off"
+msgstr "visszatekerés ki"
+
+#: src/frontend/common/host_tape.cpp:872
+msgid "rewind: nothing kept yet"
+msgstr "visszatekerés: még nincs mentett pont"
+
+#: src/frontend/common/host_tape.cpp:875
+#, c-format
+msgid "rewind: %llu s back possible, %zu points, %zu KiB"
+msgstr "visszatekerés: %llu s-ig lehetséges, %zu pont, %zu KiB"
+
+#: src/frontend/common/host_tape.cpp:889
+#, c-format
+msgid "cassette %s (%s)"
+msgstr "kazetta: %s (%s)"
+
+#: src/frontend/common/host_tape.cpp:889
+msgid "no cassette"
+msgstr "nincs kazetta"
+
+#: src/frontend/common/host_tape.cpp:893
+#, c-format
+msgid "%s, folder %s (read/write)"
+msgstr "%s, mappa: %s (írható)"
+
+#: src/frontend/common/host_tape.cpp:893
+#, c-format
+msgid "%s, folder %s (read only)"
+msgstr "%s, mappa: %s (csak olvasható)"
+
+#: src/frontend/common/host_tape.cpp:912
+#, c-format
+msgid "GameCard without its EPROM, so without the boot menu: %s"
+msgstr "GameCard az EPROM-ja nélkül, így indítómenü nélkül: %s"
+
+#: src/frontend/common/host_tape.cpp:941 src/frontend/common/host_tape.cpp:1278
+msgid "the slots are 0 to 3"
+msgstr "a kártyahelyek: 0-tól 3-ig"
+
+#: src/frontend/common/host_tape.cpp:948 src/frontend/common/host_tape.cpp:1281
+#, c-format
+msgid "slot %u holds the %s"
+msgstr "%u. kártyahely foglalt: %s"
+
+#: src/frontend/common/host_tape.cpp:968
+#, c-format
+msgid ""
+"Multichip sound card without its EEPROM, so without its start-up screen: %s"
+msgstr ""
+"Multichip hangkártya az EEPROM-ja nélkül, így indítóképernyő nélkül: %s"
+
+#: src/frontend/common/host_tape.cpp:1004
+msgid "the SID card is off, 6581 or 8580"
+msgstr "a SID-kártya értéke off, 6581 vagy 8580"
+
+#: src/frontend/common/host_tape.cpp:1067
+#, c-format
+msgid "TVC256k++ without its ROM, so the machine never calls the card: %s"
+msgstr "TVC256k++ a ROM-ja nélkül, így a gép sosem hívja a kártyát: %s"
+
+#: src/frontend/common/host_tape.cpp:1079
+#, c-format
+msgid "TVC256k++: %s does not mount as its flash drive"
+msgstr "TVC256k++: %s nem csatolható flash meghajtóként"
+
+#: src/frontend/common/host_tape.cpp:1082
+#, c-format
+msgid ""
+"TVC256k++ without its flash drive, so a bare LOAD there finds nothing: %s"
+msgstr ""
+"TVC256k++ a flash meghajtója nélkül, így egy puszta LOAD ott semmit sem "
+"talál: %s"
+
+#: src/frontend/common/host_tape.cpp:1159
+msgid "no TVC256k++"
+msgstr "nincs TVC256k++"
+
+#: src/frontend/common/host_tape.cpp:1163
+msgid "no mouse on the TVC256k++'s USB port"
+msgstr "nincs egér a TVC256k++ USB-portján"
+
+#: src/frontend/common/host_tape.cpp:1185
+#, c-format
+msgid "NanoSD without its EEPROM, so the machine never calls the card: %s"
+msgstr "NanoSD az EEPROM-ja nélkül, így a gép sosem hívja a kártyát: %s"
+
+#: src/frontend/common/host_tape.cpp:1262
+msgid ""
+"the TVC256k++ cannot share the machine with the HBM RAM card (its manual: no "
+"other RAM expansion beside it)"
+msgstr ""
+"a TVC256k++ nem lehet egy gépben a HBM RAM-kártyával (a kézikönyve szerint "
+"mellette nem lehet másik RAM-bővítés)"
+
+#: src/frontend/common/host_tape.cpp:1274
+msgid "every slot holds a card"
+msgstr "minden kártyahely foglalt"
+
+#: src/frontend/common/host_tape.cpp:1357
+#, c-format
+msgid "slot %u, the disk card's, holds the %s"
+msgstr "%u. kártyahely (a lemezkártyáé) foglalt: %s"
+
+#: src/frontend/common/host_tape.cpp:1379
+#: src/frontend/common/host_tape.cpp:1449
+msgid "there are drives A: to D: only"
+msgstr "csak A:-tól D:-ig vannak meghajtók"
+
+#: src/frontend/common/host_tape.cpp:1422
+#, c-format
+msgid "cannot write the disk in %c: to %s"
+msgstr "a lemez (%c:) nem írható ide: %s"
+
+#: src/frontend/common/host_tape.cpp:1429
+#, c-format
+msgid "cannot write the disk in %c: to %s: %s"
+msgstr "a lemez (%c:) nem írható ide: %s: %s"
+
+#: src/frontend/common/host_tape.cpp:1469
+#, c-format
+msgid "%s: no CAS file in the root directory to start"
+msgstr "%s: nincs indítható CAS-fájl a gyökérkönyvtárban"
+
+#: src/frontend/common/host_tape.cpp:1534
+#, c-format
+msgid "%s is not SD Dual firmware"
+msgstr "%s nem SD Dual firmware"
+
+#: src/frontend/common/host_tape.cpp:1584
+#, c-format
+msgid "%s is in an SD socket"
+msgstr "%s egy SD-foglalatban van"
+
+#: src/frontend/common/multicart_image.cpp:129
+msgid "not a MultiCart v2.1+ firmware"
+msgstr "nem MultiCart v2.1+ firmware"
+
+#: src/frontend/common/multicart_image.cpp:146
+#, c-format
+msgid "%s: the directory is full"
+msgstr "%s: a könyvtár megtelt"
+
+#: src/frontend/common/multicart_image.cpp:164
+#, c-format
+msgid "%s: no free 16 KiB bank"
+msgstr "%s: nincs szabad 16 KiB-os bank"
+
+#: src/frontend/common/multicart_image.cpp:173
+#, c-format
+msgid "%s: too short for a CAS file"
+msgstr "%s: túl rövid egy CAS-fájlhoz"
+
+#: src/frontend/common/multicart_image.cpp:182
+#, c-format
+msgid "%s: no program in the CAS file"
+msgstr "%s: nincs program a CAS-fájlban"
+
+#: src/frontend/common/multicart_image.cpp:182
+#, c-format
+msgid "%s: does not fit"
+msgstr "%s: nem fér el"
+
+#: src/frontend/common/multicart_image.cpp:210
+#, c-format
+msgid "%s: neither a CAS file nor a MOPS cartridge"
+msgstr "%s: se nem CAS-fájl, se nem MOPS cartridge"
+
+#: src/frontend/common/multicart_image.cpp:249
+#, c-format
+msgid "unknown MultiCart firmware language '%s' (en, hu, es)"
+msgstr "ismeretlen MultiCart firmware-nyelv: '%s' (en, hu, es)"
+
+#: src/frontend/common/multicart_image.cpp:255
+#, c-format
+msgid "no MultiCart firmware: %s"
+msgstr "nincs MultiCart firmware: %s"
+
+#: src/frontend/common/presets.cpp:49
+#, c-format
+msgid "cannot open '%s'"
+msgstr "nem nyitható meg: '%s'"
+
+#: src/frontend/common/presets.cpp:54
+#, c-format
+msgid "'%s' is larger than %zu bytes"
+msgstr "'%s' nagyobb %zu bájtnál"
+
+#: src/frontend/common/presets.cpp:195
+#, c-format
+msgid "no ROMs for %s (%s and %s, or files with their CRC-32)"
+msgstr "nincsenek ROM-ok ehhez: %s (%s és %s, vagy azonos CRC-32-ű fájlok)"
+
+#: src/frontend/common/presets.cpp:210
+#, c-format
+msgid "no %s (or a file with its known CRC-32; --fetch-roms downloads it)"
+msgstr "nincs %s (vagy ismert CRC-32-ű fájl; a --fetch-roms letölti)"
+
+#: src/frontend/common/presets.cpp:230
+#, c-format
+msgid ""
+"TVC256k++ without its font, so text modes stay empty until a program loads "
+"one: %s"
+msgstr ""
+"TVC256k++ a betűkészlete nélkül, így a szöveges módok üresek, amíg egy "
+"program be nem tölt egyet: %s"
+
+#: src/frontend/common/presets.cpp:244
+#, c-format
+msgid ""
+"TVC256k++: %s is not the 256 x 240 16-colour BMP the card expects; left out"
+msgstr ""
+"TVC256k++: %s nem a kártya által várt 256 x 240-es, 16 színű BMP; kimaradt"
+
+#: src/frontend/common/presets.cpp:247
+#, c-format
+msgid "TVC256k++ without its power-on picture: %s"
+msgstr "TVC256k++ a bekapcsolási képe nélkül: %s"
+
+#: src/frontend/common/rom_fetch.cpp:296
+msgid ""
+"curl was not found (Windows 10 and later have curl.exe in the system folder; "
+"install curl or put it on PATH)"
+msgstr ""
+"a curl nem található (a Windows 10 és újabb rendszermappájában van curl.exe; "
+"telepítsd, vagy tedd a PATH-ra)"
+
+#: src/frontend/common/rom_fetch.cpp:298
+msgid "curl was not found on PATH (install it, e.g. `sudo apt install curl`)"
+msgstr "a curl nincs a PATH-on (telepítsd, pl. `sudo apt install curl`)"
+
+#: src/frontend/common/rom_fetch.cpp:307
+#, c-format
+msgid "%s does not run as curl"
+msgstr "%s nem curlként fut"
+
+#: src/frontend/common/rom_fetch.cpp:308
+#, c-format
+msgid "%s does not run as curl (%s)"
+msgstr "%s nem curlként fut (%s)"
+
+#: src/frontend/common/rom_fetch.cpp:317
+msgid "curl is not available"
+msgstr "a curl nem érhető el"
+
+#: src/frontend/common/rom_fetch.cpp:325
+#, c-format
+msgid "cannot create %s: %s"
+msgstr "nem hozható létre: %s: %s"
+
+#: src/frontend/common/rom_fetch.cpp:348
+#, c-format
+msgid "downloading %s failed (curl exit %d): %s"
+msgstr "nem sikerült letölteni: %s (curl kilépési kód: %d): %s"
+
+#: src/frontend/common/rom_fetch.cpp:349
+#, c-format
+msgid "downloading %s failed: %s"
+msgstr "nem sikerült letölteni: %s: %s"
+
+#: src/frontend/common/rom_fetch.cpp:354
+#, c-format
+msgid "%s: SHA-256 %s, expected %s (the file on the site changed?)"
+msgstr "%s: SHA-256 %s, várt: %s (megváltozott a fájl az oldalon?)"
+
+#: src/frontend/common/rom_fetch.cpp:371
+#, c-format
+msgid "the ROM list names an unknown piece %s"
+msgstr "a ROM-lista ismeretlen darabot nevez meg: %s"
+
+#: src/frontend/common/rom_fetch.cpp:380
+#, c-format
+msgid "%s has no readable %s"
+msgstr "%s: nincs benne olvasható %s"
+
+#: src/frontend/common/rom_fetch.cpp:389
+#, c-format
+msgid "%s: joined SHA-256 %s, expected %s"
+msgstr "%s: az összefűzött SHA-256 %s, várt: %s"
+
+#: src/frontend/common/sd_image.cpp:34
+#, c-format
+msgid "cannot read %s"
+msgstr "nem olvasható: %s"
+
+#: src/frontend/common/sd_image.cpp:38
+#, c-format
+msgid "cannot create %s in the image"
+msgstr "nem hozható létre a képfájlban: %s"
+
+#: src/frontend/common/sd_image.cpp:51
+#, c-format
+msgid "the image is full at %s"
+msgstr "a képfájl megtelt ennél: %s"
+
+#: src/frontend/common/sd_image.cpp:65
+#, c-format
+msgid "cannot make %s in the image"
+msgstr "nem hozható létre a képfájlban: %s"
+
+#: src/frontend/common/sd_image.cpp:104
+#, c-format
+msgid "cannot open %s: %s"
+msgstr "nem nyitható meg: %s: %s"
+
+#: src/frontend/common/sd_image.cpp:108
+#, c-format
+msgid ""
+"%s: an SD card image is whole 512-byte blocks, 64 KiB to 2 TiB (%llu bytes)"
+msgstr ""
+"%s: az SD-kártya képfájl egész 512 bájtos blokkokból áll, 64 KiB és 2 TiB "
+"között (%llu bájt)"
+
+#: src/frontend/common/sd_image.cpp:118
+#, c-format
+msgid "cannot open %s"
+msgstr "nem nyitható meg: %s"
+
+#: src/frontend/common/sd_image.cpp:170
+msgid "an SD card image is 1 MiB to 2 TiB"
+msgstr "az SD-kártya képfájl 1 MiB és 2 TiB közötti"
+
+#: src/frontend/common/sd_image.cpp:201
+#, c-format
+msgid "FatFs could not format %llu MiB"
+msgstr "a FatFs nem tudott formázni %llu MiB-ot"
+
+#: src/frontend/common/sd_image.cpp:205
+msgid "the new FAT volume does not mount"
+msgstr "az új FAT-kötet nem csatolható"
+
+#: src/frontend/common/serial_host.cpp:68
+msgid "the serial line is off, on, listen[:PORT] or connect:PORT"
+msgstr "a soros vonal értéke off, on, listen[:PORT] vagy connect:PORT"
+
+#: src/frontend/common/serial_host.cpp:74
+#, c-format
+msgid "'%s' is not a TCP port"
+msgstr "'%s' nem TCP-port"
+
+#: src/frontend/common/serial_host.cpp:114
+#, c-format
+msgid "cannot connect to 127.0.0.1:%s: %s"
+msgstr "nem lehet kapcsolódni ide: 127.0.0.1:%s: %s"
+
+#: src/frontend/common/settings.cpp:77
+#, c-format
+msgid "%s line %d: %s"
+msgstr "%s, %d. sor: %s"
+
+#: src/frontend/common/settings.cpp:85
+#, c-format
+msgid "no value for '%s'"
+msgstr "nincs érték: '%s'"
+
+#: src/frontend/common/settings.cpp:96
+msgid "nanosd_sort is none, name or size"
+msgstr "a nanosd_sort értéke none, name vagy size"
+
+#: src/frontend/common/settings.cpp:109
+msgid "serial_line is off, on, listen[:PORT] or connect:PORT"
+msgstr "a serial_line értéke off, on, listen[:PORT] vagy connect:PORT"
+
+#: src/frontend/common/settings.cpp:115
+msgid "serial_flow is rts or none"
+msgstr "a serial_flow értéke rts vagy none"
+
+#: src/frontend/common/settings.cpp:121
+msgid "sid_card is off, 6581 or 8580"
+msgstr "a sid_card értéke off, 6581 vagy 8580"
+
+#: src/frontend/common/settings.cpp:131
+msgid "volume is 0 to 100"
+msgstr "a hangerő 0 és 100 között lehet"
+
+#: src/frontend/common/settings.cpp:140
+#, c-format
+msgid "%s is off, on or a port number"
+msgstr "%s értéke off, on vagy egy portszám"
+
+#: src/frontend/common/settings.cpp:146
+msgid "renderer is gl or sdl"
+msgstr "a renderer értéke gl vagy sdl"
+
+#: src/frontend/common/settings.cpp:156
+msgid "colour_switch is colour or bw"
+msgstr "a colour_switch értéke colour vagy bw"
+
+#: src/frontend/common/settings.cpp:166
+msgid "language is a code such as en or hu"
+msgstr "a language egy nyelvkód, pl. en vagy hu"
+
+#: src/frontend/common/settings.cpp:172
+msgid "keymap is symbolic or positional"
+msgstr "a keymap értéke symbolic vagy positional"
+
+#: src/frontend/common/settings.cpp:179
+#, c-format
+msgid "%s is yes or no"
+msgstr "%s értéke yes vagy no"
+
+#: src/frontend/common/settings.cpp:270
+#, c-format
+msgid "cannot replace '%s': %s"
+msgstr "nem cserélhető le: '%s': %s"

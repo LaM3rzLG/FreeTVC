@@ -1,0 +1,14 @@
+; A colour monitor on the TVC's RGB DIN socket (docs/design/ui.md "Picture").
+name = rgb-monitor
+signal = rgb
+beam.min = 0.26
+beam.max = 0.42
+spot = 0.50
+mask = grille
+mask.strength = 0.25
+mask.pitch = 3
+glow = 0.08
+curvature = 0
+vignette = 0.10
+gamma.crt = 2.4
+brightness = 1.10

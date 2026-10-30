@@ -1,0 +1,5 @@
+; freetvc-headless --moncommands test: stop at the boot's first output system call, show it, quit with code 0
+break exec U0:OS_ENTRY if ([{SP}] & 80h) == 0
+g
+chis 2
+quit 0

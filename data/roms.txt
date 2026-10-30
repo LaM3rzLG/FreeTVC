@@ -1,0 +1,83 @@
+# The ROM autofetch's list (docs/design/build.md "ROM autofetch"): read by cmake/FreeTVCRoms.cmake and compiled
+# into freeTVC (--fetch-roms, the GUI's download). Lines: site URL | piece NAME PATH-or-URL SHA256 |
+# image FILE PIECE[+PIECE...] SHA256 CRC32 DESCRIPTION (pieces in socket order; ARCHIVE#MEMBER is a file inside a ZIP
+# piece) | notice TEXT (ROMS-README.txt)
+
+site https://tvc.homeserver.hu
+
+piece TVC12.024 cas/odor/TVC12.024 7cd5b506cc8948ac75a1389f28fb933beb30f6601f09375a57328bb9826be263
+piece TVC12.025 cas/odor/TVC12.025 34c862ee57a2d66cc959d48cad35f037de9c69d500270637839397fc9892824e
+piece TVC12.026 cas/odor/TVC12.026 844ea12e20a8a281cceb097aa78b643bbc07ab2b033972b443e823b4d944f9af
+piece TVC21.020 cas/odor/TVC21.020 23c4627a7994ab960e197866ad9a73ec21aac44f437e4256e2ccf5d4bdf31fdf
+piece TVC21.021 cas/odor/TVC21.021 93fbf611f4228a3cfee7f9e266396062eb6595ec86a040c0bb55ed8fc44a5d08
+piece TVC22.D6 cas/odor/TVC22.D6 35b4d790fe6ac8979366d852ec9f4928b9ea837e78dc53d54d545576cf579040
+piece TVC22.D4 cas/odor/TVC22.D4 575e49bf7994a68f9b8a7d041d2b4140ed0324bdc3ec8e0ece313ab65542f895
+piece TVC22.D7 cas/odor/TVC22.D7 d35394333f2da0d5d597483d4c4af06b2492a74d0451b58ce3dad48bb5fdcfab
+piece hbf_eprom.rom bin/rom/hbf_eprom.rom 4ab345609578d3ffb8cb3b2777c952cad20f95d2682e15dfbb8e3fe189133241
+piece vtdos12.rom bin/rom/vtdos12.rom d10ade4334edf8d9d2fbb0037f28b479a70010ddedd8319be780fd3b4643a26a
+piece FLPDOS12.PGM cas/odor/FLPDOS12.PGM 71dabc8176813938a6b83aeb2ca0f7fb9aee78dc2375a1e106aaa432f73ef6fa
+piece vtdosrom.zip bin/rom/vtdosrom.zip e4ee37aa7c559759b8f95ef0e7059b2efb185f21c33f0e045854365f60912954
+piece TVC-GameCard-r1229.BIN https://raw.githubusercontent.com/dikdom/TVC-GameCard/56e9c2b097d1b6f79a924c9ce79e3a86a6b3c1d9/bin/TVC-GameCard-r1229.BIN 4194320a1011f7d9d280802a5ce4b29617d10012d3d55f392e9c6795ff632b4f
+piece sndmx-fw-v1.0.1.bin https://raw.githubusercontent.com/dikdom/TVC-Multichip-Soundcard/fa23e438f92d9da9c25409c2113b84597bb419c6/source/firmware/sndmx-fw-v1.0.1.bin 42be002e62357693ec0b6e4d250b7bc76dd7a8ef5bdcab6ccec660c6ff2e155e
+piece NanoSDROM-v0.33.bin https://raw.githubusercontent.com/dikdom/TVC-NanoSD/3fb88f28584038bca23dc0fa136adee8ead8298f/bin/NanoSDROM-v0.33.bin 802a45d939394853f297c404766de429c616f016c6eac8738a833bf6a71ef6b1
+piece multicart_v2.1.14en.bin https://raw.githubusercontent.com/dikdom/TVC-Multicart-v2/631b251d131e6d0782aa7192fd18f08c0134527e/software/firmware/multicart_v2.1.14en.bin 6eacc4de1409c4f9c5bc6a75eee0c2e3f62ef6791be47615ce6974907a6877ed
+piece multicart_v2.1.14hu.bin https://raw.githubusercontent.com/dikdom/TVC-Multicart-v2/631b251d131e6d0782aa7192fd18f08c0134527e/software/firmware/multicart_v2.1.14hu.bin 509765eb7825095f4334d77457fa65dcf65e68780c5a807ba958fafda4b1f6d3
+piece multicart_v2.1.14es.bin https://raw.githubusercontent.com/dikdom/TVC-Multicart-v2/631b251d131e6d0782aa7192fd18f08c0134527e/software/firmware/multicart_v2.1.14es.bin cebd02ddc0631bf4ce8131caed6251ec0b6f29950c64cca9f0d8cd09503bda92
+piece tvc-256k.bin https://raw.githubusercontent.com/dikdom/TVC256kplusplus/4580b144a9b99388a306b871b4f48f4d4b8f3905/binaries/tvc-256k%2B%2B.bin 4fc47a80273d87358b122ab3e53eeadb432efe0e7a10dd1e27597f41c11942b9
+piece c16-hungarian.bin https://raw.githubusercontent.com/dikdom/TVC256kplusplus/4580b144a9b99388a306b871b4f48f4d4b8f3905/sources/firmware/TVC-IO/binaries/c16-hungarian.bin 725e56d52ee480e0d64929f2c19f0d56370f5a5932a8bc780042b7b632bb44ac
+piece tvc-16cimage.bmp https://raw.githubusercontent.com/dikdom/TVC256kplusplus/4580b144a9b99388a306b871b4f48f4d4b8f3905/sources/firmware/TVC-IO/binaries/tvc-16cimage.bmp 9e6369875a88e357ca58721e75c9cb82a93642af593d376204a66666a2c0f8c9
+piece flash-root-1.3-bin.zip https://raw.githubusercontent.com/dikdom/TVC256kplusplus/4580b144a9b99388a306b871b4f48f4d4b8f3905/binaries/flash-root-1.3-bin.zip 361734450d22e6623991ce3234661e4a20261651fa94824b622158dfb23519b3
+piece sd_dual_2022_11_09.zip https://web.archive.org/web/20250516092431id_/http://users.atw.hu/sdinterface/Firmware/sd_dual_2022_11_09.zip b3b3bcc3fbac08fbc8ea7b5c17fd2de3e34e0d7c88ac635535fce27300590c67
+piece sd_dual_2022_11_09_gm.zip https://web.archive.org/web/20250516092433id_/http://users.atw.hu/sdinterface/Firmware/sd_dual_2022_11_09_gm.zip 9d70080086a22f87347284459b3ac104ff26081e2353dada83c1382d1591f31f
+
+image sys12.bin TVC12.024+TVC12.025 81f1fbaf887a41525c1bcfd982521528a0c979322504580ed58928c23a277b6f 6DA8809A SYS 1.2 (D4 + D3)
+image ext1x.bin TVC12.026 844ea12e20a8a281cceb097aa78b643bbc07ab2b033972b443e823b4d944f9af 1CBBEAC6 EXT 1.x, the 8 KiB socket image (D7)
+image sys21.bin TVC21.020+TVC21.021 aaa2beac0aa9a434e9138027682b070dd0dd5b7de23170dc11bfc4e8b3255f28 53C8FF98 SYS 2.1 (D6 + D4)
+image sys22.bin TVC22.D6+TVC22.D4 72d17d1af7845a12e88985bb8f491a81b8657a659ecf1dc4d8028449f7318da6 79FA818C SYS 2.2 (D6 + D4)
+image ext2x.bin TVC22.D7 d35394333f2da0d5d597483d4c4af06b2492a74d0451b58ce3dad48bb5fdcfab 05E1C3A8 EXT 2.x (D7)
+image hbf.rom hbf_eprom.rom 4ab345609578d3ffb8cb3b2777c952cad20f95d2682e15dfbb8e3fe189133241 AE34982B HBF disk card EPROM, VT-DOS 1.1
+image hbf12.rom FLPDOS12.PGM 71dabc8176813938a6b83aeb2ca0f7fb9aee78dc2375a1e106aaa432f73ef6fa 2ACF8477 HBF disk card EPROM, VT-DOS 1.2
+image vtdos11.rom vtdosrom.zip#VT-DOS_1.1/VT-DOS11-CART.ROM dbe483ec6ffc1c95a0b2de6bffc6fd52bbf80c8ef0e92fe29a8ad1c787154979 40DDC741 VT-DOS 1.1 cartridge
+image vtdos12.rom vtdos12.rom d10ade4334edf8d9d2fbb0037f28b479a70010ddedd8319be780fd3b4643a26a 2C10C420 VT-DOS 1.2 cartridge
+image gamecard.rom TVC-GameCard-r1229.BIN 4194320a1011f7d9d280802a5ce4b29617d10012d3d55f392e9c6795ff632b4f F782DB9B GameCard EPROM (dikdom, MIT)
+image multichip.rom sndmx-fw-v1.0.1.bin 42be002e62357693ec0b6e4d250b7bc76dd7a8ef5bdcab6ccec660c6ff2e155e 704D1C27 Multichip sound card EEPROM, firmware 1.0.1 (Vass Sándor, CC BY-NC-SA 4.0)
+image nanosd.rom NanoSDROM-v0.33.bin 802a45d939394853f297c404766de429c616f016c6eac8738a833bf6a71ef6b1 AF3C8EB7 NanoSD IO Card EEPROM, ROM v0.33 (Vass Sándor, BSD-3-Clause)
+image multicart-en.rom multicart_v2.1.14en.bin 6eacc4de1409c4f9c5bc6a75eee0c2e3f62ef6791be47615ce6974907a6877ed 7C275018 MultiCart v2 firmware 2.1.14, English (Vass Sándor, BSD licence)
+image multicart-hu.rom multicart_v2.1.14hu.bin 509765eb7825095f4334d77457fa65dcf65e68780c5a807ba958fafda4b1f6d3 50B96903 MultiCart v2 firmware 2.1.14, Hungarian (Vass Sándor, BSD licence)
+image multicart-es.rom multicart_v2.1.14es.bin cebd02ddc0631bf4ce8131caed6251ec0b6f29950c64cca9f0d8cd09503bda92 FFB77D45 MultiCart v2 firmware 2.1.14, Spanish (Vass Sándor, BSD licence)
+image card256.rom tvc-256k.bin 4fc47a80273d87358b122ab3e53eeadb432efe0e7a10dd1e27597f41c11942b9 F759A66F TVC256k++ card ROM, firmware 0.24 (dikdom, MIT)
+image card256-font.bin c16-hungarian.bin 725e56d52ee480e0d64929f2c19f0d56370f5a5932a8bc780042b7b632bb44ac 5B6A2B88 TVC256k++ power-on font (C16/Plus4 set with Hungarian letters)
+image card256-picture.bmp tvc-16cimage.bmp 9e6369875a88e357ca58721e75c9cb82a93642af593d376204a66666a2c0f8c9 EA0740CD TVC256k++ power-on picture (dikdom, MIT)
+image card256-flash.bin flash-root-1.3-bin.zip#flash-root-1.3.bin 617c1a4d65f078533c6148280c2d4139d94b2373fd2ebadacb9321287cf278be E0FFC216 TVC256k++ flash drive 1.3 (dikdom's launcher and demos, TVC games)
+image sddual.rom sd_dual_2022_11_09.zip#sd_dual_2022_11_09/vtdos_cr.bin 850bee13c83bb44c081b20b8eafba97813b62ea72874cdc4d10e4b40a2f83a31 F758C797 SD Dual cartridge firmware 2022.11.09 (Sebestyén Pál)
+image sddual-gm.rom sd_dual_2022_11_09_gm.zip#sd_dual_2022_11_09_gm/vtdos_cr.bin eea5c74605bd43057fc5508494350882643838abb77fc05714673eef0289a103 2CC250AF SD Dual cartridge firmware 2022.11.09, gamer mode (Sebestyén Pál)
+
+notice ROMs for freeTVC, fetched from tvc.homeserver.hu, the card authors' GitHub repositories and the Internet Archive.
+notice They are not part of freeTVC and not covered by its licence. The system ROMs are copyright Videoton /
+notice IS Systems, the disk card and VT-DOS ROMs are copyright Videoton. Keep them for your own use.
+notice gamecard.rom is the TVC-GameCard EPROM by dikdom, MIT licence, https://github.com/dikdom/TVC-GameCard; its
+notice boot menu and TVC4Snake are dikdom's, its games Rasterrunner, BattleField and Bomberman are by Bertók Zsolt,
+notice Major Tamás, Persa Noel and Sáránszki Mihály (as credited in the card's documentation).
+notice multichip.rom is the TVC Multichip Soundcard's firmware 1.0.1 by Vass Sándor (dikdom), Creative Commons
+notice Attribution-NonCommercial-ShareAlike 4.0 International, https://github.com/dikdom/TVC-Multichip-Soundcard; as its
+notice sources credit them, its YM demo plays the OutZone ending from vgmrips.net and its SAA demo uses the E-Tracker player
+notice ported from the SAM Coupé by M. Tarasov (Mick), after Hanák Miklós's and RetroHW's TVC SAA1099 tests.
+notice nanosd.rom is the NanoSD IO Card's EEPROM, ROM v0.33 (bin/NanoSDROM-v0.33.bin) by Vass Sándor (dikdom),
+notice BSD 3-Clause licence, Copyright (c) 2021, dikdom, https://github.com/dikdom/TVC-NanoSD.
+notice multicart-en.rom, multicart-hu.rom and multicart-es.rom are the MultiCart v2 firmware 2.1.14 in English,
+notice Hungarian and Spanish (software/firmware/multicart_v2.1.14*.bin) by Vass Sándor (dikdom), Copyright (C) 2017-2023,
+notice BSD-style licence (the repository's README), https://github.com/dikdom/TVC-Multicart-v2; freeTVC's image builder
+notice puts one of them in front of the files it writes to a MultiCart image.
+notice card256.rom is the TVC256k++ card's I/O ROM (binaries/tvc-256k++.bin, firmware 0.24) by dikdom, MIT licence,
+notice https://github.com/dikdom/TVC256kplusplus; the author published it for emulator developers.
+notice card256-font.bin and card256-picture.bmp come from the same repository's firmware sources (binaries/c16-hungarian.bin
+notice and binaries/tvc-16cimage.bmp), which the card copies into its RAM at power-on. The font is the Commodore 16/Plus/4
+notice character set with Hungarian letters added; the original character set's copyright stays with its holders.
+notice The picture is dikdom's, MIT licence.
+notice card256-flash.bin is the card's flash drive image 1.3 (binaries/flash-root-1.3-bin.zip of the same repository), a
+notice littlefs volume with dikdom's launcher and demos (MIT licence) and a collection of TVC programs and games by their
+notice authors, as the card's author distributes it for the card's users; their copyrights stay with their holders.
+notice sddual.rom and sddual-gm.rom are the SD Dual cartridge's firmware 2022.11.09 (vtdos_cr.bin, the plain and the
+notice "gamer mode" build) by Sebestyén Pál, from his TVC SD interface site (sdinterface.atw.hu, now offline), fetched
+notice from the Internet Archive's copy. They hold his SD card and file manager code and Videoton's VT-DOS 1.2 (copyright
+notice Videoton); no licence is stated. Keep them for your own use.

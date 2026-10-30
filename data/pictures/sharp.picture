@@ -1,0 +1,3 @@
+; The TVC's pixels as they are, scaled without filtering (docs/design/ui.md "Picture").
+name = sharp
+signal = sharp

@@ -1,0 +1,30 @@
+; freeTVC skin: deck, the light skin. Every case surface takes the putty of the letter keys and the text the dark
+; ink of the TVC manuals; the data panels are a lighter sheet of the same paper. Keys not set here keep the bronze values.
+
+name = deck
+
+; Surfaces
+colour.frame      = #cfc7b6  ; around the screen
+colour.deck       = #e2dbcd  ; run bar, page column, panels, strip
+colour.groove     = #8a7d6c  ; line between frame and deck
+colour.rib        = #cbc2b0  ; header bands, separators, the focused tab, empty slot ribs
+colour.key        = #bfb5a2  ; controls
+colour.key.hover  = #b2a894
+colour.key.active = #a59a85
+colour.label      = #2b2520  ; text on the case
+colour.muted      = #6f6354  ; secondary text on the case
+
+; Data panels (Listing, Memory, Console): ink on a lighter sheet
+panel.light  = yes
+colour.putty = #efe9de
+colour.ink   = #2b2520
+
+; On a light case every TVC colour takes its dark variant (I = 0), on the case and on the data panels
+role.exec   = dark-red dark-red
+role.read   = dark-green dark-green
+role.write  = dark-magenta dark-magenta
+role.io     = dark-cyan dark-cyan
+role.vram   = dark-blue dark-blue
+role.notice = #6e6600 #6e6600  ; darker than the I = 0 yellow (#929200), which is too faint on the light case
+
+metric.screen.margin = 24

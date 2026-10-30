@@ -1,0 +1,16 @@
+; freeTVC symbols: SYS ROM 2.2 seen in page 0 (0000-3FFF), used only during boot
+; (the same image runs at C000-FFFF in page 3 afterwards: tvc-sys22.sym; the boot code 021C-034F is identical in 2.1)
+; Format: label = 0xADDR  ; comment   Evidence: docs/hardware/rom.md section 3
+
+reset           = 0x0000  ; JP 021Ch
+copyright       = 0x0003  ; data: "Copyright (1987) IS Systems Ltd"
+boot            = 0x021C  ; DI / IM 1 / OUT (2),40h (SYS in pages 0 and 3)
+boot_to_ext     = 0x0226  ; OUT (2),C0h / JP E14Bh (EXT: RAM intact check)
+boot_from_ext   = 0x022D  ; OUT (2),40h / JP C234h (continue in page 3)
+boot_test_u3    = 0x029B  ; OUT (2),80h: test U3 at C000h; result 00/FF in A' -> P3RAM
+boot_cart_check = 0x030D  ; OUT (2),20h: CART in page 3; "MOPS" at C000h -> JP C004h, else BASIC
+mops_signature  = 0x0334  ; data: "MOPS"
+reboot_stub_src = 0x0338  ; DI / OUT (2),70h / JP C21Ch; 8 bytes copied to RAM 0734h
+boot_ext_init   = 0x0340  ; OUT (2),C0h / JP E000h (EXT: RAM routines, tables, card scan)
+ram_test_p0     = 0x0347  ; RAM test called from page 0 (U3 test)
+ram_test_fill   = 0x0357  ; pattern test: fills 16 KiB from HL with A (AAh, then 55h via the "ld bc,553Eh" skip)

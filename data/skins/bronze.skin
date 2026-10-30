@@ -1,0 +1,46 @@
+; freeTVC skin: bronze (the default). Every key is listed; a skin file may set only some of them,
+; the rest keep these built-in values. Saving the skin in use applies it at once (docs/design/ui.md "Skins").
+;
+; Colours: #rrggbb, #rrggbbaa, a TVC colour name (black blue red magenta green cyan yellow white = bright)
+; or dark- + a name (the I = 0 variant, 146/255).
+
+name = bronze
+
+; Surfaces, taken from the TVC case (docs/design/ui.md "The machine's own materials")
+colour.frame      = #2a231e  ; around the screen: the case's upper part
+colour.deck       = #3b322b  ; status strip, panels, popups: the keyboard deck
+colour.groove     = #1c1713  ; line between frame and deck
+colour.rib        = #4c4037  ; header bands, separators, empty slot ribs
+colour.key        = #565048  ; controls: the charcoal modifier keys
+colour.key.hover  = #665f56
+colour.key.active = #766e63
+colour.panel      = #443a32  ; dense data panels (Listing, Memory, Console): a step lighter than the deck
+colour.putty      = #dcd5c6  ; dense data panels with panel.light = yes: the letter keys
+colour.ink        = #2b2520  ; text on putty
+colour.label      = #ece6dc  ; text on the case: the white lettering
+colour.muted      = #b3a796  ; secondary text on the case
+
+; Dense data panels: no = colour.panel with case text and bright role colours; yes = putty and ink, dark role colours
+panel.light = no
+
+; Meanings, as TVC colours: a name gives the bright variant on the case and the dark one on putty;
+; two colours set them separately (on case, on putty)
+role.exec   = red      ; execute, PC, breakpoint
+role.read   = green
+role.write  = magenta
+role.io     = cyan     ; I/O port access
+role.vram   = blue
+role.notice = yellow   ; IRQ, changed value, notices
+
+; Fonts: looked up next to this file, then in fonts/ next to the program; sizes in points
+font.ui        = AtkinsonHyperlegibleNext-Regular.ttf
+font.strong    = AtkinsonHyperlegibleNext-Medium.ttf
+font.data      = AtkinsonHyperlegibleMono-Regular.ttf
+font.ui.size   = 15
+font.data.size = 15
+
+; Metrics in points
+metric.strip.height  = 30  ; status strip
+metric.screen.margin = 16  ; frame between window edge and screen
+metric.groove        = 2   ; groove line above the strip
+metric.rounding      = 0   ; corner radius of controls and popups

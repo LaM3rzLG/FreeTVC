@@ -1,0 +1,13 @@
+; A black and white TV on the RF/composite output: the colour subcarrier shows as fine dots in coloured areas, unless
+; the TVC's rear switch is on B/W (docs/design/ui.md "Picture").
+name = bw-tv
+signal = mono
+luma.bandwidth = 4.0
+beam.min = 0.32
+beam.max = 0.50
+mask = none
+glow = 0.15
+curvature = 0.05
+vignette = 0.30
+gamma.crt = 2.4
+brightness = 1.10

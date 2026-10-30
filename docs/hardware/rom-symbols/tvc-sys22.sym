@@ -1,0 +1,187 @@
+; freeTVC symbols: SYS ROM 2.2 in page 3 (C000-FFFF; port 02h b7-6 = 01)
+; Format: label = 0xADDR  ; comment   Evidence: docs/hardware/rom.md (evidence tags there)
+; C0E8-CF01 is byte-identical in SYS 2.1 (except C2C6h, the version byte), so those labels also fit 2.1.
+; Upper-case names are [OS] function names; stmt_* come from the ROM keyword table (D73Ah), bas_op_* from C08Bh.
+
+; --- tables and data ---
+bas_stmt_table   = 0xC023  ; 99 words: tokens FFh..CAh (statements), then the RST 18h op table
+bas_op_table     = 0xC08B  ; RST 18h ops 00h-2Eh (word = C08Bh + 2 * (op & 7Fh))
+crtc_init_table  = 0xC20C  ; 16 bytes, written R15 down to R0 by the boot loop at C241h
+font             = 0xC574  ; character bitmaps, 10 bytes per character, to C8D3h
+kbd_tables       = 0xCD28  ; keyboard code tables, to CE67h
+progid_src       = 0xCFA4  ; "TV COMPUTER BASIC" source for PROGID (0E98h)
+bas_keywords     = 0xD73A  ; keyword strings, last character + 80h; entry k = token FFh - k
+bas_vectors_src  = 0xF7B4  ; 27h bytes copied to RAM 0008h-002Eh by BASIC init (CF01h)
+bas_err_msgs     = 0xFACA  ; error texts: number, length, text (tokens >= 80h inline), FFh
+
+; --- boot (page 3 part; the page-0 part is in tvc-sys22-page0.sym) ---
+reboot           = 0xC21C  ; page-3 copy of the reset code; target of the RAM reboot stub
+boot_sys         = 0xC234  ; OUT (2),50h; clear ports 60h-63h; CRTC init; warm/cold decision
+boot_test_u0     = 0xC261  ; SP = BFFFh, test U0; error: border colours cycle on port 00h
+boot_test_vram   = 0xC271  ; SP = 16ACh, test VRAM at 8000h
+boot_test_u1u2   = 0xC280  ; OUT (2),70h, test 4000h, then 8000h if U1 passed; HI_MEM = HL - 1 (7FFFh / BFFFh per [OS])
+boot_after_u3    = 0xC2BB  ; back from the page-0 U3 test; sets BAS_VERSION (C2C5h)
+boot_after_ext   = 0xC2D1  ; back from EXT init; if 0EB3h was 0 (cold start?) fills hooks 0725h-0733h, copies reboot stub
+basic_entry      = 0xC329  ; OUT (2),70h, P_SAVE = 70h, EI, JP CEC2h
+reboot_stub_src  = 0xC338  ; DI / OUT (2),70h / JP C21Ch (copied to 0734h)
+ram_test         = 0xC34D  ; pattern RAM test of the 16 KiB page at HL; NZ = error
+
+; --- system call (RST 30h) and IRQ ---
+call_hl          = 0xC321  ; JP (HL)
+fn_decode        = 0xC372  ; split code into direction / class / function, look up IN_TABLE or OUT_TABLE
+fn_device_lookup = 0xC3CB  ; device number -> dev_table -> "count, handlers"; FFh if function >= count
+fn_return        = 0xC3EF  ; common exit; on error EXT E1F4h restores the default assignment (?)
+kernel_fn0       = 0xC404  ; RET (kernel IRQ function)
+irq_handler      = 0xC405  ; from IT_ENTRY: save P_SAVE and registers, enter fn_common with carry set
+fn_entry         = 0xC418  ; from INFUNC: push OUTFUNC as return address, enter fn_common with carry clear
+fn_common        = 0xC41E  ; carry set: irq_service; clear: fn_decode
+irq_service      = 0xC43E  ; INT_FLAG, INTINC++, BORDER -> port 00h, port 59h, sound/cursor IRQ, devices
+irq_dev_loop     = 0xC48B  ; calls function 0 of each device through fn_device_lookup
+HI_MEM_SET       = 0xC4B4  ; 71h/F1h; floor 1EACh, error FBh
+EXP_DIRECT       = 0xC4CD  ; 72h/F2h
+IO_DIRECT        = 0xC4DE  ; 73h/F3h
+SLOT_NUM         = 0xC501  ; 74h/F4h
+dev_table        = 0xC538  ; 8 pointers, device 0-7 (device 6 = 0: card class goes to EXT)
+bkout_loop       = 0xC548  ; block output as repeated character output (DE, BC)
+bkin_loop        = 0xC55C  ; block input as repeated character input; no SYS caller found (?)
+kernel_dev       = 0xC201  ; count 5: kernel_fn0, HI_MEM_SET, EXP_DIRECT, IO_DIRECT, SLOT_NUM
+
+; --- device tables and SYS-side handlers ---
+vid_dev          = 0xC9EC  ; count 15, all vid_stub
+vid_stub         = 0xCA0B  ; EXX / DE = F192h / -> ext_fn_bridge
+bridge_ret       = 0xCA19  ; RET (EXT handlers return here through the bridge)
+ed_dev           = 0xCA1A  ; count 5, all ed_stub
+ed_stub          = 0xCA25  ; EXX / DE = EB13h / -> ext_fn_bridge
+ext_fn_bridge    = 0xCA29  ; HL = F179h (EXT function dispatcher) / JP bridge_to_ext
+kbd_dev          = 0xCA2F  ; count 5
+fill_bytes       = 0xCA7D  ; (DE)..(DE+BC) = A
+KBD_STATUS       = 0xCA84  ; 93h
+KBD_CHIN         = 0xCA91  ; 91h; the work is in EXT EB1Dh / EB37h
+kbd_bkin         = 0xCAC7  ; RET (keyboard function 2)
+kbd_fkey         = 0xCAC8  ; keyboard function 4 (code 14h), used by FKEY; not in [OS] (?)
+kbd_irq          = 0xCB34  ; keyboard function 0: matrix scan (LOCK_KEY, PICTURE, OLDPICT)
+prt_dev          = 0xCE68  ; count 3
+PAR_BKOUT        = 0xCE6F  ; 42h
+PAR_CHOUT        = 0xCE75  ; 41h; calls HOOK_0725
+prt_irq          = 0xCE9D  ; printer function 0
+snd_dev          = 0xCE9E  ; count 4, all snd_stub
+snd_stub         = 0xCEA7  ; EXX / DE = FF40h / -> ext_fn_bridge
+cas_dev          = 0xCEAE  ; count 6, all cas_stub
+cas_stub         = 0xCEBB  ; EXX / DE = E415h / -> ext_fn_bridge
+
+; --- BASIC interpreter ---
+basic_cold       = 0xCEC2  ; BASIC initialisation
+bas_copy_vectors = 0xCF01  ; F7B4h -> 0008h (27h bytes); output vector 0712h = bas_putc
+bas_exec_stmt    = 0xD0E9  ; token >= CAh: handler = word at C023h + 2 * (FFh - token)
+bas_call_hl      = 0xD113  ; JP (HL)
+rst18_interp     = 0xF7DB  ; RST 18h: reads ops at BAS_IP until one has bit 7 set
+bas_error        = 0xF9D6  ; error entry, A = error number (from RST 08h / RST 10h)
+print_inline     = 0xFB78  ; CALL, then "DB n, n characters"
+print_counted    = 0xFB7E  ; prints the length-prefixed string at HL
+print_char       = 0xFB99  ; prints A through the vector at 0712h
+bas_putc         = 0xFBAA  ; default output vector
+bridge_to_ext    = 0xFFF5  ; P_SAVE = F0h, OUT (2),F0h, JP (HL) in EXT
+jp_hl_sys        = 0xFFFE  ; JP (HL)
+
+; --- BASIC statements (token -> handler, from bas_stmt_table) ---
+stmt_colon       = 0xD0E0  ; token FDh ":" (next statement)
+stmt_REM         = 0xD126  ; token FCh; also tokens FEh ("!") and FFh
+stmt_DATA        = 0xD8E8  ; token FBh
+stmt_CLOSE       = 0xE437  ; token FAh
+stmt_CLS         = 0xD8F2  ; token F9h
+stmt_CONTINUE    = 0xD616  ; token F8h
+stmt_DEF         = 0xD8F8  ; token F7h
+stmt_DELETE      = 0xD663  ; token F6h
+stmt_DIM         = 0xD946  ; token F5h
+stmt_ELSE        = 0xDA02  ; token F4h
+stmt_END         = 0xDA10  ; token F3h
+stmt_FOR         = 0xDAB2  ; token F2h
+stmt_GET         = 0xE4A7  ; token F1h
+stmt_GOSUB       = 0xDCE9  ; token F0h
+stmt_GOTO        = 0xDD19  ; token EFh
+stmt_GRAPHICS    = 0xE074  ; token EEh
+stmt_IF          = 0xDC55  ; token EDh
+stmt_INPUT       = 0xDB14  ; token ECh
+stmt_LET         = 0xDD2C  ; token EBh
+stmt_LIST        = 0xD655  ; token EAh
+stmt_LLIST       = 0xD650  ; token E9h
+stmt_LOAD        = 0xE4E8  ; token E8h
+stmt_LOMEM       = 0xDDBB  ; token E7h
+stmt_NEW         = 0xD6DA  ; token E6h
+stmt_NEXT        = 0xDE1B  ; token E5h
+stmt_OK          = 0xD0AE  ; token E4h
+stmt_ON          = 0xDC9F  ; token E3h
+stmt_OPEN        = 0xE460  ; token E2h
+stmt_OUT         = 0xDE97  ; token E0h
+stmt_PLOT        = 0xE09A  ; token DFh; sub-keywords POLYGON E100h, ELLIPSE E13Bh, RECTANGLE E1B7h
+stmt_POKE        = 0xDEA8  ; token DEh
+stmt_PRINT       = 0xDEC8  ; token DDh; also token E1h OUTPUT
+stmt_RANDOMIZE   = 0xE010  ; token DCh
+stmt_READ        = 0xDB63  ; token DBh
+stmt_RESTORE     = 0xE037  ; token DAh
+stmt_RETURN      = 0xE052  ; token D9h
+stmt_RUN         = 0xD6ED  ; token D8h
+stmt_SAVE        = 0xE519  ; token D7h
+stmt_SET         = 0xE332  ; token D6h
+stmt_SOUND       = 0xE3CF  ; token D5h
+stmt_STOP        = 0xE069  ; token D4h
+stmt_TRACE       = 0xD6FF  ; token D3h
+stmt_VERIFY      = 0xE56A  ; token D2h
+stmt_EXT         = 0xDA52  ; token D1h
+stmt_LPRINT      = 0xDEC5  ; token D0h
+stmt_AUTO        = 0xD2F6  ; token CFh
+stmt_FKEY        = 0xDA97  ; token CEh
+stmt_RENUMBER    = 0xD345  ; token CDh
+stmt_EXCEPTION   = 0xDA21  ; token CCh
+plot_polygon     = 0xE100  ; PLOT ... POLYGON (token ABh): video function 0Dh
+plot_ellipse     = 0xE13B  ; PLOT ... ELLIPSE (token ADh): video function 0Eh
+plot_rectangle   = 0xE1B7  ; PLOT ... RECTANGLE (token ACh)
+
+; --- RST 18h ops (op -> handler, from bas_op_table; meanings not analysed) ---
+bas_op_00        = 0xF0E9
+bas_op_01        = 0xF257
+bas_op_02        = 0xF168
+bas_op_03        = 0xF0E4
+bas_op_04        = 0xF38B
+bas_op_05        = 0xE607  ; reads one operand byte from BAS_IP
+bas_op_06        = 0xE62E
+bas_op_07        = 0xE624
+bas_op_08        = 0xE674
+bas_op_09        = 0xE66A
+bas_op_0a        = 0xE65B
+bas_op_0b        = 0xE651
+bas_op_0c        = 0xF6EA
+bas_op_0d        = 0xF781
+bas_op_0e        = 0xE5F4
+bas_op_0f        = 0xF673
+bas_op_10        = 0xE61F
+bas_op_11        = 0xE629
+bas_op_12        = 0xE665
+bas_op_13        = 0xE66F
+bas_op_14        = 0xE64C
+bas_op_15        = 0xE656
+bas_op_16        = 0xEAB3
+bas_op_17        = 0xE745
+bas_op_18        = 0xE699
+bas_op_19        = 0xEC4F
+bas_op_1a        = 0xE7D7
+bas_op_1b        = 0xE904
+bas_op_1c        = 0xE976
+bas_op_1d        = 0xEB24
+bas_op_1e        = 0xEB71
+bas_op_1f        = 0xF2EF
+bas_op_20        = 0xF371
+bas_op_21        = 0xF433
+bas_op_22        = 0xF444
+bas_op_23        = 0xF399
+bas_op_24        = 0xF63D
+bas_op_25        = 0xF46F
+bas_op_26        = 0xF683
+bas_op_27        = 0xF71C
+bas_op_28        = 0xF6D6
+bas_op_29        = 0xF79A
+bas_op_2a        = 0xF333
+bas_op_2b        = 0xECEA
+bas_op_2c        = 0xEEE6
+bas_op_2d        = 0xF89F
+bas_op_2e        = 0xFBE1

@@ -1,0 +1,82 @@
+; freeTVC symbols: EXT ROM 2.x (8 KiB) in page 3 at E000-FFFF (port 02h b7-6 = 11)
+; Format: label = 0xADDR  ; comment   Evidence: docs/hardware/rom.md (evidence tags there)
+; Upper-case names are [OS] function names; "(?)" = named from usage only.
+
+; --- boot and RAM initialisation ---
+ext_boot_init    = 0xE000  ; OUT (2),D0h; copy RAM routines and tables; card scan (port 5Ah, port 03h)
+ext_warm_check   = 0xE14B  ; compares 30 bytes at 0B23h with E279h; sets WARM_FLAG; JP 022Dh (page 0)
+ram_init_tables  = 0xE259  ; 16 bytes -> 0B00h: IN_TABLE, OUT_TABLE defaults
+os_entry_src     = 0xE269  ; 16 bytes -> 0030h: OS_ENTRY, IT_ENTRY
+infunc_src       = 0xE279  ; 38 bytes -> 0B23h: INFUNC, OUTFUNC, INT_EXIT
+card_name_vgb    = 0xE2A3  ; 03h "VGB": name for card ID 01
+card_name_rs232  = 0xE2A7  ; 05h "RS232": name for card ID 00; E2A8h is compared by the class-6 dispatch
+card_name_disk   = 0xE2AD  ; 04h "DISK": name for card ID 10
+ext_card_init    = 0xE0FE  ; per slot: if named and ID <> 00, call the card init at (C00Bh)
+
+; --- dispatch ---
+card_by_device      = 0xE174  ; device byte with bit 7 set: card in the slot given by the byte
+card_by_class       = 0xE17A  ; class 6: slot from the table; RS232 -> ser_dev, else card C00Dh; IX = 48h + 30h * slot
+io_error_restore    = 0xE1F4  ; reached from fn_return on error; reloads the default assignment (?)
+card_irq_poll       = 0xE235  ; IRQ: polls the four slots
+ext_fn_dispatch     = 0xF179  ; HL = DE' + 2 * (code & 0Fh); call; return through SYS CA19h
+bridge_to_sys       = 0xFFF5  ; P_SAVE = 70h, OUT (2),70h, JP (HL) in SYS
+jp_hl_ext           = 0xFFFE  ; JP (HL)
+
+; --- RS-232 (class 6, card name RS232) ---
+ser_dev          = 0xE2BD  ; count 5
+RS232_SET        = 0xE2D2  ; 63h/E3h; uses BAUD, FORMAT
+ser_irq          = 0xE336  ; function 0
+SER_CH           = 0xE369  ; SER_CHIN E1h / SER_CHOUT 61h; calls HOOK_0728
+RS232_CLOSE      = 0xE396  ; 64h/E4h
+SER_BK           = 0xE3F4  ; SER_BKIN E2h / SER_BKOUT 62h
+
+; --- cassette (class 5) ---
+cas_fn_table     = 0xE415  ; 6 words
+CAS_OPEN         = 0xE421  ; CAS_OPEN D3h / CAS_CRTE 53h; WinTVC TTP trap slot 2 site
+cas_irq          = 0xE546  ; function 0
+CAS_CLOSE        = 0xE579  ; D4h / 54h
+cas_close_hl0    = 0xE5AD  ; "LD HL,0" in close; WinTVC trap slot 4 site
+CAS_CH           = 0xE5B4  ; CAS_CHIN D1h / CAS_CHOUT 51h
+CAS_VERIFY       = 0xE626  ; D5h
+CAS_BK           = 0xE651  ; CAS_BKIN D2h / CAS_BKOUT 52h
+cas_sync_search  = 0xE7B1  ; leader/sync search in block read; WinTVC trap slot 0 site
+cas_rd_crc       = 0xE8C3  ; reads the CRC, low byte first
+cas_rd_bits      = 0xE965  ; bit-read loop of the byte read; WinTVC trap slot 3 site
+cas_wr_crc       = 0xEA4C  ; sends the CRC, low byte first
+cas_wr_bits      = 0xEA84  ; "LD B,8" bit-write loop of the byte write; WinTVC trap slot 1 site
+cas_crc_bit      = 0xEAFC  ; CRC update per bit (to EB12h)
+
+; --- editor (class 2) and keyboard input ---
+ed_fn_table      = 0xEB13  ; 5 words
+kbd_chin_ext     = 0xEB1D  ; KBD_CHIN work (from SYS CA91h)
+kbd_chin_cursor  = 0xEB37  ; KBD_CHIN with the cursor IRQ on (INT_DES b2)
+CFIX             = 0xEB8F  ; 24h/A4h
+CPOS             = 0xEB99  ; 23h/A3h
+ED_BK            = 0xEBBD  ; ED_BKIN A2h / ED_BKOUT 22h
+ED_CH            = 0xEBCE  ; ED_CHIN A1h / ED_CHOUT 21h
+ed_ctrl_table    = 0xECD3  ; control code, handler address pairs (not traced yet)
+ED_INT           = 0xEF86  ; 20h/A0h
+
+; --- video (class 0) ---
+vid_fn_table     = 0xF192  ; 15 words
+vid_irq          = 0xF1B7  ; RET
+VMODE            = 0xF226  ; 04h; C >= 3 -> F7h
+PAL              = 0xF26A  ; 0Ch
+CLS              = 0xF27B  ; 05h
+BREL             = 0xF30E  ; 07h
+BABS             = 0xF311  ; 06h
+BON              = 0xF42F  ; 08h
+BOFF             = 0xF43F  ; 09h
+VID_BKOUT        = 0xF4C6  ; 02h
+VID_CHOUT        = 0xF4D4  ; 01h
+FILL             = 0xF59C  ; 0Ah
+DEFC             = 0xF77D  ; 0Bh
+BTEXT            = 0xF79C  ; 03h
+vid_polygon      = 0xF835  ; 0Dh, BASIC PLOT ... POLYGON; parameter block at DE, error E3h (?)
+vid_ellipse      = 0xFA2A  ; 0Eh, BASIC PLOT ... ELLIPSE (?)
+
+; --- sound (class 3) ---
+snd_fn_table     = 0xFF40  ; 4 words
+snd_irq          = 0xFF48  ; function 0
+snd_nop          = 0xFF6C  ; RET (functions 1 and 2)
+TONE_SET         = 0xFF6D  ; 33h; SND_IRQ, SND_ACTIVE, SND_WORK

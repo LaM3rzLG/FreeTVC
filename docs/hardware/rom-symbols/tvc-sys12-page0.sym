@@ -1,0 +1,8 @@
+; freeTVC symbols: SYS ROM 1.2 in page 0 (0000-3FFF), reset and boot only (port 02h = 00h/40h)
+; Format: label = 0xADDR  ; comment   Evidence: docs/hardware/rom.md §11
+
+reset            = 0x0000  ; JP 0229h
+boot             = 0x0229  ; DI / IM 1 / OUT (2),40h
+boot_to_ext      = 0x0233  ; OUT (2),C0h, JP F13Dh (EXT 1.x RAM-intact check)
+boot_back        = 0x023A  ; return from EXT: OUT (2),40h, JP C241h
+ram_test         = 0x0347  ; LD BC,553Eh hides LD A,55h at 0348h (second test pattern)

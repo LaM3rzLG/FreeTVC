@@ -1,0 +1,51 @@
+; freeTVC symbols: EXT ROM 1.x (4 KiB) at F000-FFFF when page 3 = EXT (port 02h b7-6 = 11); E000-EFFF reads FFh
+; Format: label = 0xADDR  ; comment   Evidence: docs/hardware/rom.md §11
+; Cassette routine names follow the SYS class-5 table; trap sites are WinTVC's EXT 1.x patch sites (docs/hardware/rom.md §11).
+
+; --- boot ---
+ext_boot         = 0xF000  ; OUT (2),D0h; copies the RAM stubs, sets defaults, scans the cards (F050h)
+ram_check        = 0xF13D  ; entered from page-0 0237h; WARM_FLAG; returns with JP 023Ah (F163h)
+
+; --- card class ---
+card_dispatch    = 0xF166  ; slot from IN/OUT_TABLE byte (bit 7 set), name entry 0040h + 30h*slot
+card_class6      = 0xF16C  ; class 6: reads the byte at table + 7 ❓
+ser_fn_table     = 0xF291  ; count 5, then words; used when the name entry is "RS232"
+ser_irq          = 0xF305
+SER_CH           = 0xF339
+SER_BK           = 0xF3B7
+RS232_SET        = 0xF2A4
+RS232_CLOSE      = 0xF357
+
+; --- cassette ---
+cas_ch_entry     = 0xF3D8  ; CALL F593h, then the common return to SYS (F3F4h)
+cas_bk_entry     = 0xF3DD
+cas_open_entry   = 0xF3E2
+cas_close_entry  = 0xF3E7
+cas_verify_entry = 0xF3EC
+cas_reset_entry  = 0xF3F1  ; CALL F707h
+cas_return       = 0xF3F4  ; LD HL,D9E7h / JP FFF0h
+CAS_OPEN         = 0xF3FA  ; WinTVC trap slot 2 site
+CAS_CLOSE        = 0xF558
+cas_close_hl0    = 0xF58C  ; LD HL,0 inside CAS_CLOSE; WinTVC trap slot 4
+CAS_CH           = 0xF593
+CAS_VERIFY       = 0xF605
+CAS_BK           = 0xF630
+cas_clear        = 0xF707  ; clears 0BF0h-0E34h and the cassette flags, clears 05h b7-6 (motors)
+cas_sync_search  = 0xF798  ; leader/sync search of the block read; WinTVC trap slot 0
+cas_bit_read     = 0xF919  ; WinTVC trap slot 3
+cas_bit_write    = 0xFA3D  ; LD B,8 of the bit-write loop; WinTVC trap slot 1
+
+; --- BASIC number output extensions ---
+bas_fmt_a        = 0xFCB5  ; from SYS E670h
+bas_fmt_b        = 0xFF9C  ; from SYS E64Ah
+
+; --- RAM-init blocks and data ---
+in_out_tables_src = 0xFB0E ; 16 bytes -> 0B00h (IN_TABLE, OUT_TABLE; same as 2.x)
+rst30_stub_src   = 0xFB1E  ; 16 bytes -> 0030h: JP 0B23h; IT_ENTRY ... JP C412h
+infunc_src       = 0xFB2E  ; 38 bytes -> 0B23h: INFUNC (JP C363h), OUTFUNC, INT_EXIT
+mops_signature   = 0xFB54  ; "MOPS"
+card_name_vgb    = 0xFB58  ; 03 "VGB"
+card_name_rs232  = 0xFB5C  ; 05 "RS232"
+card_name_disk   = 0xFB62  ; 04 "DISK"
+ram_0740_src     = 0xFB6B  ; 320 bytes -> 0740h, then the next 10 bytes repeated 64 times -> 0880h-0AFFh (content ❓)
+bridge_to_sys    = 0xFFF0  ; PUSH AF / LD A,70h / LD (P_SAVE),A / OUT (2),A / POP AF / JP (HL)

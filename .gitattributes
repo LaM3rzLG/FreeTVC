@@ -1,0 +1,5 @@
+# Normalised line endings for the Windows (MSVC) and Linux builds
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.patch text eol=lf

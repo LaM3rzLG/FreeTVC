@@ -1,0 +1,416 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 7d00ecf..56d9a62 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -13,6 +13,8 @@
+ - NEX file: the loading screen (Layer2, ULA, LoRes, Timex HiRes/HiCol) is now loaded before the memory banks, incl. palette and display settings like the NEX loader does. zsim only shows the ULA screen.
+ - NEX file: fixed the bank offset for files with a 320x256/640x256 Layer2 loading screen (the palette was not taken into account).
+ - A generic "dzrp" remote has been implemented which can connect via serial or socket connection.
++  - A remote that reports machine type UNKNOWN (0) uses the memory model from "dzrp.customMemory" in the launch.json.
++  - "Break on Interrupt" is passed to the remote (CMD_ENABLE_BREAK_ON_INTERRUPT) if the remote supports it.
+ - Memory Views (debug commands "-mv", "-mvw" and "-mvd") allow additional parameter "bank=" to specify the bank to display.
+ - Memory Views: fixed size 0x10000 (or the full bank size) which showed an empty view. A block ending at 0xFFFF (or at the bank end) does not show an additional line afterwards anymore.
+ - Debug commands "-md", "-mdelta", "-ml", "-ms", "-msetb" and "-msetw" allow additional parameter to specify a bank to read from or write to.
+diff --git a/design/DeZogProtocol.md b/design/DeZogProtocol.md
+index b9e6112..d637576 100644
+--- a/design/DeZogProtocol.md
++++ b/design/DeZogProtocol.md
+@@ -296,6 +296,9 @@ Response (Length=7+n):
+ | *5    | 1    | 0-255               | Machine type (memory model): 0 = UNKNOWN, 1 = ZX16K, 2 = ZX48K, 3 = ZX128K, 4 = ZXNEXT. Note: CSpect and the ZX Next will always return ZXNEXT. |
+ | 6     | 1-n  | 0-terminated string | The responding program name + version as a string. E.g. "dbg_uart_if v2.0.0"                                                                    |
+ 
++Machine type UNKNOWN (0): the generic "dzrp" remote then takes the memory model from 'customMemory' in the 'dzrp' launch.json configuration.
++The slot contents returned by CMD_GET_REGISTERS are the bank indices of that 'customMemory', and the bank numbers of long addresses (bank+1) and of CMD_READ_BANK_MEM/CMD_WRITE_BANK_MEM refer to it as well.
++
+ 
+ ## CMD_CLOSE=2
+ This is the last command. It is sent when the debug session is closed gracefully.
+diff --git a/documentation/Usage.md b/documentation/Usage.md
+index c4636e2..fc64bd8 100644
+--- a/documentation/Usage.md
++++ b/documentation/Usage.md
+@@ -1565,6 +1565,37 @@ for a socket connection or
+ 
+ for a serial connection.
+ 
++If the remote is not one of the predefined machines it reports the machine type UNKNOWN (0) in CMD_INIT.
++Then the memory layout has to be defined with "customMemory", in the same format as for zsim (see [customMemory](#custommemory); "ioMmu" and "filePath" are not used).
++The bank indices are the bank numbers the remote reports for the slots.
++A bank that is visible in several slots of different sizes can use "bankSize" and "bankOffset", e.g. a 16k ROM that can also be paged into two 8k slots:
++~~~json
++    "remoteType": "dzrp",
++    "dzrp": {
++        "port": 14000,
++        "customMemory": {
++            "slots": [
++                {
++                    "range": ["0x0000", "0x3FFF"],
++                    "banks": [{"index": 0, "name": "ROM", "rom": true}, {"index": 1, "name": "RAM0"}]
++                },
++                {
++                    "range": ["0x4000", "0xBFFF"],
++                    "banks": [{"index": 2, "name": "RAM1"}]
++                },
++                {
++                    "range": ["0xC000", "0xDFFF"],
++                    "banks": [{"index": 0, "bankSize": "0x4000"}, {"index": 3, "name": "RAM2"}]
++                },
++                {
++                    "range": ["0xE000", "0xFFFF"],
++                    "banks": [{"index": 0, "bankSize": "0x4000", "bankOffset": "0x2000"}, {"index": 4, "name": "RAM3"}]
++                }
++            ]
++        }
++    }
++~~~
++
+ 
+ ### MAME - Multiple Machine Arcade Emulator
+ 
+diff --git a/package.json b/package.json
+index f3470d3..cafa03d 100644
+--- a/package.json
++++ b/package.json
+@@ -1124,6 +1124,10 @@
+ 									"timeout": {
+ 										"type": "number",
+ 										"description": "In secs. If no response is received within this time the connection is disconnected. Usually you don't need to change this value. Defaults to 5 seconds."
++									},
++									"customMemory": {
++										"description": "The memory layout (slots and banks) for a remote that reports the machine type UNKNOWN (0) in CMD_INIT. Same format as 'zsim.customMemory' ('ioMmu' and 'filePath' are not used). The bank numbers are the ones the remote returns in CMD_GET_REGISTERS. Please refer to the documentation.",
++										"type": "object"
+ 									}
+ 								}
+ 							},
+diff --git a/src/remotes/dzrp/dzrpremote.ts b/src/remotes/dzrp/dzrpremote.ts
+index eee31aa..86d0a8a 100644
+--- a/src/remotes/dzrp/dzrpremote.ts
++++ b/src/remotes/dzrp/dzrpremote.ts
+@@ -18,6 +18,7 @@ import {Z80RegistersStandardDecoder} from '../z80registersstandarddecoder';
+ import {PromiseCallbacks} from '../../misc/promisecallbacks';
+ import {MemoryModelZx128k, MemoryModelZx16k, MemoryModelZx48k} from '../MemoryModel/zxspectrummemorymodels';
+ import {MemoryModelZxNext} from '../MemoryModel/zxnextmemorymodels';
++import {MemoryModel} from '../MemoryModel/memorymodel';
+ import {DzrpTransportTest} from './dzrptransporttest';
+ import {LogEval} from '../../misc/logeval';
+ import {Z80File} from './z80file';
+@@ -110,6 +111,7 @@ export enum AlternateCommand {
+  * It is required to determine the memory model.
+  */
+ export enum DzrpMachineType {
++	UNKNOWN = 0,	// The memory model is taken from 'customMemory' in the launch.json
+ 	ZX16K = 1,
+ 	ZX48K = 2,
+ 	ZX128K = 3,
+@@ -248,6 +250,10 @@ export class DzrpRemote extends RemoteBase {
+ 			Z80Registers.decoder = this.createZ80RegistersDecoder();
+ 			// Set memory model according machine type
+ 			switch (resp.machineType) {
++				case DzrpMachineType.UNKNOWN:
++					// Not one of the predefined machines: the user describes the memory
++					this.memoryModel = this.createCustomMemoryModel();
++					break;
+ 				case DzrpMachineType.ZX16K:
+ 					// ZX Spectrum 16K
+ 					this.memoryModel = new MemoryModelZx16k();
+@@ -283,6 +289,14 @@ export class DzrpRemote extends RemoteBase {
+ 	}
+ 
+ 
++	/** Override to support machine type UNKNOWN (0).
++	 * @returns The memory model for a machine that is none of the predefined ones.
++	 */
++	protected createCustomMemoryModel(): MemoryModel {
++		throw Error("Unknown machine type " + DzrpMachineType.UNKNOWN + " received.");
++	}
++
++
+ 	/** Override.
+ 	 * Handles the CMD_GET_SUPPORTED_COMMANDS response.
+ 	 * At least for the DzrpTransportRemote and subclasses.
+diff --git a/src/remotes/dzrptransport/dzrpgenericremote.ts b/src/remotes/dzrptransport/dzrpgenericremote.ts
+index 3df1fce..5db81e4 100644
+--- a/src/remotes/dzrptransport/dzrpgenericremote.ts
++++ b/src/remotes/dzrptransport/dzrpgenericremote.ts
+@@ -1,6 +1,8 @@
+ import {DzrpTransportRemote as DzrpTransportRemote} from './dzrptransportremote';
+ import {WithSocket} from './transportsocketmixin';
+ import {WithSerial} from './transportserialmixin';
++import {MemoryModel} from '../MemoryModel/memorymodel';
++import {Settings} from '../../settings/settings';
+ 
+ 
+ /** A generic implementation of a DZRP remote.
+@@ -8,9 +10,18 @@ import {WithSerial} from './transportserialmixin';
+  * These generic classes can support all DZRP commands.
+  * The DzrpGenericRemote basically is configured through the
+  * DZRP CMF_GET_SUPPORTED_COMMANDS command.
+- * I.e. the remote needs to support >= DZRP 2.2, implementing the CMD_GET_SUPPORTED_COMMANDS.
++ * I.e. the remote needs to support >= DZRP 2.2.0, implementing the CMD_GET_SUPPORTED_COMMANDS.
+  */
+ class DzrpGenericRemote extends DzrpTransportRemote {
++	/** A remote that reports machine type UNKNOWN (0) uses the memory model
++	 * from 'customMemory' of the 'dzrp' launch configuration.
++	 */
++	protected override createCustomMemoryModel(): MemoryModel {
++		const customMemory = Settings.launch.dzrp.customMemory;
++		if (!customMemory)
++			throw Error("The remote reports an unknown machine type (0). Please define the memory with 'customMemory' in the 'dzrp' section of the launch.json.");
++		return new MemoryModel(customMemory);
++	}
+ }
+ 
+ export class DzrpGenericSocketRemote extends WithSocket(DzrpGenericRemote) {
+diff --git a/src/remotes/dzrptransport/dzrptransportremote.ts b/src/remotes/dzrptransport/dzrptransportremote.ts
+index 5a6453a..ab45cce 100644
+--- a/src/remotes/dzrptransport/dzrptransportremote.ts
++++ b/src/remotes/dzrptransport/dzrptransportremote.ts
+@@ -1166,5 +1166,18 @@ export class DzrpTransportRemote extends DzrpQueuedRemote {
+ 		const on = (enable) ? 1 : 0;
+ 		await this.sendDzrpCmd(DZRP.CMD_ENABLE_BREAK_ON_INTERRUPT, [on]);
+ 	}
++
++
++	/** Enables/disables to break on an interrupt if the remote supports
++	 * CMD_ENABLE_BREAK_ON_INTERRUPT.
++	 * @param enable true=enable break on interrupt, false=disable.
++	 * @returns The new state.
++	 */
++	public override async enableBreakOnInterrupt(enable: boolean): Promise<boolean> {
++		if (!this.supportsBreakOnInterrupt)
++			return false;
++		await this.sendDzrpCmdEnableBreakOnInterrupt(enable);
++		return enable;
++	}
+ }
+ 
+diff --git a/src/settings/settings.ts b/src/settings/settings.ts
+index dff9fc9..e683247 100644
+--- a/src/settings/settings.ts
++++ b/src/settings/settings.ts
+@@ -179,6 +179,12 @@ export interface MameType extends DzrpTransportType {
+ export interface ZxNextType extends DzrpTransportType {
+ }
+ 
++// Definitions for the generic DZRP remote type.
++export interface DzrpType extends DzrpTransportType {
++	// The memory layout if the remote reports machine type UNKNOWN (0).
++	customMemory?: CustomMemoryType;
++}
++
+ 
+ // Subtype for the custom javascript code.
+ export interface CustomCodeType {
+@@ -449,7 +455,7 @@ export interface SettingsParameters extends DebugProtocol.LaunchRequestArguments
+ 	zxnext: ZxNextType;
+ 
+ 	// A generic DZRP remote.
+-	dzrp: DzrpTransportType;
++	dzrp: DzrpType;
+ 
+ 	/// true if the configuration is for unit tests.
+ 	unitTests: false;
+@@ -900,36 +906,7 @@ export class Settings {
+ 		}
+ 
+ 		// zsim custom memory
+-		const custMem = launchCfg.zsim.customMemory;
+-		if (custMem !== undefined) {
+-			// io MMU concatenate
+-			if (custMem.ioMmu !== undefined) {
+-				if (typeof custMem.ioMmu !== "string")
+-					custMem.ioMmu = custMem.ioMmu.join("\n");
+-			}
+-			// Slots
+-			for (const slotRange of custMem.slots) {
+-				// Convert slot ranges from hex-string to number
+-				const len = slotRange.range.length;
+-				for (let i = 0; i < len; i++) {
+-					// Convert hex into number
+-					slotRange.range[i] = HexFormat.convertHexNumber(slotRange.range[i])!;
+-				}
+-				// Banks
+-				for (const bank of slotRange.banks) {
+-					// ROM/RAM
+-					if (bank.rom === undefined)
+-						bank.rom = false;	// RAM by default;
+-					// Create abs paths
+-					if (bank.filePath) {
+-						const path = UnifiedPath.getUnifiedPath(bank.filePath);
+-						bank.filePath = WorkspacePaths.getAbsFilePath(path, rootFolder);
+-					}
+-					// Convert rom offset from hex-string to number
+-					bank.fileOffset = HexFormat.convertHexNumber(bank.fileOffset);
+-				}
+-			}
+-		}
++		this.convertCustomMemory(launchCfg.zsim.customMemory, rootFolder);
+ 
+ 		// zxnext
+ 		if (!launchCfg.zxnext) {
+@@ -949,8 +926,9 @@ export class Settings {
+ 
+ 		// Generic DZRP remote
+ 		if (!launchCfg.dzrp) {
+-			launchCfg.dzrp = {} as DzrpTransportType;
++			launchCfg.dzrp = {} as DzrpType;
+ 		}
++		this.convertCustomMemory(launchCfg.dzrp.customMemory, rootFolder);
+ 		if (launchCfg.dzrp.timeout === undefined) {
+ 			launchCfg.dzrp.timeout = 5;	// Seconds
+ 		}
+@@ -1259,6 +1237,46 @@ export class Settings {
+ 	}
+ 
+ 
++	/** Converts the hex strings of a 'customMemory' (zsim or dzrp) into
++	 * numbers, the file paths into absolute paths and sets the defaults.
++	 * @param custMem The custom memory definition. Nothing is done if undefined.
++	 * @param rootFolder The folder for relative file paths.
++	 */
++	protected static convertCustomMemory(custMem: CustomMemoryType | undefined, rootFolder: string) {
++		if (custMem === undefined)
++			return;
++		// io MMU concatenate
++		if (custMem.ioMmu !== undefined) {
++			if (typeof custMem.ioMmu !== "string")
++				custMem.ioMmu = custMem.ioMmu.join("\n");
++		}
++		// Slots
++		for (const slotRange of custMem.slots) {
++			// Convert slot ranges from hex-string to number
++			const len = slotRange.range.length;
++			for (let i = 0; i < len; i++) {
++				// Convert hex into number
++				slotRange.range[i] = HexFormat.convertHexNumber(slotRange.range[i])!;
++			}
++			// Banks
++			for (const bank of slotRange.banks) {
++				// ROM/RAM
++				if (bank.rom === undefined)
++					bank.rom = false;	// RAM by default;
++				// Create abs paths
++				if (bank.filePath) {
++					const path = UnifiedPath.getUnifiedPath(bank.filePath);
++					bank.filePath = WorkspacePaths.getAbsFilePath(path, rootFolder);
++				}
++				// Convert rom offset, bank size and bank offset from hex-string to number
++				bank.fileOffset = HexFormat.convertHexNumber(bank.fileOffset);
++				bank.bankSize = HexFormat.convertHexNumber(bank.bankSize);
++				bank.bankOffset = HexFormat.convertHexNumber(bank.bankOffset);
++			}
++		}
++	}
++
++
+ 	/**
+ 	 * Returns all xxxListFiles parameters in an array.
+ 	 * This is used to start the file watcher.
+diff --git a/tests/dzrpgenericremote.tests.ts b/tests/dzrpgenericremote.tests.ts
+new file mode 100644
+index 0000000..ded1004
+--- /dev/null
++++ b/tests/dzrpgenericremote.tests.ts
+@@ -0,0 +1,102 @@
++import * as assert from 'assert';
++import * as sinon from 'sinon';
++import {suite, test, setup, teardown} from 'mocha';
++import {WorkspacePaths} from '../src/misc/workspacepaths';
++import {Settings} from '../src/settings/settings';
++import {DzrpGenericSocketRemote} from '../src/remotes/dzrptransport/dzrpgenericremote';
++import {BankType} from '../src/remotes/MemoryModel/memorymodel';
++
++
++
++suite('DzrpGenericRemote', () => {
++
++	setup(() => {
++		WorkspacePaths.setExtensionPath('.');
++	});
++
++	teardown(() => {
++		sinon.restore();
++	});
++
++	suite('createCustomMemoryModel', () => {
++
++		test('customMemory with hex strings and a bank in slots of different sizes', () => {
++			const cfg: any = {
++				remoteType: 'dzrp',
++				rootFolder: './tests/data',
++				dzrp: {
++					customMemory: {
++						slots: [
++							{
++								range: ["0x0000", "0x3FFF"],
++								banks: [{index: 0, name: "ROM", rom: true}, {index: 1, name: "RAM0"}]
++							},
++							{
++								range: ["0x4000", "0xBFFF"],
++								banks: [{index: 2, name: "RAM1"}]
++							},
++							{
++								range: ["0xC000", "0xDFFF"],
++								banks: [{index: 0, bankSize: "0x4000"}, {index: 3, name: "RAM2"}]
++							},
++							{
++								range: ["0xE000", "0xFFFF"],
++								initialBank: 4,
++								banks: [{index: 0, bankSize: "0x4000", bankOffset: "0x2000"}, {index: 4, name: "RAM3"}]
++							}
++						]
++					}
++				}
++			};
++			Settings.launch = Settings.Init(cfg);
++			Settings.CheckSettings();
++			const remote = new DzrpGenericSocketRemote(Settings.launch.dzrp) as any;
++			const model = remote.createCustomMemoryModel();
++
++			assert.equal(model.slotRanges.length, 4);
++			assert.equal(model.slotRanges[2].start, 0xC000);
++			assert.equal(model.slotRanges[3].end, 0xFFFF);
++			assert.deepEqual(model.initialSlots, [0, 2, 0, 4]);
++			assert.equal(model.slotAddress64kAssociation[0xE000], 3);
++			assert.equal(model.banks[0].name, "ROM");
++			assert.equal(model.banks[0].bankType, BankType.ROM);
++			assert.equal(model.banks[0].size, 0x4000);
++			assert.deepEqual(model.banks[0].slotBankOffsets, {3: 0x2000});
++			assert.equal(model.banks[2].size, 0x8000);
++			assert.equal(model.banks[4].name, "RAM3");
++			assert.equal(model.getBankName(3), "RAM2");
++		});
++
++		test('no customMemory', () => {
++			const cfg: any = {
++				remoteType: 'dzrp',
++				rootFolder: './tests/data'
++			};
++			Settings.launch = Settings.Init(cfg);
++			const remote = new DzrpGenericSocketRemote(Settings.launch.dzrp) as any;
++			assert.throws(() => remote.createCustomMemoryModel(), /customMemory/);
++		});
++	});
++
++	suite('enableBreakOnInterrupt', () => {
++
++		test('supported', async () => {
++			Settings.launch = Settings.Init({remoteType: 'dzrp', rootFolder: './tests/data'} as any);
++			const remote = new DzrpGenericSocketRemote(Settings.launch.dzrp) as any;
++			remote.supportsBreakOnInterrupt = true;
++			const send = sinon.stub(remote, 'sendDzrpCmdEnableBreakOnInterrupt').resolves();
++			assert.equal(await remote.enableBreakOnInterrupt(true), true);
++			assert.equal(await remote.enableBreakOnInterrupt(false), false);
++			assert.deepEqual(send.args, [[true], [false]]);
++		});
++
++		test('not supported', async () => {
++			Settings.launch = Settings.Init({remoteType: 'dzrp', rootFolder: './tests/data'} as any);
++			const remote = new DzrpGenericSocketRemote(Settings.launch.dzrp) as any;
++			remote.supportsBreakOnInterrupt = false;
++			const send = sinon.stub(remote, 'sendDzrpCmdEnableBreakOnInterrupt').resolves();
++			assert.equal(await remote.enableBreakOnInterrupt(true), false);
++			assert.ok(send.notCalled);
++		});
++	});
++});

@@ -1,0 +1,44 @@
+{
+  "root": "testdata/roms",
+  "inline_rst": {"30": 1, "08": "1!", "18": "bit7/05=1"},
+  "page3": {"1": "sys12", "3": "ext1x"},
+  "page0": {"0": "sys12lo"},
+  "images": {
+    "sys12lo": {
+      "file": "sys12.bin", "origin": "0000",
+      "entries": {"0000": "reset"}
+    },
+    "sys12": {
+      "file": "sys12.bin", "origin": "c000",
+      "entries": {"fb82": "rst18_interp", "fd5c": "bas_error", "fff0": "bridge_to_ext",
+                  "d3ad": "chr_put_mode0", "d3bc": "chr_put_mode1", "d3d9": "chr_put_mode2",
+                  "d191": "edctl_13", "d198": "edctl_04", "d195": "edctl_05", "d19e": "edctl_18", "d205": "edctl_16", "d287": "edctl_07",
+                  "d278": "edctl_08", "d1fd": "edctl_19", "d1f7": "edctl_0e", "d1a8": "edctl_0b", "d1cd": "edctl_09"},
+      "bridge": {"fff0": "ext1x"},
+      "inline_call": {"fe79": "len"},
+      "links": {"e64a": "ext1x:ff9c", "e670": "ext1x:fcb5"},
+      "names": {"c545": "crtc_init_table"},
+      "tables": [{"addr": "c55d", "count": 8, "kind": "devtab", "name": "dev"},
+                 {"addr": "c555", "count": 4, "name": "dev_init"},
+                 {"addr": "c067", "count": 63, "name": "bas_tok"},
+                 {"addr": "cbdb", "count": 4, "name": "vec_b86_tab"},
+                 {"addr": "cbe3", "count": 8, "name": "vec_b84_tab"}]
+    },
+    "ext1x": {
+      "file": "ext1x.bin", "offset": "1000", "origin": "f000",
+      "entries": {"f000": "ext_boot", "fff0": "bridge_to_sys"},
+      "links": {"f163": "sys12lo:023a"},
+      "bridge": {"fff0": "sys12"},
+      "tables": [{"addr": "f291", "kind": "counted", "name": "ser_fn"}]
+    },
+    "ram0030": {
+      "file": "ext1x.bin", "offset": "1b1e", "length": "10", "origin": "0030",
+      "entries": {"0030": "rst30", "0038": "irq"},
+      "links": {"0030": "ram0b23:0b23"}
+    },
+    "ram0b23": {
+      "file": "ext1x.bin", "offset": "1b2e", "length": "26", "origin": "0b23",
+      "entries": {"0b23": "rst30_ram", "0b37": "rst30_ret", "0b41": "irq_ret"}
+    }
+  }
+}
