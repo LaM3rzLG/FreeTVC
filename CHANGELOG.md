@@ -6,10 +6,6 @@
 
 - An About window (main menu → *About freeTVC...*): the L@M3rZ logo, copper raster bars and a sine scroller in the TVC's colours, the version and build details, the credits, and a button that copies the build details for bug reports.
 
-### Fixed
-
-- Keystrokes shorter than a TVC frame (paste or macro tools, or a moment when the GUI is busy) were lost, merged or reordered. Every key now stays down for at least a frame, a repeated key waits until it has been up for a frame, and new keys reach the TVC one per frame in the order they were pressed.
-
 ### Downloads
 
 | File | For |
