@@ -101,6 +101,7 @@ struct PlayActions {
     bool eject = false;
     bool toggle_bench = false;
     bool toggle_settings = false;  // the settings sheet
+    bool open_about = false;
     bool tape_insert = false;     // file dialog, then into the deck
     bool tape_insert_play = false;  // the same, then PLAY goes down (the strip's play key with no tape)
     bool tape_run = false;        // autostart from the tape in the deck

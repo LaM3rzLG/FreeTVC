@@ -139,6 +139,7 @@ if(FREETVC_BUILD_GUI)
 
     add_executable(freetvc WIN32
         frontend/sdl/main.cpp
+        frontend/sdl/about_view.cpp
         frontend/sdl/bench_view.cpp
         frontend/sdl/deck.cpp
         frontend/sdl/display.cpp
@@ -151,6 +152,15 @@ if(FREETVC_BUILD_GUI)
         frontend/sdl/skin_style.cpp)
     target_link_libraries(freetvc PRIVATE freetvc_frontend_common freetvc_remote freetvc_skin freetvc_keymap freetvc_imgui SDL3::SDL3)
     freetvc_warnings(freetvc)
+
+    # The About window's build line, refreshed at every build (cmake/FreeTVCBuildInfo.cmake)
+    add_custom_target(freetvc_build_info
+        COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${PROJECT_SOURCE_DIR} -DOUT=${CMAKE_CURRENT_BINARY_DIR}/generated/build_info.hpp
+            "-DCOMPILER=${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}" "-DPLATFORM=${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}"
+            -P ${PROJECT_SOURCE_DIR}/cmake/FreeTVCBuildInfo.cmake
+        BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/generated/build_info.hpp
+        VERBATIM)
+    add_dependencies(freetvc freetvc_build_info)
 
     # Fonts and skins live next to the executable (design/ui.md "Skins")
     include(${PROJECT_SOURCE_DIR}/cmake/FreeTVCFonts.cmake)
@@ -189,6 +199,15 @@ if(FREETVC_BUILD_GUI)
         VERBATIM)
     add_custom_target(freetvc_pictures ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/pictures.stamp)
     add_dependencies(freetvc freetvc_pictures)
+    # The About window's logo (design/ui.md "About window")
+    file(GLOB FREETVC_ABOUT_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/data/about/*)
+    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/about.stamp
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/about $<TARGET_FILE_DIR:freetvc>/about
+        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/about.stamp
+        DEPENDS ${FREETVC_ABOUT_FILES}
+        VERBATIM)
+    add_custom_target(freetvc_about ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/about.stamp)
+    add_dependencies(freetvc freetvc_about)
     # Translations too (design/ui.md "Language")
     file(GLOB FREETVC_LANGUAGE_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/data/lang/*.po)
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lang.stamp

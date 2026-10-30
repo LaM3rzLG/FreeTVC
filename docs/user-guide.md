@@ -15,7 +15,7 @@ Two programs come out of one build:
 
 Platforms: Linux and Windows (x86-64). The code also has macOS paths ❓ (not tested). The window program needs SDL3 (fetched by the build); its picture model needs OpenGL 3.3, otherwise it draws with SDL's renderer.
 
-Version: `freetvc --version` and `freetvc-headless --version` print `freeTVC 1.0.0`.
+Version: `freetvc --version` and `freetvc-headless --version` print `freeTVC 1.0.1`.
 
 ## 2. Getting the ROMs
 

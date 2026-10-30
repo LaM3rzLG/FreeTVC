@@ -354,6 +354,10 @@ Checked on Xvfb with XTEST input, window grabs and stderr:
 - Shared messages: a bad `freetvc.ini` line ("freetvc.ini, 1. sor: ismeretlen kulcs: 'foo'"), `gamecard = yes` without `gamecard.rom` (the GameCard note with its nested "nincs gamecard.rom ..." part) and a damaged `quick.tvcs` loaded with Shift+F9 ("quick.tvcs: nem freeTVC-pillanatkép ..."), each in Hungarian in the strip and in English on stderr, with the monitor and MCP tests unchanged; `translation_test` from MinGW under Wine (`msg()` against MinGW's printf).
 - Not checked: the file dialogs' filter names (zenity on Xvfb), every tooltip, the Hungarian text on Windows. The Hungarian wording has not had a native speaker's full review.
 
+## About window
+
+Main menu → *About freeTVC...* (`src/frontend/sdl/about_view.*`): a black panel over the dimmed window with the L@M3rZ logo (`data/about/lamerz-logo.png`, resampled with SDL to its size on screen and shrunk so the panel fits the window), copper raster bars and a sine scroller in the TVC's own bright colours, the version, the build (commit, `(modified)` for a changed tree, commit date; generated at every build by `cmake/FreeTVCBuildInfo.cmake`), the build date and compiler, platform, SDL version and renderer, the credits (LG / L@M3rZ, Dey / L@M3rZ), the licence and the repository link. *Copy build info* puts the same lines in English on the clipboard for bug reports; Esc, *Close* or a click outside closes it. The logo is under the project's licence, GPL-3.0-or-later.
+
 ## Settings file and ROM search
 
 Code: the ROM search in `frontend/common/presets.{hpp,cpp}` (`rom_places`, `find_preset_roms`, `program_directory`, `user_data_directory`; test `frontend.rom_search`), the settings file in `frontend/common/settings.{hpp,cpp}` (test `frontend.settings`). The ROM autofetch ([build.md](build.md), section "ROM autofetch") fills `roms/` next to the programs at build time, or `roms/` in the user data folder from the programs: the GUI offers it in a message box when it finds no ROMs at start, and under the machine menu's **Download ROMs**.

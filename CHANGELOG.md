@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.1 — 2026-10-31
+
+### New
+
+- An About window (main menu → *About freeTVC...*): the L@M3rZ logo, copper raster bars and a sine scroller in the TVC's colours, the version and build details, the credits, and a button that copies the build details for bug reports.
+
+### Fixed
+
+- Keystrokes shorter than a TVC frame (paste or macro tools, or a moment when the GUI is busy) were lost, merged or reordered. Every key now stays down for at least a frame, a repeated key waits until it has been up for a frame, and new keys reach the TVC one per frame in the order they were pressed.
+
+### Downloads
+
+| File | For |
+|---|---|
+| `freeTVC-1.0.1-windows-x64.zip` | 64-bit Windows: unpack anywhere and run `freetvc.exe`. The programs are not signed, so Windows SmartScreen may warn on the first start. |
+| `freeTVC-1.0.1-linux-x86_64.tar.gz` | 64-bit Linux with glibc 2.38 or newer (Ubuntu 24.04, Debian 13, Fedora 39 or newer): unpack and run `./freetvc`. Older distributions: build from source ([docs/developer-guide.md](https://github.com/LaM3rzLG/FreeTVC/blob/main/docs/developer-guide.md)). |
+| `SHA256SUMS` | checksums of both archives |
+
+The packages contain the same ROM set as 1.0.0; `roms/ROMS-README.txt` lists what is included and what the GUI's "Download ROMs" item fetches.
+
 ## 1.0.0 — 2026-10-30
 
 The first release of freeTVC, an emulator of the Videoton TV Computer (TVC) for Linux and Windows.

@@ -428,7 +428,7 @@ The launch configurations DeZog needs are in `tools/dezog/project/.vscode/launch
   - a session over a real TCP connection;
   - TVC banks: type 0, the five slots for port 02h B0h and D0h (VID0, CARD0, EXT), bank memory by offset, a VID0-qualified breakpoint that does not fire while U2 is paged while the U2 one does, and watchpoint removal by bank.
 - **DeZog 3.8.0-rc7 from source in its own VS Code profile, driving the GUI on the 2.2 ROM** (`tools/dezog/`, XTEST keys, window grabs), flat view with a `NOSLOT64K` source:
-  - "'freeTVC 1.0.0' initialized."; the program loaded at 6000h, and the editor stopped on `start`;
+  - "'freeTVC 1.0.1' initialized."; the program loaded at 6000h, and the editor stopped on `start`;
   - step over shows HL = 6019h, A = 48h 'H' and the flags;
   - a breakpoint on line 17 is hit ("Breakpoint hit @6011h"), and the freeTVC status strip shows "paused, monitor: stopped at 6011";
   - Continue and Pause give "Manual break.";

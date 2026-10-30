@@ -41,6 +41,7 @@
 #include "frontend/sdl/keyboard_editor.hpp"
 #include "frontend/sdl/keymap.hpp"
 #include "frontend/sdl/picture.hpp"
+#include "frontend/sdl/about_view.hpp"
 #include "frontend/sdl/settings_view.hpp"
 #include "frontend/sdl/skin.hpp"
 #include "frontend/sdl/skin_style.hpp"
@@ -1471,6 +1472,7 @@ int main(int argc, char** argv) {
     };
     std::uint64_t settings_checked_ns = 0;
     freetvc::sdl::SettingsView settings_view;
+    freetvc::sdl::AboutView about_view;
     const std::string settings_file = settings.path.string();
     // The disk card's EPROM by choice: a card that is in takes it at once and the machine powers on
     const auto use_disk_rom = [&](const std::string& choice) {
@@ -2244,6 +2246,7 @@ int main(int argc, char** argv) {
         sheet.layout = input.keymap().name;
         sheet.layout_given = keys_given;
         const freetvc::sdl::SettingsActions sheet_actions = settings_view.draw(status, sheet, skins.skin, skins.fonts, sheet_top, actions);
+        actions.menu_open |= about_view.draw(*display, base_dir / "about" / "lamerz-logo.png", display->name(), skins.skin, skins.fonts, skins.scale);
         ImGui::Render();
 
         display->prepare_picture(texture, machine.config().colour, machine.frame_count());
@@ -2255,6 +2258,9 @@ int main(int argc, char** argv) {
         menu_open = actions.menu_open;
         if (actions.toggle_settings) {
             settings_view.toggle();
+        }
+        if (actions.open_about) {
+            about_view.open();
         }
         if (sheet_actions.choose_rom_dir || sheet_actions.choose_disk_rom) {
             static const SDL_DialogFileFilter kRoms[] = {{N_("ROM images (*.rom, *.bin)"), "rom;bin;ROM;BIN"}, {N_("All files"), "*"}};
@@ -2917,6 +2923,7 @@ int main(int argc, char** argv) {
     }
     display->destroy_texture(vram_texture);
     display->destroy_texture(texture);
+    about_view.release(*display);
     display.reset();  // its ImGui backends and the window go with it
     ImGui::DestroyContext();
     SDL_Quit();

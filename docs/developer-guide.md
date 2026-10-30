@@ -137,7 +137,7 @@ build/gcc-release/src/freetvc-headless --version
 build/gcc-release/src/freetvc-headless --help
 ```
 
-The first prints `freeTVC 1.0.0` (the project version in `CMakeLists.txt`).
+The first prints `freeTVC 1.0.1` (the project version in `CMakeLists.txt`).
 
 ### Build options
 

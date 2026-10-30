@@ -46,7 +46,7 @@ package() {  # <build dir> <folder name> <program suffix>
     dir=$stage/$2
     mkdir -p "$dir"
     cp "$1/src/freetvc$3" "$1/src/freetvc-headless$3" "$dir/"
-    for d in fonts skins keymaps pictures lang; do
+    for d in fonts skins keymaps pictures lang about; do
         cp -R "$1/src/$d" "$dir/$d"
     done
     cp -R "$stage/roms" "$dir/roms"

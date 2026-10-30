@@ -3640,3 +3640,57 @@ msgstr "%s értéke yes vagy no"
 #, c-format
 msgid "cannot replace '%s': %s"
 msgstr "nem cserélhető le: '%s': %s"
+
+#: src/frontend/sdl/play_view.cpp
+msgid "About freeTVC..."
+msgstr "A freeTVC névjegye..."
+
+#: src/frontend/sdl/about_view.cpp
+msgid "an emulator of the Videoton TV Computer"
+msgstr "a Videoton TV Computer emulátora"
+
+#: src/frontend/sdl/about_view.cpp
+msgid "Build"
+msgstr "Változat"
+
+#: src/frontend/sdl/about_view.cpp
+msgid " (modified)"
+msgstr " (módosítva)"
+
+#: src/frontend/sdl/about_view.cpp
+msgid "not from a git checkout"
+msgstr "nem git-munkapéldányból"
+
+#: src/frontend/sdl/about_view.cpp
+msgid "Built"
+msgstr "Fordítva"
+
+#: src/frontend/sdl/about_view.cpp
+#, c-format
+msgid "%s with %s"
+msgstr "%s, %s fordítóval"
+
+#: src/frontend/sdl/about_view.cpp
+msgid "Platform"
+msgstr "Platform"
+
+#: src/frontend/sdl/about_view.cpp
+msgid "Renderer"
+msgstr "Megjelenítés"
+
+#: src/frontend/sdl/about_view.cpp
+msgid "Made by"
+msgstr "Készítették"
+
+#: src/frontend/sdl/about_view.cpp
+#, c-format
+msgid "freeTVC %s   ***   the Videoton TV Computer lives on   ***   coded by LG and Dey of L@M3rZ   ***   greetings to everyone who keeps the TVC alive: the tvc.homeserver.hu archive, the makers of the expansion cards and the authors of the emulators that showed the way   ***   press Esc to get back to the machine   ***"
+msgstr "freeTVC %s   ***   a Videoton TV Computer él és virul   ***   kódolta LG és Dey, L@M3rZ   ***   üdvözlet mindenkinek, aki életben tartja a TVC-t: a tvc.homeserver.hu archívumnak, a bővítőkártyák készítőinek és az emulátorok szerzőinek, akik megmutatták az utat   ***   Esc: vissza a géphez   ***"
+
+#: src/frontend/sdl/about_view.cpp
+msgid "Copied"
+msgstr "Kimásolva"
+
+#: src/frontend/sdl/about_view.cpp
+msgid "Copy build info"
+msgstr "Változatadatok másolása"

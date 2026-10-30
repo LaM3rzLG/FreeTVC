@@ -98,6 +98,7 @@ void draw_main_menu(const PlayStatus& status, PlayActions& actions) {
     ImGui::Separator();
     actions.toggle_settings |= ImGui::MenuItem(tr("Settings..."), nullptr, status.settings);
     actions.toggle_bench |= ImGui::MenuItem(tr("Bench"), "F12", status.bench);
+    actions.open_about |= ImGui::MenuItem(tr("About freeTVC..."));
     actions.quit |= ImGui::MenuItem(tr("Quit"));
 }
 
