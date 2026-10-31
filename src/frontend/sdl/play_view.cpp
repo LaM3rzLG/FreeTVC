@@ -112,7 +112,7 @@ void draw_machine_menu(const PlayStatus& status, PlayActions& actions) {
     }
     actions.fetch_roms |= ImGui::MenuItem(tr("Download ROMs"));
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("The TVC's ROMs from tvc.homeserver.hu and the cards' firmware from their authors' sites, with the system's curl, into the user data folder"));
+        ImGui::SetTooltip("%s", tr("The TVC's ROMs from tvc.homeserver.hu and the cards' firmware from their authors' sites, with the system's curl, into the ROM folder chosen in Settings (rom_dir), else the user data folder"));
     }
     ImGui::Separator();
     actions.toggle_pause |= ImGui::MenuItem(tr("Pause"), "Pause", status.paused);

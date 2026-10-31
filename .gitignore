@@ -1,6 +1,8 @@
 # ROM images are never committed
 *.rom
 *.ROM
+/roms/
+/ROMS/
 
 # local tool installs (sjasmplus, gdb, DeZog)
 /.tools/
@@ -20,3 +22,6 @@ __pycache__/
 /.vscode/
 /CMakeUserPresets.json
 .claude/settings.local.json
+
+# macOS
+.DS_Store

@@ -70,7 +70,7 @@ freeTVC can download every file in the table from the original sources: tvc.home
 |---|---|
 | `freetvc-headless --fetch-roms` (then exits) | `--rom-dir DIR` if given, else `roms/` in the user data folder |
 | `freetvc` with no ROMs found at start: a message box offers **Download** or **Quit** | `roms/` in the user data folder |
-| `freetvc`: **Download ROMs** in the machine menu (the preset name in the strip) or in Settings → Machine | `roms/` in the user data folder; cards that went in without their ROM take it then, and the machine powers on |
+| `freetvc`: **Download ROMs** in the machine menu (the preset name in the strip) or in Settings → Machine | the folder in `rom_dir` (Settings → Machine → Choose folder...) if one is set, else `roms/` in the user data folder; cards that went in without their ROM take it then, and the machine powers on |
 | at build time: `-DFREETVC_FETCH_ROMS=ON`, or `cmake -DFREETVC_ROM_OUT=<dir> -P cmake/FreeTVCRoms.cmake` | `roms/` next to the built programs, or `<dir>` ([build.md](design/build.md)) |
 
 ## 3. First start and Play mode

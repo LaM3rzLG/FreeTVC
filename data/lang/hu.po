@@ -1698,6 +1698,10 @@ msgstr "a ROM-ok letöltése a tvc.homeserver.hu oldalról..."
 msgid "ROMs downloaded into the user data folder"
 msgstr "a ROM-ok letöltve a felhasználói adatmappába"
 
+#: src/frontend/sdl/main.cpp
+msgid "ROMs downloaded into the ROM folder (rom_dir)"
+msgstr "a ROM-ok letöltve a ROM-mappába (rom_dir)"
+
 #: src/frontend/sdl/main.cpp:2513
 msgid "ROMs downloaded; the cards took theirs and the machine powered on"
 msgstr "a ROM-ok letöltve; a kártyák megkapták a sajátjukat, hidegindítás"
@@ -2033,10 +2037,12 @@ msgstr "ROM-ok letöltése"
 #: src/frontend/sdl/play_view.cpp:114
 msgid ""
 "The TVC's ROMs from tvc.homeserver.hu and the cards' firmware from their "
-"authors' sites, with the system's curl, into the user data folder"
+"authors' sites, with the system's curl, into the ROM folder chosen in "
+"Settings (rom_dir), else the user data folder"
 msgstr ""
 "A TVC ROM-jai a tvc.homeserver.hu oldalról, a kártyák firmware-e a szerzőik "
-"oldaláról, a rendszer curl programjával, a felhasználói adatmappába"
+"oldaláról, a rendszer curl programjával, a Beállításokban választott "
+"ROM-mappába (rom_dir), ha nincs ilyen, a felhasználói adatmappába"
 
 #: src/frontend/sdl/play_view.cpp:119
 msgid "Power cycle"

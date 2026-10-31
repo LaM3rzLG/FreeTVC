@@ -310,6 +310,7 @@ struct RomDownload {
     std::atomic<bool> done{false};
     bool ok = false;
     std::string result;
+    fs::path dir;
 
     bool running() const { return worker.joinable() && !done; }
     // True once, when a started download has ended
@@ -320,17 +321,18 @@ struct RomDownload {
         worker.join();
         return true;
     }
-    void start(fs::path dir) {
+    void start(fs::path into) {
         if (worker.joinable()) {
             worker.join();  // an ended download not reported yet
         }
         done = false;
-        worker = std::thread([this, dir = std::move(dir)] {
+        dir = std::move(into);
+        worker = std::thread([this, target = dir] {
             const freetvc::CurlCheck curl = freetvc::find_curl();
             std::string error;
-            ok = curl.ok() && freetvc::fetch_roms(curl, dir, error);
+            ok = curl.ok() && freetvc::fetch_roms(curl, target, error);
             if (ok) {
-                std::fprintf(stderr, "freetvc: ROMs downloaded into %s\n", dir.string().c_str());
+                std::fprintf(stderr, "freetvc: ROMs downloaded into %s\n", target.string().c_str());
             }
             result = curl.ok() ? error : curl.problem;
             done = true;
@@ -2511,11 +2513,12 @@ int main(int argc, char** argv) {
         }
         if (actions.fetch_roms && !rom_download.running()) {
             notice.show_text(false, "downloading the ROMs from tvc.homeserver.hu...");
-            rom_download.start(user_dir / "roms");
+            rom_download.start(rom_dir_setting.empty() ? user_dir / "roms" : fs::path(rom_dir_setting));
         }
         if (rom_download.finished()) {
             if (rom_download.ok) {
-                notice.show_text(false, "ROMs downloaded into the user data folder");
+                notice.show_text(false, rom_download.dir == user_dir / "roms" ? "ROMs downloaded into the user data folder"
+                                                                              : "ROMs downloaded into the ROM folder (rom_dir)");
             } else {
                 notice.set(rom_download.result, true);
             }
