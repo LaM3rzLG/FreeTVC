@@ -377,6 +377,14 @@ struct Notice {
     }
 };
 
+// UI scale in window points: ImGui already applies the pixel density (macOS Retina, Wayland)
+float ui_scale(SDL_Window* window) {
+    const float display = SDL_GetWindowDisplayScale(window);
+    const float density = SDL_GetWindowPixelDensity(window);
+    const float scale = display > 0.0f && density > 0.0f ? display / density : 1.0f;
+    return scale > 0.0f ? scale : 1.0f;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -851,7 +859,7 @@ int main(int argc, char** argv) {
     SkinState skins;
     skins.dirs = {user_dir / "skins", base_dir / "skins"};
     skins.font_dir = base_dir / "fonts";
-    skins.scale = SDL_GetWindowDisplayScale(window) > 0.0f ? SDL_GetWindowDisplayScale(window) : 1.0f;
+    skins.scale = ui_scale(window);
     if (const auto path = freetvc::sdl::find_skin(skin_option, skins.dirs)) {
         const std::string message = skins.load(*path);
         notice.set(message, !message.empty());
@@ -1775,7 +1783,7 @@ int main(int argc, char** argv) {
                 }
             }
             if (event.type == SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED) {
-                skins.scale = SDL_GetWindowDisplayScale(window) > 0.0f ? SDL_GetWindowDisplayScale(window) : 1.0f;
+                skins.scale = ui_scale(window);
                 freetvc::sdl::apply_style(skins.skin, skins.scale, ImGui::GetStyle());
             }
             const bool key_event = event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP;
