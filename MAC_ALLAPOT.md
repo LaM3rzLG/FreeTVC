@@ -30,6 +30,11 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 - `registers` / `sprites` (`sprite`, `pixels`) / `tiles` (`rows`) / `ram` (`address`, `length`, `psram`, `format`); mellékhatás
   nélkül (peek_register). Kipróbálva MCP-n: bekapcsolás utáni sapka-sprite pixelre egyezik a képpel, ütközés nem törlődik.
 
+## Issue #1 állapota (2026-11-02)
+- 1. kártyahely a felületen: KÉSZ (ed4863b) · 5. MCP `card256`: KÉSZ (a3647ee)
+- 2. videófelvétel, 3. billentyűzetkiosztás megjelenítése: hátravan
+- 4. About + „Bronze” sötét betű: **ELVETVE** (a felhasználó döntése, 2026-11-02)
+
 ## Tudás a repóban
 - `CLAUDE.md` (munkaszabályok), `.claude/skills/freetvc-mac/` (fordítás, futtatás, MCP, időzítésmérés).
 - `tools/mac/`: `build_mac.sh` (fordítás, teszt nélkül), `mcp.sh` (egy MCP-hívás), `mcp_pace.py` (valós idejű
