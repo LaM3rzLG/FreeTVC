@@ -15,8 +15,8 @@ changes: `AGENTS.md`. The user speaks Hungarian; answer in Hungarian, briefly.
 
 ## Rules from the user
 - **Never run the automatic tests** (`ctest`, `tests/`): the Mac build turns them off (`FREETVC_BUILD_TESTS=OFF`).
-- Git is Claude's job; the user never runs git. Repo: https://github.com/LaM3rzLG/FreeTVC-Mac (public, remote `mac`,
-  local `main` tracks it; `origin` is the private upstream LaM3rzLG/FreeTVC — do not push there).
+- Git is Claude's job; the user never runs git. Repo: https://github.com/LaM3rzLG/FreeTVC (public, remote `origin`,
+  local `main` tracks it) - everything goes here (user, 2026-11-01). FreeTVC-Mac (remote `mac`) is no longer used; no new repos.
 - **Commit author is always `Deybacsi <deyprof@gmail.com>`** (author and committer):
   `GIT_COMMITTER_NAME=Deybacsi GIT_COMMITTER_EMAIL=deyprof@gmail.com git -c user.name=Deybacsi -c user.email=deyprof@gmail.com commit ...`
 - No ROMs in git (`.gitignore`: `*.rom`, `/roms/`, `/ROMS/`; the `.bin` ROMs live only in ignored folders).

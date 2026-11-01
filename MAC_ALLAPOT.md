@@ -15,7 +15,7 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 
 ## Mac-javítások
 - **Retina:** a felület kétszeres méretű volt. UI-skála = kijelzőskála / pixelsűrűség (`src/frontend/sdl/main.cpp`).
-  Commit `b5c98b5`, feltöltve: https://github.com/LaM3rzLG/FreeTVC-Mac (publikus, szerző: Deybacsi).
+  Commit `b5c98b5`, szerző: Deybacsi. Minden a https://github.com/LaM3rzLG/FreeTVC repóba megy (2026-11-01 óta; a FreeTVC-Mac nem használt).
 - **ROM-letöltés:** a "ROM-ok letöltése" a beállított `rom_dir` mappába tölt (ha van), különben a felhasználói
   adatmappába. `.gitignore`: `/roms/`, `/ROMS/`, `.DS_Store`. A felhasználó kipróbálta: a ROM-ok jó helyre mennek.
 
