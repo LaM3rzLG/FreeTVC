@@ -53,8 +53,8 @@ How the checks below were made: the unit tests run in CTest (`ctest`, tests labe
 **Common behaviour of all cards and cartridges:**
 - Switching a card in or out, from any front end, powers the machine on, like a cartridge. Inserting media into a card that is out (a disk, for example) puts the card in. The preset menu keeps the cards across a change of board.
 - Snapshots carry the card kind with its EPROM image in the `SLOT` chunk (embedded like a cartridge) and the card's state in `CARD`, so a snapshot brings its cards along when it is loaded into a machine without them. Media that stand for host files (disks, SD cards, flash images, the pendrive folder) are **outside the machine state**: snapshots name them by path in `MEDI`, and rewind never undoes writes to them ([media.md](media.md), "Snapshots").
-- The GUI's strip lights a slot rib for every inserted card; the Cards menu (opened from the slot ribs) switches the cards and the cartridge ([ui.md](ui.md), "Strip menus"). The settings window lists them too.
-- In the GUI, card keys in `freetvc.ini` are written when they change, unless the command line set them for this run ([ui.md](ui.md), "Settings file and ROM search").
+- The GUI's strip lights a slot rib for every inserted card; the Cards menu (opened from the slot ribs) switches the cards and the cartridge and chooses each slot card's slot ([ui.md](ui.md), "Strip menus"). The settings window lists them too, with slot buttons. The HBF card stays in slot 0.
+- In the GUI, card keys in `freetvc.ini` (`yes` for the card's own slot, else the slot number) are written when they change, unless the command line set them for this run ([ui.md](ui.md), "Settings file and ROM search").
 - The MCP `media` tool's `status` action reports every card.
 
 ## HBF disk card

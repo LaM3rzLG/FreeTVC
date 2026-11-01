@@ -125,11 +125,49 @@ void draw_machine(const Sheet& s, const PlayStatus& status, const SettingsStatus
                "(vtdos11.rom or vtdos12.rom); either works with either EPROM."));
 
     heading(s, tr("Other cards"));
-    play.toggle_gamecard |= check(tr("GameCard"), status.gamecard_slot >= 0);
-    play.toggle_multichip |= check(tr("Multichip sound card"), status.multichip_slot >= 0);
-    play.toggle_card256 |= check(tr("TVC256k++"), status.card256_slot >= 0);
-    play.toggle_nanosd |= check(tr("NanoSD"), status.nanosd_slot >= 0);
-    play.toggle_serial |= check(tr("Serial card"), status.serial_slot >= 0);
+    struct SlotCard {
+        const char* name;
+        CardKind kind;
+        int slot;
+        bool& toggle;
+    };
+    const SlotCard cards[] = {{tr("GameCard"), CardKind::GameCard, status.gamecard_slot, play.toggle_gamecard},
+                              {tr("Multichip sound card"), CardKind::Multichip, status.multichip_slot, play.toggle_multichip},
+                              {tr("TVC256k++"), CardKind::Card256, status.card256_slot, play.toggle_card256},
+                              {tr("NanoSD"), CardKind::NanoSd, status.nanosd_slot, play.toggle_nanosd},
+                              {tr("Serial card"), CardKind::Serial, status.serial_slot, play.toggle_serial}};
+    // The slot buttons line up in a column right of the longest name
+    float column = 0.0f;
+    for (const SlotCard& c : cards) {
+        column = std::max(column, ImGui::CalcTextSize(c.name).x);
+    }
+    column += ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x + ImGui::GetStyle().ItemSpacing.x * 3.0f;
+    const float left = ImGui::GetCursorPosX();
+    for (const SlotCard& c : cards) {
+        c.toggle |= check(c.name, c.slot >= 0);
+        ImGui::SameLine(left + column);
+        ImGui::TextUnformatted(tr("slot"));
+        for (int n = 0; n < static_cast<int>(kCardSlots); ++n) {
+            ImGui::SameLine();
+            ImGui::PushID(c.name);
+            ImGui::PushID(n);
+            const bool taken = n != c.slot && !status.slot_cards[n].empty();
+            ImGui::BeginDisabled(taken);
+            const char digit[2] = {static_cast<char>('0' + n), 0};
+            if (ImGui::RadioButton(digit, n == c.slot) && n != c.slot) {
+                play.slot_card = c.kind;
+                play.slot_card_to = n;
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+            ImGui::PopID();
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                const std::string holder(status.slot_cards[n]);
+                ImGui::SetTooltip("%s", holder.empty() || n == c.slot ? tr_format("Slot %d, ports %d0h-%dFh", n, n + 1, n + 1).c_str()
+                                                                       : tr_format("Slot %d, ports %d0h-%dFh: %s", n, n + 1, n + 1, holder.c_str()).c_str());
+            }
+        }
+    }
     ImGui::TextUnformatted(tr("SID card"));
     const char* models[] = {tr("none"), "MOS 6581", "MOS 8580"};
     for (int m = 0; m < 3; ++m) {
@@ -138,8 +176,8 @@ void draw_machine(const Sheet& s, const PlayStatus& status, const SettingsStatus
             play.sid_card = m;
         }
     }
-    note(s, tr("The same switches as the Cards menu; each powers the machine on. freeTVC starts with the cards that were in "
-               "when it closed."));
+    note(s, tr("The same switches as the Cards menu; each powers the machine on. A slot button puts the card in that slot or "
+               "moves it there. freeTVC starts with the cards that were in when it closed, in the same slots."));
 }
 
 // A slider for one picture value; true while it changes, `done` when it is let go

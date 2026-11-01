@@ -120,6 +120,30 @@ void draw_machine_menu(const PlayStatus& status, PlayActions& actions) {
     actions.power_cycle |= ImGui::MenuItem(tr("Power cycle"));
 }
 
+// The slot a card goes into, or moves to; a slot with another card shows it, greyed out
+void slot_choice(const PlayStatus& status, CardKind kind, int slot, const char* id, PlayActions& actions) {
+    ImGui::Indent();
+    const std::string label = std::string(slot >= 0 ? tr("Move to slot") : tr("Put in slot")) + "##" + id;
+    if (ImGui::BeginMenu(label.c_str())) {
+        char item[160];
+        for (int s = 0; s < static_cast<int>(kCardSlots); ++s) {
+            const bool free = status.slot_cards[s].empty();
+            if (free || s == slot) {
+                std::snprintf(item, sizeof item, tr("Slot %d, ports %d0h-%dFh"), s, s + 1, s + 1);
+            } else {
+                const std::string holder(status.slot_cards[s]);
+                std::snprintf(item, sizeof item, tr("Slot %d, ports %d0h-%dFh: %s"), s, s + 1, s + 1, holder.c_str());
+            }
+            if (ImGui::MenuItem(item, nullptr, s == slot, free || s == slot) && s != slot) {
+                actions.slot_card = kind;
+                actions.slot_card_to = s;
+            }
+        }
+        ImGui::EndMenu();
+    }
+    ImGui::Unindent();
+}
+
 void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
     // design/cards.md: switching a card powers the machine on
     ImGui::SeparatorText(tr("Cards"));
@@ -138,6 +162,7 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
         ImGui::SetTooltip("%s", tr("dikdom's card: SN76489 sound, joysticks 3 and 4 on gamepads 3 and 4, a boot menu with four games; "
                                    "the machine powers on"));
     }
+    slot_choice(status, CardKind::GameCard, status.gamecard_slot, "gamecard", actions);
     if (status.multichip_slot >= 0) {
         std::snprintf(item, sizeof item, tr("Multichip sound card in slot %d"), status.multichip_slot);
     } else {
@@ -148,6 +173,7 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
         ImGui::SetTooltip("%s", tr("Vass Sándor's card: SN76489, SAA1099 and YM3812 (OPL2) on the TV's sound; its start-up screen plays "
                                    "a demo on each chip after SPACE; the machine powers on"));
     }
+    slot_choice(status, CardKind::Multichip, status.multichip_slot, "multichip", actions);
     // Outside the slots, so no slot number; one chip at a time
     for (const int chip : {1, 2}) {
         if (ImGui::MenuItem(chip == 1 ? tr("SID card, MOS 6581") : tr("SID card, MOS 8580"), nullptr, status.sid_card == chip)) {
@@ -169,6 +195,7 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
                                    "drives for LOAD and SAVE, a mouse, its EXT command line (EXT and the slot number), its vSID sound; "
                                    "the machine powers on"));
     }
+    slot_choice(status, CardKind::Card256, status.card256_slot, "card256", actions);
     if (status.card256_slot >= 0) {
         // One USB port, so the pendrive and the mouse take turns; none of this powers the machine on
         ImGui::Indent();
@@ -202,6 +229,7 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
         ImGui::SetTooltip("%s", tr("Vass Sándor's card: an SD card through an Arduino Nano; LOAD and SAVE go to it, a file-select menu at "
                                    "power-on (ESC skips it), its command line with EXT 0; the machine powers on"));
     }
+    slot_choice(status, CardKind::NanoSd, status.nanosd_slot, "nanosd", actions);
     if (status.nanosd_slot >= 0) {
         // The SD card comes and goes like on the card, without powering on; the Nano notices
         ImGui::Indent();
@@ -223,6 +251,7 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("%s", tr("Videoton's RS-232 card (an 8251A): BASIC's device #6 (LIST #6, SAVE #6, LOAD #6); the machine powers on"));
     }
+    slot_choice(status, CardKind::Serial, status.serial_slot, "serial", actions);
     if (status.serial_slot >= 0) {
         // The cable and its files change without powering on
         ImGui::Indent();

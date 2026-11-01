@@ -450,13 +450,13 @@ int main(int argc, char** argv) {
     std::vector<std::pair<unsigned, std::string>> disks;
     std::optional<unsigned> gamecard_slot;
     if (settings.values.gamecard.value_or(false)) {
-        gamecard_slot = freetvc::kGameCardSlot;
+        gamecard_slot = settings.values.gamecard_slot.value_or(freetvc::kGameCardSlot);
     }
     bool gamecard_given = false;
     std::string gamecard_rom_path;
     std::optional<unsigned> multichip_slot;
     if (settings.values.multichip.value_or(false)) {
-        multichip_slot = freetvc::kMultichipSlot;
+        multichip_slot = settings.values.multichip_slot.value_or(freetvc::kMultichipSlot);
     }
     bool multichip_given = false;
     std::string multichip_rom_path;
@@ -465,7 +465,7 @@ int main(int argc, char** argv) {
     std::uint32_t sid_clock = freetvc::SidCardConfig{}.clock_hz;
     std::optional<unsigned> nanosd_slot;
     if (settings.values.nanosd.value_or(false)) {
-        nanosd_slot = freetvc::kNanoSdSlot;
+        nanosd_slot = settings.values.nanosd_slot.value_or(freetvc::kNanoSdSlot);
     }
     bool nanosd_given = false;
     std::string nanosd_rom_path;
@@ -477,7 +477,7 @@ int main(int argc, char** argv) {
     bool printer_given = false;
     std::optional<unsigned> serial_slot;
     if (settings.values.serial_card.value_or(false)) {
-        serial_slot = freetvc::kSerialSlot;
+        serial_slot = settings.values.serial_slot.value_or(freetvc::kSerialSlot);
     }
     bool serial_given = false;
     std::string serial_line = settings.values.serial_line.value_or("off");
@@ -486,7 +486,7 @@ int main(int argc, char** argv) {
     std::string serial_send, serial_capture;
     std::optional<unsigned> card256_slot;  // kCardSlots: slot 0, else the first free one
     if (settings.values.card256.value_or(false)) {
-        card256_slot = freetvc::kCardSlots;
+        card256_slot = settings.values.card256_slot.value_or(freetvc::kCardSlots);
     }
     bool card256_given = false;
     std::string card256_rom_path;
@@ -1164,13 +1164,13 @@ int main(int argc, char** argv) {
     for (std::string& line : tape.take_messages()) {
         notice.set(std::move(line), true);
     }
-    const bool gamecard_at_start = tape.gamecard_slot() >= 0;
-    const bool multichip_at_start = tape.multichip_slot() >= 0;
+    const int gamecard_at_start = tape.gamecard_slot();
+    const int multichip_at_start = tape.multichip_slot();
     const std::string sid_card_at_start = tape.sid_card_model();
-    const bool card256_at_start = tape.card256_slot() >= 0;
-    const bool nanosd_at_start = tape.nanosd_slot() >= 0;
+    const int card256_at_start = tape.card256_slot();
+    const int nanosd_at_start = tape.nanosd_slot();
     const std::string printer_at_start = tape.printer_setting();
-    const bool serial_at_start = tape.serial_slot() >= 0;
+    const int serial_at_start = tape.serial_slot();
     const std::string serial_line_at_start = tape.serial_peer_name();
     const bool serial_flow_at_start = tape.serial_rts_flow();
     tape.set_sddual_flash_writable(sddual_flash_write);
@@ -1400,6 +1400,10 @@ int main(int argc, char** argv) {
         bench_view.set_mcp(mcp.get(), "http://127.0.0.1:" + std::to_string(mcp_host->http_port()) + "/mcp");
     }
     // The machine's state for freetvc.ini, except a command-line value the menus left alone; written when it changes
+    // A slot card's key: no, yes for its own slot, else the slot number
+    const auto card_setting = [](int slot, unsigned own) {
+        return slot < 0 ? std::string("no") : slot == static_cast<int>(own) ? std::string("yes") : std::to_string(slot);
+    };
     const auto collect_settings = [&] {
         freetvc::SettingValues values;
         if (!preset_given || preset_index != preset_at_start) {
@@ -1417,29 +1421,29 @@ int main(int argc, char** argv) {
         if ((!disk_card_given && (settings.values.disk_card.has_value() || tape.disk_card_on())) || tape.disk_card_on() != disk_card_at_start) {
             values.emplace_back("disk_card", tape.disk_card_on() ? "yes" : "no");
         }
-        const bool gamecard_on = tape.gamecard_slot() >= 0;
-        if ((!gamecard_given && (settings.values.gamecard.has_value() || gamecard_on)) || gamecard_on != gamecard_at_start) {
-            values.emplace_back("gamecard", gamecard_on ? "yes" : "no");
+        const int gamecard_now = tape.gamecard_slot();
+        if ((!gamecard_given && (settings.values.gamecard.has_value() || gamecard_now >= 0)) || gamecard_now != gamecard_at_start) {
+            values.emplace_back("gamecard", card_setting(gamecard_now, freetvc::kGameCardSlot));
         }
-        const bool multichip_on = tape.multichip_slot() >= 0;
-        if ((!multichip_given && (settings.values.multichip.has_value() || multichip_on)) || multichip_on != multichip_at_start) {
-            values.emplace_back("multichip", multichip_on ? "yes" : "no");
+        const int multichip_now = tape.multichip_slot();
+        if ((!multichip_given && (settings.values.multichip.has_value() || multichip_now >= 0)) || multichip_now != multichip_at_start) {
+            values.emplace_back("multichip", card_setting(multichip_now, freetvc::kMultichipSlot));
         }
         const std::string sid_now = tape.sid_card_model();
         if ((!sid_card_given && (settings.values.sid_card.has_value() || sid_now != "off")) || sid_now != sid_card_at_start) {
             values.emplace_back("sid_card", sid_now);
         }
-        const bool nanosd_on = tape.nanosd_slot() >= 0;
-        if ((!nanosd_given && (settings.values.nanosd.has_value() || nanosd_on)) || nanosd_on != nanosd_at_start) {
-            values.emplace_back("nanosd", nanosd_on ? "yes" : "no");
+        const int nanosd_now = tape.nanosd_slot();
+        if ((!nanosd_given && (settings.values.nanosd.has_value() || nanosd_now >= 0)) || nanosd_now != nanosd_at_start) {
+            values.emplace_back("nanosd", card_setting(nanosd_now, freetvc::kNanoSdSlot));
         }
         const std::string printer_now = tape.printer_setting();
         if ((!printer_given && settings.values.printer.value_or("off") != printer_now) || printer_now != printer_at_start) {
             values.emplace_back("printer", printer_now);
         }
-        const bool serial_on = tape.serial_slot() >= 0;
-        if ((!serial_given && (settings.values.serial_card.has_value() || serial_on)) || serial_on != serial_at_start) {
-            values.emplace_back("serial_card", serial_on ? "yes" : "no");
+        const int serial_now = tape.serial_slot();
+        if ((!serial_given && (settings.values.serial_card.has_value() || serial_now >= 0)) || serial_now != serial_at_start) {
+            values.emplace_back("serial_card", card_setting(serial_now, freetvc::kSerialSlot));
         }
         // A cable to a host peer only makes sense with its files, which are not saved
         const std::string line_now = tape.serial_peer_name() == "on" ? "off" : tape.serial_peer_name();
@@ -1457,9 +1461,9 @@ int main(int argc, char** argv) {
             values.emplace_back("nanosd_menu", eeprom.menu ? "yes" : "no");
             values.emplace_back("nanosd_sort", eeprom.sort == 1 ? "name" : eeprom.sort == 2 ? "size" : "none");
         }
-        const bool card256_on = tape.card256_slot() >= 0;
-        if ((!card256_given && (settings.values.card256.has_value() || card256_on)) || card256_on != card256_at_start) {
-            values.emplace_back("card256", card256_on ? "yes" : "no");
+        const int card256_now = tape.card256_slot();
+        if ((!card256_given && (settings.values.card256.has_value() || card256_now >= 0)) || card256_now != card256_at_start) {
+            values.emplace_back("card256", card_setting(card256_now, freetvc::kCard256Slot));
         }
         const std::string usb_now = card256_usb_setting();
         if ((!card256_usb_given && settings.values.card256_usb.value_or("none") != usb_now) || usb_now != card256_usb_at_start) {
@@ -2517,8 +2521,8 @@ int main(int argc, char** argv) {
         }
         if (rom_download.finished()) {
             if (rom_download.ok) {
-                notice.show_text(false, rom_download.dir == user_dir / "roms" ? "ROMs downloaded into the user data folder"
-                                                                              : "ROMs downloaded into the ROM folder (rom_dir)");
+                notice.show_text(false, rom_download.dir == user_dir / "roms" ? N_("ROMs downloaded into the user data folder")
+                                                                              : N_("ROMs downloaded into the ROM folder (rom_dir)"));
             } else {
                 notice.set(rom_download.result, true);
             }
@@ -2796,6 +2800,50 @@ int main(int argc, char** argv) {
                 } else {
                     notice.show_text(false, "Multichip sound card out; powered on");
                 }
+                for (std::string& line : tape.take_messages()) {
+                    notice.set(std::move(line), true);
+                }
+            } else {
+                notice.set(error, true);
+            }
+        }
+        if (actions.slot_card != freetvc::CardKind::None && actions.slot_card_to >= 0) {
+            const auto slot = static_cast<unsigned>(actions.slot_card_to);
+            const int n = actions.slot_card_to;
+            bool placed = false;
+            switch (actions.slot_card) {
+            case freetvc::CardKind::GameCard:
+                if ((placed = tape.gamecard(true, slot, error))) {
+                    notice.show(false, "GameCard in slot %d; powered on", n);
+                }
+                break;
+            case freetvc::CardKind::Multichip:
+                if ((placed = tape.multichip(true, slot, error))) {
+                    notice.show(false, "Multichip sound card in slot %d; powered on", n);
+                }
+                break;
+            case freetvc::CardKind::Card256:
+                if ((placed = tape.card256(true, slot, error))) {
+                    notice.show(false, "TVC256k++ in slot %d (EXT %d); powered on", n, n);
+                }
+                break;
+            case freetvc::CardKind::NanoSd:
+                if ((placed = tape.nanosd(true, slot, error))) {
+                    notice.show(false, "NanoSD in slot %d; powered on", n);
+                }
+                break;
+            case freetvc::CardKind::Serial:
+                if ((placed = tape.serial_card(true, slot, error))) {
+                    notice.show(false, "serial card in slot %d; powered on", n);
+                }
+                break;
+            default:
+                break;
+            }
+            if (placed) {
+                debugger->cancel_step();
+                monitor->machine_changed();
+                input.machine_replaced();
                 for (std::string& line : tape.take_messages()) {
                     notice.set(std::move(line), true);
                 }

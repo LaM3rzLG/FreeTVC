@@ -2069,6 +2069,24 @@ msgstr ""
 msgid "GameCard in slot %d"
 msgstr "GameCard (%d. kártyahely)"
 
+#: src/frontend/sdl/play_view.cpp
+msgid "Put in slot"
+msgstr "Behelyezés kártyahelyre"
+
+#: src/frontend/sdl/play_view.cpp
+msgid "Move to slot"
+msgstr "Átrakás másik kártyahelyre"
+
+#: src/frontend/sdl/play_view.cpp
+#, c-format
+msgid "Slot %d, ports %d0h-%dFh"
+msgstr "%d. kártyahely (%d0h-%dFh portok)"
+
+#: src/frontend/sdl/play_view.cpp
+#, c-format
+msgid "Slot %d, ports %d0h-%dFh: %s"
+msgstr "%d. kártyahely (%d0h-%dFh portok): %s"
+
 #: src/frontend/sdl/play_view.cpp:137
 msgid ""
 "dikdom's card: SN76489 sound, joysticks 3 and 4 on gamepads 3 and 4, a boot "
@@ -2657,11 +2675,14 @@ msgstr "nincs"
 
 #: src/frontend/sdl/settings_view.cpp:141
 msgid ""
-"The same switches as the Cards menu; each powers the machine on. freeTVC "
-"starts with the cards that were in when it closed."
+"The same switches as the Cards menu; each powers the machine on. A slot "
+"button puts the card in that slot or moves it there. freeTVC starts with the "
+"cards that were in when it closed, in the same slots."
 msgstr ""
 "Ugyanazok a kapcsolók, mint a Kártyák menüben; mindegyik hidegindítással "
-"jár. A freeTVC azokkal a kártyákkal indul, amelyek kilépéskor bent voltak."
+"jár. A kártyahely-gomb abba a kártyahelybe teszi vagy oda rakja át a "
+"kártyát. A freeTVC azokkal a kártyákkal indul, amelyek kilépéskor bent "
+"voltak, ugyanazokon a kártyahelyeken."
 
 #: src/frontend/sdl/settings_view.cpp:168
 msgid "Only sharp pixels here: the picture model needs OpenGL 3.3."

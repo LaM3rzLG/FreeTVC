@@ -139,6 +139,8 @@ struct PlayActions {
     bool printer_unplug = false;
     bool toggle_serial = false;      // the serial card goes in (slot 1, else the first free) or out and the machine powers on
     int serial_line = -1;            // its cable: 0 unplugged, 1 listening on 127.0.0.1:6585
+    CardKind slot_card = CardKind::None;  // this card goes into `slot_card_to` (put in or moved) and the machine powers on
+    int slot_card_to = -1;
     bool serial_send_file = false;   // file dialog, then its bytes go to the TVC
     bool serial_capture = false;     // save dialog, then what the TVC sends is appended there
     bool serial_capture_stop = false;

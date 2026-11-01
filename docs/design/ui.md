@@ -82,7 +82,7 @@ Each device has its own menu, opened from its own strip item, so no menu grows t
 
 | Strip item | Menu | Contents |
 |---|---|---|
-| slot ribs | **Cards** | "Disk card in slot 0" (HBF; the disk-card switch lives here, not in the Disk menu); GameCard; Multichip sound card; the SID card, MOS 6581 or 8580 (one at a time: the checked one takes it out; no slot rib, it sits outside the slots); TVC256k++ and, while it is in, its USB port (pendrive folder, mouse, empty) and flash drive image ([cards.md](cards.md), TVC256k++ "Front ends"); NanoSD and, while it is in, its SD card folder or "Take the SD card out"; the serial card (slot 1, else the first free one) and, while it is in, its cable ("Cable unplugged", "Cable to TCP port 6585" showing "connected" or "waiting"), "Send a file..." and "Capture to a file..."; a **Printer port** section: "Printer to a file..." (a save dialog: `.txt` gets UTF-8 text, anything else the raw bytes) and "No printer" (the default; the port is the main board's own, but a printer is something plugged into the machine); a **Cartridge** section: "Insert cartridge...", "Remove cartridge", "New MultiCart image..." (pick the programs, then the image's name; it goes in), "SD Dual cartridge" with its "microSD card image...", "SD card image..." and "Take ... out", and "New SD card image..." (pick the files, then the image's name; it goes into the microSD socket, with the cartridge). Cartridges are plug-in boards, though not slot cards, so they are here |
+| slot ribs | **Cards** | "Disk card in slot 0" (HBF; the disk-card switch lives here, not in the Disk menu); GameCard; Multichip sound card (under each slot card, indented, **Put in slot** or, while it is in, **Move to slot**: a submenu of slots 0–3 with their ports, the card's own checked, a slot holding another card greyed out with its name; the choice puts the card there or moves it and powers on); the SID card, MOS 6581 or 8580 (one at a time: the checked one takes it out; no slot rib, it sits outside the slots); TVC256k++ and, while it is in, its USB port (pendrive folder, mouse, empty) and flash drive image ([cards.md](cards.md), TVC256k++ "Front ends"); NanoSD and, while it is in, its SD card folder or "Take the SD card out"; the serial card (slot 1, else the first free one) and, while it is in, its cable ("Cable unplugged", "Cable to TCP port 6585" showing "connected" or "waiting"), "Send a file..." and "Capture to a file..."; a **Printer port** section: "Printer to a file..." (a save dialog: `.txt` gets UTF-8 text, anything else the raw bytes) and "No printer" (the default; the port is the main board's own, but a printer is something plugged into the machine); a **Cartridge** section: "Insert cartridge...", "Remove cartridge", "New MultiCart image..." (pick the programs, then the image's name; it goes in), "SD Dual cartridge" with its "microSD card image...", "SD card image..." and "Take ... out", and "New SD card image..." (pick the files, then the image's name; it goes into the microSD socket, with the cartridge). Cartridges are plug-in boards, though not slot cards, so they are here |
 | nameplate **free**TVC | **main** | Program: "Load program..." (every format, so it belongs to no one device), "Run again", "Eject cassette"; Snapshot: quick save, quick load, save and load snapshot; Keyboard: symbolic, positional; Skin: the skins found, "Reload skin"; Language; Screen: full raster, screenshot, full screen; then **Settings...**, **Bench** and **Quit** |
 | preset name | **machine and ROM** | the presets, **Download ROMs** (the TVC's ROMs and the card ROMs, with the system's curl, into the `rom_dir` folder if one is set, else the user data folder; [build.md](build.md), section "ROM autofetch"), then Pause, Reset, Power cycle (they act on the machine) |
 | tape item | **Tape** | "Insert tape..." (a `.wav` or `.ttp` file, or a `.cas` played as a tape), "Run the tape", Play, Stop, Rewind, "Record to WAV...", "Eject tape", "Fast tape" ([media.md](media.md), section "Tape deck") |
@@ -293,7 +293,7 @@ All on the real GUI (`tools/ui/ui_drive.py`: XTEST keys and clicks, window grabs
 **Settings...** in the main menu opens a sheet at the right of the window, from the top (Play) or below the run bar (Bench) down to the strip. Play's screen and Bench's dock space give up its width, so the picture stays visible and a change shows at once. Code: `frontend/sdl/settings_view.*`; it returns the same `PlayActions` as the menus (preset, cards, skin, language, mapping, mute...) plus its own `SettingsActions`.
 
 - Materials: the deck colour with the groove along its left edge, a header band in the rib colour with **Close**; the sections as words down a column as wide as the longest name, the current one marked with a lit slot rib (the strip's motif) and the strong font. Escape closes it while it has the keys; while it has them they stay out of the TVC.
-- **Machine**: the presets; the ROM folder in use, **Choose folder...** (writes `rom_dir`; the machine powers on only when the preset's ROMs differ), **Default places** (removes the key), **Download ROMs**; the disk card in slot 0 and its EPROM: VT-DOS 1.1 (`hbf.rom`), VT-DOS 1.2 (`hbf12.rom`) or an image file (a card that is in takes it at once and powers on); the other cards (the Cards menu's switches) and the SID card's chip.
+- **Machine**: the presets; the ROM folder in use, **Choose folder...** (writes `rom_dir`; the machine powers on only when the preset's ROMs differ), **Default places** (removes the key), **Download ROMs**; the disk card in slot 0 and its EPROM: VT-DOS 1.1 (`hbf.rom`), VT-DOS 1.2 (`hbf12.rom`) or an image file (a card that is in takes it at once and powers on); the other cards (the Cards menu's switches, each with slot buttons 0–3 in a column right of the names: the card's slot marked, a slot holding another card greyed out, its tooltip naming the slot's ports and card) and the SID card's chip.
 - **Picture**: see "Picture"; the TVC's rear colour switch; full screen now and at start, full raster; what draws (OpenGL or SDL's renderer) and SDL's renderer from the next start.
 - **Sound**: mute, volume (the stream's gain, saved as `volume`), sound output from the next start (`audio`).
 - **Keyboard and joysticks**: symbolic or positional, the key layout and **Edit the layout...** (see "Keyboard editor"), the joystick keys.
@@ -404,17 +404,17 @@ Code: the ROM search in `frontend/common/presets.{hpp,cpp}` (`rom_places`, `find
 | `colour_switch` | `colour`, `bw` | the TVC's rear switch |
 | `disk_card` | yes/no | the HBF card in slot 0 |
 | `disk_rom` | `1.1`, `1.2`, file | its EPROM (VT-DOS 1.1 `hbf.rom`, VT-DOS 1.2 `hbf12.rom`, or an image) |
-| `gamecard` | yes/no | the GameCard in slot 1; gamepads 3 and 4 are its joysticks 3 and 4 |
-| `multichip` | yes/no | the Multichip sound card in slot 2 |
+| `gamecard` | yes/no/0–3 | the GameCard in slot 1 (`yes`) or that slot; gamepads 3 and 4 are its joysticks 3 and 4 |
+| `multichip` | yes/no/0–3 | the Multichip sound card in slot 2 (`yes`) or that slot |
 | `sid_card` | `off`, `6581`, `8580` | the SID card at ports E0h–FFh |
-| `card256` | yes/no | the TVC256k++ in slot 0 or the first free one |
+| `card256` | yes/no/0–3 | the TVC256k++ in slot 0 or the first free one (`yes`), or that slot |
 | `card256_usb` | `none`, `mouse`, folder | its USB port |
 | `card256_flash` | image or folder | its flash drive |
-| `nanosd` | yes/no | the NanoSD in slot 3 |
+| `nanosd` | yes/no/0–3 | the NanoSD in slot 3 (`yes`) or that slot |
 | `nanosd_sd` | `none`, folder | its SD card |
 | `nanosd_menu`, `nanosd_sort` | yes/no; `none`, `name`, `size` | the Nano's EEPROM: the file-select menu at boot and its sort order |
 | `printer` | `off`, `on`, file | the printer (`on` keeps the output in memory) |
-| `serial_card` | yes/no | the serial card in slot 1 |
+| `serial_card` | yes/no/0–3 | the serial card in slot 1 (`yes`) or that slot |
 | `serial_line` | `off`, `on`, `listen[:PORT]`, `connect:PORT` | its cable |
 | `serial_flow` | `rts`, `none` | its flow control |
 | `monitor`, `mcp`, `dzrp`, `gdb` | `off`, `on`, port | the remote servers at start |

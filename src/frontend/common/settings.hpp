@@ -22,6 +22,7 @@ struct Settings {
     std::optional<bool> audio;
     std::optional<bool> full_raster;
     std::optional<bool> disk_card;  // the HBF card in slot 0
+    // gamecard, multichip, card256, nanosd and serial_card are yes, no, or the slot number 0-3 (yes = the card's own slot)
     std::optional<bool> gamecard;   // the GameCard in slot 1
     std::optional<bool> multichip;  // the Multichip sound card in slot 2
     std::optional<std::string> sid_card;  // the SID card at ports E0h-FFh: off, 6581 or 8580
@@ -36,6 +37,11 @@ struct Settings {
     std::optional<bool> serial_card;           // the serial card in slot 1
     std::optional<std::string> serial_line;    // its cable: off, on, listen[:PORT] or connect:PORT
     std::optional<std::string> serial_flow;    // rts or none
+    std::optional<unsigned> gamecard_slot;     // the slot those keys name, when a number
+    std::optional<unsigned> multichip_slot;
+    std::optional<unsigned> card256_slot;
+    std::optional<unsigned> nanosd_slot;
+    std::optional<unsigned> serial_slot;
     std::optional<std::string> disk_rom;       // the disk card's EPROM: 1.1 (hbf.rom), 1.2 (hbf12.rom) or a file (made absolute)
     std::optional<int> volume;                 // 0-100
     std::optional<bool> fullscreen;            // the GUI starts in full screen

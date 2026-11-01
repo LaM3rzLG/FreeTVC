@@ -15,9 +15,16 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 
 ## Mac-javítások
 - **Retina:** a felület kétszeres méretű volt. UI-skála = kijelzőskála / pixelsűrűség (`src/frontend/sdl/main.cpp`).
-  Commit `b5c98b5`, szerző: Deybacsi. Minden a https://github.com/LaM3rzLG/FreeTVC repóba megy (2026-11-01 óta; a FreeTVC-Mac nem használt).
+  Commit `b5c98b5`. Minden a https://github.com/LaM3rzLG/FreeTVC repóba megy (2026-11-01 óta; a FreeTVC-Mac nem használt).
 - **ROM-letöltés:** a "ROM-ok letöltése" a beállított `rom_dir` mappába tölt (ha van), különben a felhasználói
   adatmappába. `.gitignore`: `/roms/`, `/ROMS/`, `.DS_Store`. A felhasználó kipróbálta: a ROM-ok jó helyre mennek.
+
+## Kártyahely választása a felületen (2026-11-01, kérésre)
+- Kártyák menü: minden kártya alatt „Behelyezés kártyahelyre” / „Átrakás másik kártyahelyre” almenü (0-3, portokkal; a
+  foglalt hely szürke, a benne lévő kártya nevével). Beállítások → Gép: 0-3 gombok minden kártya mellett.
+- `freetvc.ini`: `gamecard`, `multichip`, `card256`, `nanosd`, `serial_card` = yes / no / 0-3 (yes = a kártya saját helye).
+- A lemezkártya (HBF) marad a 0-son. MCP-vel ellenőrizve: az ini-ből a megadott helyre kerül, átrakás után az ini frissül.
+  A menük kattintása: a felhasználó próbálja ki.
 
 ## Tudás a repóban
 - `CLAUDE.md` (munkaszabályok), `.claude/skills/freetvc-mac/` (fordítás, futtatás, MCP, időzítésmérés).

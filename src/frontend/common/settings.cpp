@@ -171,6 +171,19 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
             } else {
                 fail(msg("keymap is symbolic or positional"));
             }
+        } else if ((key == "gamecard" || key == "multichip" || key == "card256" || key == "nanosd" || key == "serial_card") &&
+                   value.size() == 1 && value[0] >= '0' && value[0] <= '3') {
+            const auto slot = static_cast<unsigned>(value[0] - '0');
+            (key == "gamecard"    ? s.gamecard
+             : key == "multichip" ? s.multichip
+             : key == "card256"   ? s.card256
+             : key == "nanosd"    ? s.nanosd
+                                  : s.serial_card) = true;
+            (key == "gamecard"    ? s.gamecard_slot
+             : key == "multichip" ? s.multichip_slot
+             : key == "card256"   ? s.card256_slot
+             : key == "nanosd"    ? s.nanosd_slot
+                                  : s.serial_slot) = slot;
         } else if (key == "audio" || key == "full_raster" || key == "disk_card" || key == "gamecard" || key == "multichip" ||
                    key == "card256" || key == "nanosd" || key == "nanosd_menu" || key == "serial_card" || key == "fullscreen" ||
                    key == "dzrp_banks" || key == "mcp_allow_monitor") {

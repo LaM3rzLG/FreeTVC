@@ -282,7 +282,7 @@ The machine's state is kept once a second of machine time for the last 60 s. Hol
 
 ## 5. Expansion cards
 
-The TVC has four card slots (0–3), each with 16 I/O ports at 10h + 10h·n and an 8 KiB memory window at C000h–DFFFh. Putting a card in or taking it out powers the machine on. Two cards cannot share a slot. The GUI starts with the cards that were in when it closed (the `freetvc.ini` keys below). Details of each card are in [cards.md](design/cards.md).
+The TVC has four card slots (0–3), each with 16 I/O ports at 10h + 10h·n and an 8 KiB memory window at C000h–DFFFh. Putting a card in or taking it out powers the machine on. Two cards cannot share a slot. The GUI starts with the cards that were in when it closed, in the same slots (the `freetvc.ini` keys below). In the Cards menu, **Put in slot** (or **Move to slot** while the card is in) under a card chooses its slot; a slot holding another card is greyed out with that card's name. Settings → Machine has the same choice as slot buttons 0–3 beside each card. Details of each card are in [cards.md](design/cards.md).
 
 | Card | Command line | `freetvc.ini` | GUI | ROM | Default slot |
 |---|---|---|---|---|---|
@@ -292,7 +292,7 @@ The TVC has four card slots (0–3), each with 16 I/O ports at 10h + 10h·n and 
 | SID card: a MOS 6581 or 8580 on reSID, at ports E0h–FFh outside the slots (WinTVC's layout; no real card's documentation is known) | `--sid-card [6581\|8580]` (default 6581), `--sid-clock HZ` (100 000–4 000 000, default 985 248) | `sid_card` (`off`, `6581`, `8580`) | Cards → SID card, MOS 6581 / MOS 8580 | none | no slot |
 | TVC256k++ (dikdom): 256 KiB fast RAM over U2/U3, 8 MiB paged RAM, overlay graphics and sprites, drives, mouse, vSID sound, `EXT n` command line (n = its slot) | `--card256 [SLOT]`, `--card256-rom FILE` (12 KiB), `--card256-usb DIR\|mouse\|none`, `--card256-flash FILE\|DIR` | `card256`, `card256_usb`, `card256_flash` | Cards → TVC256k++, with Pendrive folder..., Mouse, USB port empty, Flash drive image... (none of these powers on) | `card256.rom`; optional `card256-font.bin`, `card256-picture.bmp` (power-on screen) and `card256-flash.bin` (drive 2) | 0, else the first free; not on `32k+hbm-1.2` |
 | NanoSD (Vass Sándor): an SD card through an Arduino Nano; file-select menu at power-on (ESC skips it), `EXT 0` command line | `--nanosd [SLOT]`, `--nanosd-rom FILE` (64 KiB), `--nanosd-sd DIR` (a folder as the SD card; brings the card) | `nanosd`, `nanosd_sd`, `nanosd_menu`, `nanosd_sort` | Cards → NanoSD, with SD card folder... and Take the SD card out | `nanosd.rom` | 3 |
-| Serial card (Videoton, an 8251A): BASIC's device #6 (`LIST #6`, `SAVE #6`, `LOAD #6`) | `--serial-card [SLOT]`, `--serial PEER`, `--serial-flow rts\|none`, `--serial-send FILE`, `--serial-capture FILE` (each brings the card) | `serial_card`, `serial_line`, `serial_flow` | Cards → Serial card, with Cable unplugged, Cable to TCP port 6585, Send a file..., Capture to a file... | none | 1, else (GUI menu) the first free |
+| Serial card (Videoton, an 8251A): BASIC's device #6 (`LIST #6`, `SAVE #6`, `LOAD #6`) | `--serial-card [SLOT]`, `--serial PEER`, `--serial-flow rts\|none`, `--serial-send FILE`, `--serial-capture FILE` (each brings the card) | `serial_card`, `serial_line`, `serial_flow` | Cards → Serial card, with Cable unplugged, Cable to TCP port 6585, Send a file..., Capture to a file... | none | 1, else (its GUI switch) the first free |
 | SD Dual cartridge (Sebestyén Pál): two SD sockets, VT-DOS 1.2 and a file manager in flash; in BASIC `EXT 2` starts the VT-DOS command line, `EXT 3` the file manager | `--sddual`, `--sddual-gm`, `--sddual-rom FILE`, `--sddual-flash-write`, `--sd FILE` (microSD), `--sd2 FILE` (SD) | (not kept) | Cards → SD Dual cartridge, with its card images and Take ... out; New SD card image... | `sddual.rom` or `sddual-gm.rom` | the cartridge port |
 | Printer on the main board's Centronics port | `--printer FILE\|on` | `printer` (`off`, `on`, a file) | Cards → Printer port: Printer to a file..., No printer | none | |
 
@@ -346,18 +346,18 @@ Main menu → **Settings...** opens a sheet at the right of the window (below Be
 | `colour_switch` | `colour`, `bw` | `colour` | the TVC's rear switch |
 | `disk_card` | flag | no | |
 | `disk_rom` | `1.1`, `1.2` or a file | `1.1` | |
-| `gamecard` | flag | no | slot 1 |
-| `multichip` | flag | no | slot 2 |
+| `gamecard` | flag or a slot 0–3 | no | `yes` = slot 1 |
+| `multichip` | flag or a slot 0–3 | no | `yes` = slot 2 |
 | `sid_card` | `off`, `6581`, `8580` | `off` | |
-| `card256` | flag | no | slot 0, else the first free |
+| `card256` | flag or a slot 0–3 | no | `yes` = slot 0, else the first free |
 | `card256_usb` | `none`, `mouse` or a folder | `none` | |
 | `card256_flash` | a littlefs image or a folder | (`card256-flash.bin` from the ROM search) | |
-| `nanosd` | flag | no | slot 3 |
+| `nanosd` | flag or a slot 0–3 | no | `yes` = slot 3 |
 | `nanosd_sd` | `none` or a folder | `none` | |
 | `nanosd_menu` | flag | yes | the Nano's EEPROM: file-select menu at power-on |
 | `nanosd_sort` | `none`, `name`, `size` | `none` | the Nano's EEPROM: menu order |
 | `printer` | `off`, `on` or a file | `off` | |
-| `serial_card` | flag | no | slot 1 |
+| `serial_card` | flag or a slot 0–3 | no | `yes` = slot 1 |
 | `serial_line` | `off`, `on`, `listen[:PORT]`, `connect:PORT` | `off` | `on` is saved as `off` (its files are not saved) |
 | `serial_flow` | `rts`, `none` | `rts` | |
 | `monitor`, `mcp`, `dzrp`, `gdb` | `off`, `on` (default port) or a port 1–65535 | `off` | the remote servers at start |
