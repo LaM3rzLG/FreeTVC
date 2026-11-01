@@ -542,6 +542,7 @@ Example client configuration (the `mcpServers` shape most clients use; paths are
 | `evaluate` | a monitor expression |
 | `load_binary` | a host file into memory, optionally jump there |
 | `media` | cassette, autostart, tape, cartridges, MultiCart and SD images, disks, every card, printer, serial line |
+| `card256` | the TVC256k++ card without side effects: `registers` (all 256, decoded), `sprites` (position, colour, phase, flags, data address; pixels as 24 × 21 rows of hex colours), `tiles` (the overlay's 32 × 30 screen codes and colours), `ram` (fast RAM or PSRAM) |
 | `monitor_command` | one text monitor command; refused unless `--mcp-allow-monitor` (or `mcp_allow_monitor = yes`) |
 
 After power-on the TVC's logo waits for a key, so keys typed in the first frames (about 330) are lost; `media autostart` handles this itself. [tools/mcp/README.md](../tools/mcp/README.md) describes checks with the official MCP Inspector; the protocol details are in [debug-and-remote.md](design/debug-and-remote.md).

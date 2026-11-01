@@ -9,6 +9,7 @@
 #include <iterator>
 #include <optional>
 
+#include "core/cards/card256.hpp"
 #include "core/input/keyboard.hpp"
 #include "debug/disassembler.hpp"
 #include "debug/expression.hpp"
@@ -1295,6 +1296,174 @@ json media(Ctx& c, const json& args) {
                        {"serial", media->serial_describe()}});
 }
 
+// The TVC256k++ in the machine and its slot; fails when no slot holds one
+std::pair<const Card256*, unsigned> card256_of(Ctx& c) {
+    for (unsigned slot = 0; slot < kCardSlots; ++slot) {
+        if (const auto* card = dynamic_cast<const Card256*>(c.machine.cards().card(slot))) {
+            return {card, slot};
+        }
+    }
+    fail("no TVC256k++ in the machine (media card256_on puts it in)");
+}
+
+// A fast-RAM address: five hex digits
+std::string hex5(std::uint32_t v) {
+    char buf[8];
+    std::snprintf(buf, sizeof buf, "%05X", v & 0xFFFFF);
+    return buf;
+}
+
+std::string hex_bytes(const Card256& card, std::uint32_t at, unsigned count) {
+    std::string out;
+    const auto ram = card.fast_ram();
+    for (unsigned i = 0; i < count; ++i) {
+        out += (i ? " " : "") + hex2(at + i < ram.size() ? ram[at + i] : 0);
+    }
+    return out;
+}
+
+// design/cards.md "TVC256k++", "Registers" and "Overlay"; everything through peek_register, so nothing is cleared
+json card256_tool(Ctx& c, const json& args) {
+    const auto [card, slot] = card256_of(c);
+    const std::string action = string_arg(args, "action", "registers");
+    const auto reg = [&](unsigned index) { return card->peek_register(static_cast<std::uint8_t>(index)); };
+    const auto word = [&](unsigned index) { return static_cast<unsigned>(reg(index) | reg(index + 1) << 8); };
+    const auto bits16 = [](unsigned v) {
+        std::string out(16, '0');
+        for (unsigned i = 0; i < 16; ++i) {
+            out[i] = (v >> (15 - i)) & 1 ? '1' : '0';
+        }
+        return out;
+    };
+    if (action == "registers") {
+        std::string all;
+        for (unsigned i = 0; i < 256; ++i) {
+            all += (i ? " " : "") + hex2(reg(i));
+        }
+        static constexpr std::array<const char*, 4> kModes{"off", "2-colour text", "16-colour text", "bitmap"};
+        const unsigned mode = reg(0xA0) & 3;
+        return structured(
+            {{"slot", slot},
+             {"ports", hex2(0x10 + 0x10 * slot) + "h-" + hex2(0x1F + 0x10 * slot) + "h"},
+             {"overlay",
+              {{"mode", kModes[mode]},
+               {"A0_mode", hex2(reg(0xA0))},
+               {"A1_screen_base", hex2(reg(0xA1))}, {"screen_address", hex5(reg(0xA1) * 0x400u)},
+               {"A2_colour_base", hex2(reg(0xA2))}, {"colour_address", hex5(reg(0xA2) * 0x400u)},
+               {"A3_font_base", hex2(reg(0xA3))},
+               {"A4_bitmap_base", hex2(reg(0xA4))},
+               {"A5_scroll_x", hex2(reg(0xA5))}, {"A6_scroll_y", hex2(reg(0xA6))}, {"A7_border", hex2(reg(0xA7))},
+               {"A8_line", reg(0xA8)}, {"A9_height", reg(0xA9)}}},
+             {"sprites",
+              {{"9E_sprite_base", hex2(reg(0x9E))},
+               {"enabled", bits16(word(0x90))}, {"foreground", bits16(word(0x92))}, {"colour_mode_16", bits16(word(0x94))},
+               {"collision_sprite_sprite", bits16(word(0x96))}, {"collision_sprite_background", bits16(word(0x98))},
+               {"mask_sprite_sprite", bits16(word(0x9A))}, {"mask_sprite_background", bits16(word(0x9C))},
+               {"irq", card->irq()}}},
+             {"memory",
+              {{"B0_u2_page", hex2(reg(0xB0))}, {"B1_u3_page", hex2(reg(0xB1))},
+               {"psram_u2", hex4(word(0xB2))}, {"psram_u3", hex4(word(0xB4))},
+               {"B7_rom_bank", reg(0xB7)}, {"psram_pages_used", card->psram_pages_used()}}},
+             {"functions",
+              {{"C0_running", hex2(reg(0xC0))}, {"C1_parameters", hex2(reg(0xC1))}, {"C2_result", hex2(reg(0xC2))},
+               {"C6_chain", hex2(reg(0xC6))}, {"C7_bitmap_base", hex2(reg(0xC7))},
+               {"firmware", std::to_string(reg(0xC3)) + "." + std::to_string(reg(0xC4))}}},
+             {"usb", {{"D0_device", hex2(reg(0xD0))}, {"D1_buttons", hex2(reg(0xD1))}, {"D5_mouse_speed", hex2(reg(0xD5))},
+                      {"D6_storage", hex2(reg(0xD6))}}},
+             {"all", all},
+             {"note", "read without side effects: the collision words and mouse movement are not cleared"}});
+    }
+    if (action == "sprites") {
+        const auto only = int_arg(args, "sprite", -1, 0, 15);
+        const bool pixels = bool_arg(args, "pixels", only >= 0);
+        const std::uint32_t base = (reg(0x9E) & 7u) * 0x4000u;
+        const auto ram = card->fast_ram();
+        const auto at = [&](std::uint32_t a) -> std::uint8_t { return a < ram.size() ? ram[a] : 0; };
+        json list = json::array();
+        for (unsigned n = 0; n < 16; ++n) {
+            if (only >= 0 && n != static_cast<unsigned>(only)) {
+                continue;
+            }
+            const bool full = reg(0x80 + n) != 0;
+            const unsigned phase = reg(0x50 + n);
+            const std::uint32_t data = base + phase * (full ? 256u : 64u);
+            json s{{"sprite", n}, {"x", word(n * 2)}, {"y", word(0x20 + n * 2)}, {"colour", reg(0x40 + n) & 0x0F},
+                   {"phase", hex2(phase)}, {"foreground", reg(0x60 + n) != 0}, {"enabled", reg(0x70 + n) != 0},
+                   {"colours", full ? 16 : 2}, {"data_address", hex5(data)}};
+            if (pixels) {
+                // 24 x 21: hex digit = colour, '.' = transparent (colour 8 in 16-colour data, a clear bit in 2-colour data)
+                json rows = json::array();
+                const unsigned colour = reg(0x40 + n) & 0x0F;
+                for (unsigned row = 0; row < 21; ++row) {
+                    std::string line;
+                    for (unsigned k = 0; k < (full ? 12u : 3u); ++k) {
+                        const std::uint8_t b = at(data + row * (full ? 12u : 3u) + k);
+                        if (full) {
+                            for (const unsigned nib : {static_cast<unsigned>(b >> 4), static_cast<unsigned>(b & 0x0F)}) {
+                                line += nib == 8 ? '.' : "0123456789ABCDEF"[nib];
+                            }
+                        } else {
+                            for (unsigned bit = 0; bit < 8; ++bit) {
+                                line += (b & (0x80 >> bit)) ? "0123456789ABCDEF"[colour] : '.';
+                            }
+                        }
+                    }
+                    rows.push_back(line);
+                }
+                s["pixels"] = rows;
+                s["bytes"] = hex_bytes(*card, data, full ? 252u : 63u);
+            }
+            list.push_back(std::move(s));
+        }
+        return structured({{"slot", slot}, {"sprite_base", hex2(reg(0x9E))}, {"sprites", list}});
+    }
+    if (action == "tiles") {
+        const std::uint32_t screen = reg(0xA1) * 0x400u;
+        const std::uint32_t colours = reg(0xA2) * 0x400u;
+        const auto rows = static_cast<unsigned>(int_arg(args, "rows", 30, 1, 30));
+        json codes = json::array();
+        json colour_rows = json::array();
+        for (unsigned r = 0; r < rows; ++r) {
+            codes.push_back(hex_bytes(*card, screen + r * 32, 32));
+            colour_rows.push_back(hex_bytes(*card, colours + r * 32, 32));
+        }
+        static constexpr std::array<const char*, 4> kModes{"off", "2-colour text", "16-colour text", "bitmap"};
+        return structured({{"slot", slot}, {"mode", kModes[reg(0xA0) & 3]},
+                           {"screen_address", hex5(screen)},
+                           {"colour_address", hex5(colours)},
+                           {"columns", 32}, {"rows", rows}, {"codes", codes}, {"colours", colour_rows},
+                           {"note", "fast-RAM addresses; colours are IRGB in the low nibble (2-colour text only; 16-colour glyphs carry their own)"}});
+    }
+    if (action == "ram") {
+        const bool psram = bool_arg(args, "psram", false);
+        const auto limit = static_cast<std::int64_t>(psram ? Card256::kPsramSize : Card256::kFastSize);
+        const auto address = static_cast<std::uint32_t>(int_arg(args, "address", 0, 0, limit - 1));
+        const auto length = static_cast<unsigned>(int_arg(args, "length", 256, 1, 0x10000));
+        if (address + length > limit) {
+            fail("the range goes past the end of the " + std::string(psram ? "PSRAM" : "fast RAM"));
+        }
+        std::vector<std::uint8_t> data(length);
+        const auto ram = card->fast_ram();
+        for (unsigned i = 0; i < length; ++i) {
+            data[i] = psram ? card->psram_read(address + i) : ram[address + i];
+        }
+        const std::string format = string_arg(args, "format", "hex");
+        std::string hex;
+        if (format == "hex") {
+            for (unsigned i = 0; i < length; ++i) {
+                hex += (i ? " " : "") + hex2(data[i]);
+            }
+        } else if (format != "base64") {
+            fail("format is hex or base64");
+        }
+        char where[16];
+        std::snprintf(where, sizeof where, "%06X", static_cast<unsigned>(address));
+        return structured({{"slot", slot}, {"memory", psram ? "psram" : "fast"}, {"address", std::string(where)}, {"length", length},
+                           {"format", format}, {"data", format == "hex" ? hex : base64(data)}});
+    }
+    fail("action is registers, sprites, tiles or ram");
+}
+
 json monitor_command(Ctx& c, const json& args) {
     if (!c.options.allow_monitor_command) {
         fail("monitor_command is off; start freeTVC with --mcp-allow-monitor to allow it");
@@ -1419,6 +1588,16 @@ std::vector<Tool> make_tools(Monitor& monitor, const McpOptions& options) {
                              {"language", {{"type", "string"}, {"enum", {"en", "hu", "es"}}}},
                              {"bank", {{"type", "integer"}, {"minimum", 0}, {"maximum", 63}}}}, {"action"}),
                      annotations(false, true, false), bind(media)});
+    tools.push_back({"card256", "TVC256k++ card state", "Inspects dikdom's TVC256k++ card without side effects (collision words and mouse movement are not cleared). registers: every register (all 256 as hex) and the decoded overlay, sprite, memory, function and USB registers; sprites: the 16 sprites' position, colour, phase, flags and data address, with pixels (24 x 21 rows, hex colour digits, '.' transparent) and raw bytes for one sprite or with pixels true; tiles: the overlay's 32 x 30 screen codes and colour bytes from the card's fast RAM (rows: 1-30); ram: read the card's fast RAM (288 KiB; address 0-47FFFh as an integer) or, with psram true, its 8 MiB PSRAM (format hex or base64).",
+                     schema({{"action", {{"type", "string"}, {"enum", {"registers", "sprites", "tiles", "ram"}}}},
+                             {"sprite", {{"type", "integer"}, {"minimum", 0}, {"maximum", 15}}},
+                             {"pixels", {{"type", "boolean"}}},
+                             {"rows", {{"type", "integer"}, {"minimum", 1}, {"maximum", 30}}},
+                             {"address", {{"type", "integer"}, {"minimum", 0}}},
+                             {"length", {{"type", "integer"}, {"minimum", 1}, {"maximum", 65536}}},
+                             {"psram", {{"type", "boolean"}}},
+                             {"format", {{"type", "string"}, {"enum", {"hex", "base64"}}}}}),
+                     annotations(true, false, true), bind(card256_tool)});
     tools.push_back({"monitor_command", "Text monitor command", "Runs one text monitor command (VICE-style; 'help' lists them). Off unless the emulator was started with --mcp-allow-monitor.",
                      schema({{"command", {{"type", "string"}}}}, {"command"}), annotations(false, true, false), bind(monitor_command)});
     return tools;

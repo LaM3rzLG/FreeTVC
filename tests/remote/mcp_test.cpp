@@ -89,7 +89,7 @@ void protocol() {
     EXPECT(request(s, 4, "ping", json::object(), false)["result"].is_object(), "");
 
     json list = request(s, 5, "tools/list", json::object());
-    EXPECT(list["result"]["tools"].size() == s.tool_count() && s.tool_count() == 20 && list["result"]["ttlMs"].is_number(), list.dump());
+    EXPECT(list["result"]["tools"].size() == s.tool_count() && s.tool_count() == 21 && list["result"]["ttlMs"].is_number(), list.dump());
     json legacy_list = request(s, 6, "tools/list", json::object(), false);
     EXPECT(legacy_list["result"]["tools"] == list["result"]["tools"] && !legacy_list["result"].contains("resultType"), "");
 
@@ -156,6 +156,8 @@ void protocol() {
     EXPECT(r["content"][0]["type"] == "image" && r["content"][0]["data"].get<std::string>().rfind("iVBORw0KGgo", 0) == 0, r.dump().substr(0, 200));
     r = call(s, "io_state", json::object());
     EXPECT(r["structuredContent"]["paging"]["port02"] == "B0", r.dump());
+    r = call(s, "card256", {{"action", "registers"}});
+    EXPECT(r["isError"] == true && r["content"][0]["text"].get<std::string>().find("no TVC256k++") != std::string::npos, r.dump());
     r = call(s, "control", {{"action", "resume"}});
     EXPECT(r["structuredContent"]["state"] == "running" && !mon.active(), r.dump());
     r = call(s, "control", {{"action", "pause"}});

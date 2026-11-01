@@ -5,6 +5,7 @@
 ### New
 
 - The slot of each expansion card can be chosen in the GUI ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): in the Cards menu, *Put in slot* (or *Move to slot* while the card is in) under the GameCard, the Multichip sound card, the TVC256k++, the NanoSD and the serial card lists slots 0–3 with their ports, a slot holding another card greyed out with its name; Settings → Machine has slot buttons 0–3 beside each card. `freetvc.ini` keeps the slot (`gamecard = 3`; `yes` is the card's own slot). The HBF disk card stays in slot 0.
+- MCP tool `card256` ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): the TVC256k++ card's state for debugging, read without side effects: every register, decoded; the 16 sprites with their pixels; the overlay's 32 × 30 tile codes and colours; the card's fast RAM and PSRAM.
 
 ## 1.0.1 — 2026-10-31
 

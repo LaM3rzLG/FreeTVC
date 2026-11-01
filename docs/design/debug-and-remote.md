@@ -320,6 +320,7 @@ Tool calls run on the host thread. In the GUI a long `run` holds the window unti
 | `evaluate` | a monitor expression |
 | `load_binary` | a host file into memory, optionally jump there |
 | `media` | cassette, tape deck, cartridges (including `cart_build`), disks, every card and its media, the printer and the serial line ([media.md](media.md), [cards.md](cards.md)) |
+| `card256` | the TVC256k++ card without side effects: `registers` (all 256, decoded), `sprites` (position, colour, phase, flags, data address; pixels as 24 × 21 rows of hex colours), `tiles` (the overlay's 32 × 30 screen codes and colours), `ram` (fast RAM or PSRAM) |
 | `monitor_command` | one text monitor command; refused unless `--mcp-allow-monitor` (passthrough is opt-in) |
 
 - **Arguments.** Address arguments are JSON integers (decimal) or monitor expression strings (hex default, symbols, `BANK:offset`).

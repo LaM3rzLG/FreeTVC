@@ -26,6 +26,10 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 - A lemezkártya (HBF) marad a 0-son. MCP-vel ellenőrizve: az ini-ből a megadott helyre kerül, átrakás után az ini frissül.
   A menük kattintása: a felhasználó próbálja ki.
 
+## MCP `card256` eszköz (2026-11-01, issue #1 5. pont)
+- `registers` / `sprites` (`sprite`, `pixels`) / `tiles` (`rows`) / `ram` (`address`, `length`, `psram`, `format`); mellékhatás
+  nélkül (peek_register). Kipróbálva MCP-n: bekapcsolás utáni sapka-sprite pixelre egyezik a képpel, ütközés nem törlődik.
+
 ## Tudás a repóban
 - `CLAUDE.md` (munkaszabályok), `.claude/skills/freetvc-mac/` (fordítás, futtatás, MCP, időzítésmérés).
 - `tools/mac/`: `build_mac.sh` (fordítás, teszt nélkül), `mcp.sh` (egy MCP-hívás), `mcp_pace.py` (valós idejű
