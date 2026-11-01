@@ -32,7 +32,12 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 
 ## Issue #1 állapota (2026-11-02)
 - 1. kártyahely a felületen: KÉSZ (ed4863b) · 5. MCP `card256`: KÉSZ (a3647ee)
-- 2. videófelvétel, 3. billentyűzetkiosztás megjelenítése: hátravan
+- 2. videófelvétel: **KÉSŐBBRE** (2026-11-02). Irány: FFmpeg (a freeTVC a képkockákat és a hangot a külön telepített
+  `ffmpeg`-nek adja át -> MP4). Minta: az ep128emu beépített AVI-írója (`~/Documents/TVC-emu/ep128emu/src/videorec.cpp`,
+  RLE8/YV12, GPL-2+ -> átvehető). Tesztelni csak Windows-on és Mac ARM-on tudunk.
+- 3. billentyűzetkiosztás: **KÉSŐBBRE** (2026-11-02). A rajz már megvan (`keyboard_editor.cpp`, a TVC-gombok alatt a
+  gép-gombok); hiányzik: csak megnézős mód menüből/gyorsbillentyűvel (~1-2 óra), Mac-es alapkiosztás `mac.keys`
+  (a MacBookon nincs jobb Ctrl = FIRE és számbillentyűzet = 2. joystick; ~1 óra), esetleg gamepad (~1 óra).
 - 4. About + „Bronze” sötét betű: **ELVETVE** (a felhasználó döntése, 2026-11-02)
 
 ## Tudás a repóban
