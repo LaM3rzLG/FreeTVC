@@ -48,10 +48,10 @@ Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC gépp
 - Másolatok (rewind) egy közös 2dfx-eszközön osztoznak (8 MiB RAM nem másolódik) → a rewind a 2dfx-et nem állítja vissza.
 - Kipróbálva (headless, 64k+-2.2): Cube (tvc.homeserver.hu `Cube_2dfx.zip`) — forgó kocka hat színnel, egyezik a
   honlap képével.
-- **Hiba**: Wolf 3D (`Wolf3d_2dfx.zip`, `Wolf2dfx.cas` + .bin-ek) NanoSD-vel (`--nanosd 3 --nanosd-sd MAPPA`) is
-  elakad: `WMIDI.BIN` megnyitása után a CPU 9300h–9400h körül pörög (pc 9411 / 934F), kép: piros keret, fekete papír,
-  felül csonka sor. Következő lépés: `--save-snapshot` a 3000. képkockánál, `--snapshot ... --monitor`, `d 9340 9420`;
-  a játék a `JOY+SN` (GameCard) kártyát is keresi → `--gamecard`-dal is kipróbálni.
+- Wolf 3D (`Wolf3d_2dfx.zip`) megy (2026-11-06, Mac, headless): címkép és játék (HUD, fegyver). A hiba nem a 2dfx-ben
+  volt: a gazdagépes kazetta a nyers `.bin` adatfájlokat CAS-nak nézte, és 144 bájtot levágott belőlük. Most a nem
+  `.CAS` kiterjesztésű fájlt bájtra pontosan, pufferelt fájlként adja, ahogy a NanoSD kártya (`host_cassette.cpp`).
+  A 9300h–9400h körüli ciklus csak a SPACE/ESC-re váró billentyűolvasás volt.
 - Hiányzik: GUI (Kártyák menü, Beállítások, ini `twodfx`), MCP `media` 2dfx, mentés (`twodfx_emu_save_snapshot`),
   `data/lang/hu.po` szövegek, docs (cards.md „2dfx” fejezet, status.md), ellenőrzés a GUI-ban.
 - A Windows-gépen az Intelligens alkalmazásvezérlés (Smart App Control) letiltja a friss, aláíratlan fordítást.

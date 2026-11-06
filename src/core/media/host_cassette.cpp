@@ -27,6 +27,22 @@ constexpr std::uint8_t kErrNotOpen = 0xE9;
 constexpr std::uint8_t kErrOpen = 0xEB;
 constexpr std::uint8_t kErrEof = 0xEC;
 
+// [NANOSD] the card serves a file that is not .CAS byte for byte (the 2dfx Wolf3D reads its raw .bin data this way).
+// A .CAS file keeps its header even with an odd type byte (seen in the wild). `found` has no extension for a .CAS match.
+bool has_cas_header(std::string_view found) {
+    const std::size_t dot = found.rfind('.');
+    if (dot != std::string_view::npos) {
+        std::string ext(found.substr(dot));
+        for (char& c : ext) {
+            c = static_cast<char>(c >= 'a' && c <= 'z' ? c - 32 : c);
+        }
+        if (ext != ".CAS") {
+            return false;
+        }
+    }
+    return true;
+}
+
 // The OS runs every function with U0, U1, U2 and SYS paged in (port 02h = 70h, rom.md §4)
 class OsPaging {
 public:
@@ -297,7 +313,11 @@ std::optional<std::uint8_t> HostCassette::open_read(Machine& m, std::uint16_t& d
         file = attached_;
         found = attached_name_;
     } else if (folder_) {
-        if (const auto bytes = folder_->read(name, found)) {
+        if (const auto bytes = folder_->read(name, found); bytes && !has_cas_header(found)) {
+            file = CasFile{};
+            file->buffered = true;
+            file->stream = *bytes;
+        } else if (bytes) {
             std::string error;
             file = parse_cas(*bytes, error);
             if (!file) {
