@@ -35,6 +35,9 @@ ScreenRect draw_screen(ImDrawList* draw, ImTextureID screen, bool full_raster, I
                        const PictureHook* picture = nullptr);
 
 // A row of deck items in the current window: text on the deck, the key colour under the mouse
+// The REC key's width; the camera key is as wide
+float rec_width(ImFont* font, float size, float height);
+
 class DeckRow {
 public:
     DeckRow(const Skin& skin, float height) : skin_(skin), height_(height) {}
@@ -54,10 +57,20 @@ public:
     bool tvc(const char* id, Colour colour);
     // The screenshot key: corner marks around a camera, as wide as the REC key
     bool camera(const char* id, ImFont* font, float size, Colour colour);
+    // Line icons in the machine key's style, drawn on a 45-high grid
+    bool keyboard(const char* id, Colour colour);
+    // A speaker with sound waves; `slashed` crosses it out in the `slash` colour
+    bool speaker(const char* id, Colour colour, bool slashed, Colour slash);
+    bool cassette(const char* id, Colour colour);
+    bool floppy(const char* id, Colour colour);  // a 5.25" disk
+    // A cartridge lying on its side, its contact edge to the right, and `text` after it, as one key
+    bool cartridge(const char* id, ImFont* font, float size, const char* text, Colour colour);
     void draw_hover(ImVec2 pos, ImVec2 size) const;
     float height() const { return height_; }
 
 private:
+    // An icon key `grid_w` grid units wide; returns the drawing's origin, `g` = pixels per grid unit
+    ImVec2 icon_key(const char* id, float grid_w, bool& clicked, float& g);
     const Skin& skin_;
     float height_;
 };

@@ -701,6 +701,12 @@ msgstr "%s · %llu hívás"
 msgid "Machine"
 msgstr "Gép"
 
+msgid "Version"
+msgstr "Verzió"
+
+msgid "Cart"
+msgstr "Cart"
+
 #: src/frontend/sdl/bench_view.cpp:1672
 msgid "Paging"
 msgstr "Lapozás"

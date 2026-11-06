@@ -1468,6 +1468,32 @@ int main(int argc, char** argv) {
         }
     }
     monitor->set_media(&tape);
+    // The machine picture (about/tvc64kplus.png) covers the boot at start, at power on and when a card changes: at least
+    // kSplashNs from the first frame that shows it, until the machine draws something (a 64k boots ~5 s black), then it fades
+    constexpr std::uint64_t kSplashNs = 2'500'000'000;
+    constexpr std::uint64_t kSplashMaxNs = 10'000'000'000;
+    constexpr std::uint64_t kSplashFadeNs = 500'000'000;
+    ImTextureID splash = ImTextureID_Invalid;
+    ImVec2 splash_size{};
+    if (SDL_Surface* png = SDL_LoadPNG((base_dir / "about" / "tvc64kplus.png").string().c_str())) {
+        if (SDL_Surface* argb = SDL_ConvertSurface(png, SDL_PIXELFORMAT_ARGB8888)) {
+            splash = display->create_texture(argb->w, argb->h);
+            display->update_texture(splash, argb->pixels, argb->pitch);
+            splash_size = {static_cast<float>(argb->w), static_cast<float>(argb->h)};
+            SDL_DestroySurface(argb);
+        }
+        SDL_DestroySurface(png);
+    }
+    bool splash_on = splash != ImTextureID_Invalid;
+    std::uint64_t splash_from_ns = 0;  // the first frame that showed it; 0 = not shown yet
+    std::uint64_t splash_fade_ns = 0;  // when the fade began; 0 = not yet
+    bool splash_drawn = false;         // the machine has put something other than black on the screen
+    const auto show_machine = [&] {
+        splash_on = splash != ImTextureID_Invalid;
+        splash_from_ns = 0;
+        splash_fade_ns = 0;
+        splash_drawn = false;
+    };
     const auto held = [&] { return monitor->active(); };
     // Bench's Console is a local hub client; the GUI's own monitor commands are echoed there too (design/ui.md "Bench", 7d)
     const int console_client = hub->attach_local();
@@ -1583,6 +1609,7 @@ int main(int argc, char** argv) {
         if (tape.disk_card_on() && tape.disk_card(false, why) && tape.disk_card(true, why)) {
             debugger->cancel_step();
             monitor->machine_changed();
+            show_machine();
             notice.show_text(false, N_("the disk card has its new EPROM; the machine powered on"));
         } else if (!why.empty()) {
             notice.set(why, true);
@@ -1675,6 +1702,7 @@ int main(int argc, char** argv) {
         }
         debugger->cancel_step();
         monitor->machine_changed();
+        show_machine();
         input.machine_replaced();
         notice.show(false, "%s; powered on", tape.cart_describe().c_str());
     };
@@ -1689,6 +1717,7 @@ int main(int argc, char** argv) {
         if (!card_was_on) {
             debugger->cancel_step();
             monitor->machine_changed();
+            show_machine();
             input.machine_replaced();
         }
         const std::string name = tape.disk_name(drive);
@@ -1709,6 +1738,7 @@ int main(int argc, char** argv) {
         if (!cart_was_in) {
             debugger->cancel_step();
             monitor->machine_changed();
+            show_machine();
             input.machine_replaced();
         }
         if (!tape.sd_insert(socket, path, why)) {
@@ -2218,11 +2248,36 @@ int main(int argc, char** argv) {
         ImGui::NewFrame();
         freetvc::sdl::PlayStatus status;
         status.screen = texture;
+        if (splash_on && !bench) {
+            const std::uint64_t t = SDL_GetTicksNS();
+            if (splash_from_ns == 0) {
+                splash_from_ns = t;
+            }
+            if (!splash_drawn && !warping) {
+                const auto& px = machine.framebuffer().pixels;
+                splash_drawn = std::any_of(px.begin(), px.end(), [](std::uint8_t c) { return c != 0 && c != freetvc::Framebuffer::kBlank; });
+            }
+            if (splash_fade_ns == 0 && !warping && t - splash_from_ns >= kSplashNs && (splash_drawn || t - splash_from_ns >= kSplashMaxNs)) {
+                splash_fade_ns = t;
+            }
+            const float alpha = splash_fade_ns == 0 ? 1.0f : 1.0f - static_cast<float>(t - splash_fade_ns) / static_cast<float>(kSplashFadeNs);
+            if (alpha <= 0.0f) {
+                splash_on = false;
+            } else {
+                status.splash = splash;
+                status.splash_size = splash_size;
+                status.splash_alpha = alpha;
+            }
+        } else if (bench) {
+            splash_on = false;
+        }
         status.presets = freetvc::kPresets;
         status.preset = preset_index;
         status.paused = stopped;
         status.speed_percent = speed_percent;
         status.mapping = input.mapping();
+        status.layouts = keymaps;
+        status.layout = input.keymap().name;
         status.audio = audio != nullptr;
         status.muted = muted;
         status.fullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
@@ -2487,6 +2542,14 @@ int main(int argc, char** argv) {
                 use_keymap(*shipped);
             }
         }
+        if (actions.edit_layout) {
+            keyboard_editor.open();
+            settings_view.close();
+        }
+        if (!actions.layout.empty()) {
+            use_keymap(actions.layout);
+            save_settings({{"keys", input.keymap().name}});
+        }
         if (sheet_actions.edit_layout) {
             keyboard_editor.open();
             settings_view.close();  // the editor wants the window's width
@@ -2617,6 +2680,7 @@ int main(int argc, char** argv) {
                 machine.configure(*new_config);
                 if (monitor) {
                     monitor->machine_changed();
+                    show_machine();
                 }
                 if (mcp) {
                     mcp->set_machine_name(std::string(wanted.name));
@@ -2656,6 +2720,7 @@ int main(int argc, char** argv) {
             if (rom_download.ok && tape.refresh_card_roms()) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 notice.show_text(false, "ROMs downloaded; the cards took theirs and the machine powered on");
             }
@@ -2666,6 +2731,7 @@ int main(int argc, char** argv) {
         if (actions.power_cycle) {
             tape.media().cancel();
             machine.power_on();
+            show_machine();
             input.machine_replaced();
             notice.show_text(false, "power cycled");
         }
@@ -2714,6 +2780,7 @@ int main(int argc, char** argv) {
             if (tape.card256(on, freetvc::kCardSlots, error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 if (on) {
                     notice.show(false, "TVC256k++ in slot %d (EXT %d); powered on", tape.card256_slot(), tape.card256_slot());
@@ -2763,6 +2830,7 @@ int main(int argc, char** argv) {
             if (tape.gamecard(on, slot, error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 if (on) {
                     notice.show(false, "GameCard in slot %d; powered on", static_cast<int>(slot));
@@ -2781,6 +2849,7 @@ int main(int argc, char** argv) {
             if (tape.nanosd(on, freetvc::kNanoSdSlot, error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 if (on) {
                     notice.show(false, "NanoSD in slot %d; powered on", static_cast<int>(freetvc::kNanoSdSlot));
@@ -2799,6 +2868,7 @@ int main(int argc, char** argv) {
             if (tape.sddual(on, false, error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 notice.show_text(false, on ? N_("SD Dual in; powered on (EXT 2: VT-DOS CLI, EXT 3: file manager)") : N_("SD Dual out; powered on"));
             } else {
@@ -2868,6 +2938,7 @@ int main(int argc, char** argv) {
             if (tape.serial_card(on, slot, error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 if (on) {
                     notice.show(false, "serial card in slot %d; powered on", static_cast<int>(slot));
@@ -2905,6 +2976,7 @@ int main(int argc, char** argv) {
             if (tape.sid_card(model, error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 if (actions.sid_card == 0) {
                     notice.show_text(false, "SID card out; powered on");
@@ -2920,6 +2992,7 @@ int main(int argc, char** argv) {
             if (tape.twodfx(on, freetvc::kCardSlots, error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 if (on) {
                     notice.show(false, "2dfx graphics card in slot %d; powered on", tape.twodfx_slot());
@@ -2935,6 +3008,7 @@ int main(int argc, char** argv) {
             if (tape.multichip(on, freetvc::kMultichipSlot, error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 if (on) {
                     notice.show(false, "Multichip sound card in slot %d; powered on", static_cast<int>(freetvc::kMultichipSlot));
@@ -2969,6 +3043,7 @@ int main(int argc, char** argv) {
             if (take_out(static_cast<unsigned>(actions.slot_clear))) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 notice.show(false, "slot %d empty; powered on", actions.slot_clear);
             } else {
@@ -3026,6 +3101,7 @@ int main(int argc, char** argv) {
             if (placed) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 for (std::string& line : tape.take_messages()) {
                     notice.set(std::move(line), true);
@@ -3038,6 +3114,7 @@ int main(int argc, char** argv) {
             if (tape.disk_card(!tape.disk_card_on(), error)) {
                 debugger->cancel_step();
                 monitor->machine_changed();
+                show_machine();
                 input.machine_replaced();
                 notice.show_text(false, tape.disk_card_on() ? N_("disk card in; powered on") : N_("disk card out; powered on"));
             } else {
@@ -3068,6 +3145,7 @@ int main(int argc, char** argv) {
             tape.cart_remove();
             debugger->cancel_step();
             monitor->machine_changed();
+            show_machine();
             input.machine_replaced();
             notice.show_text(false, "cartridge removed; powered on");
         }
@@ -3201,6 +3279,9 @@ int main(int argc, char** argv) {
     }
     display->destroy_texture(vram_texture);
     display->destroy_texture(texture);
+    if (splash != ImTextureID_Invalid) {
+        display->destroy_texture(splash);
+    }
     about_view.release(*display);
     display.reset();  // its ImGui backends and the window go with it
     ImGui::DestroyContext();

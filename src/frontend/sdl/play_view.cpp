@@ -22,12 +22,14 @@ constexpr const char* kMachineMenu = "##machine_menu";
 constexpr const char* kCardsMenu = "##cards_menu";
 constexpr const char* kTapeMenu = "##tape_menu";
 constexpr const char* kDiskMenu = "##disk_menu";
+constexpr const char* kCartMenu = "##cart_menu";
+constexpr const char* kKeysMenu = "##keys_menu";
 constexpr const char* kRecordMenu = "##record_menu";
 constexpr const char* kShotMenu = "##shot_menu";
 
 // Opens `id` above the strip at window x `anchor`; true while it is open (EndPopup is the caller's)
-bool begin_menu(const char* id, float anchor, float strip_top, PlayActions& actions) {
-    ImGui::SetNextWindowPos({anchor, strip_top}, ImGuiCond_Appearing, {0.0f, 1.0f});
+bool begin_menu(const char* id, float anchor, float strip_top, PlayActions& actions, float pivot_x = 0.0f) {
+    ImGui::SetNextWindowPos({anchor, strip_top}, ImGuiCond_Appearing, {pivot_x, 1.0f});
     if (!ImGui::BeginPopup(id)) {
         return false;
     }
@@ -117,7 +119,9 @@ int preset_of(const PlayStatus& status, Model model) {
 
 void draw_machine_menu(const PlayStatus& status, PlayActions& actions) {
     // The factory machines: the board, and its BASIC beside it; the HBM RAM card is in the Cards menu
-    ImGui::SeparatorText(tr("Machine"));
+    ImGui::PushStyleVar(ImGuiStyleVar_SeparatorTextAlign, {0.5f, 0.5f});
+    ImGui::SeparatorText(tr("Version"));
+    ImGui::PopStyleVar();
     const Model current = status.presets[status.preset].model;
     for (std::size_t i = 0; i < status.presets.size(); ++i) {
         const Preset& p = status.presets[i];
@@ -327,7 +331,7 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
     }
 }
 
-// The main board's printer port and the cartridge port
+// The main board's printer port
 void draw_ports_menu(const PlayStatus& status, PlayActions& actions) {
     char item[160];
     // design/machine.md "Printer port": the main board's own port; nothing plugged in by default
@@ -343,6 +347,11 @@ void draw_ports_menu(const PlayStatus& status, PlayActions& actions) {
         ImGui::SetTooltip("%s", tr("As on the real machine: an LPRINT waits after its first character until STOP (CTRL+ESC)"));
     }
 
+}
+
+// The cartridge port
+void draw_cart_menu(const PlayStatus& status, PlayActions& actions) {
+    char item[160];
     // design/media.md "Cartridges": inserting or removing one powers the machine on
     ImGui::SeparatorText(tr("Cartridge"));
     actions.cart_insert |= ImGui::MenuItem(tr("Insert cartridge..."), nullptr, false, status.can_browse);
@@ -465,25 +474,26 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     }
     const float cards_x = ImGui::GetItemRectMin().x;
 
-    // Nameplate: "free" in the muted colour, "TVC" like the case lettering
     const float pad = ImGui::GetStyle().FramePadding.x;
     const float strip_ratio = skin.font_strip_size > 0.0f ? skin.font_strip_size / skin.font_ui_size : 1.0f;
     const float ui_px = skin.font_ui_size * strip_ratio * scale;
     const float data_px = skin.font_data_size * strip_ratio * scale;
-    const ImVec2 free_size = fonts.ui->CalcTextSizeA(ui_px, FLT_MAX, 0.0f, "free");
-    const ImVec2 tvc_size = fonts.strong->CalcTextSizeA(ui_px, FLT_MAX, 0.0f, "TVC");
-    ImGui::SameLine(0.0f, 0.0f);
-    const ImVec2 plate_pos = ImGui::GetCursorScreenPos();
-    const ImVec2 plate_size{free_size.x + tvc_size.x + pad * 2.0f, strip_h};
-    if (opens(ImGui::InvisibleButton("##nameplate", plate_size), kMainMenu)) {
-        ImGui::OpenPopup(kMainMenu);
-    }
-    strip.draw_hover(plate_pos, plate_size);
     ImDrawList* draw = ImGui::GetWindowDrawList();
-    const float text_y = plate_pos.y + (strip_h - free_size.y) / 2.0f;
-    draw->AddText(fonts.ui, ui_px, {plate_pos.x + pad, text_y}, to_imgui(skin.muted), "free");
-    draw->AddText(fonts.strong, ui_px, {plate_pos.x + pad + free_size.x, text_y}, to_imgui(skin.label), "TVC");
 
+    // The cartridge port, beside the slots: its name after the key while one is in
+    std::string cart_name(status.sddual ? std::string_view{"SD Dual"} : status.cartridge);
+    if (const std::size_t dot = cart_name.rfind('.'); !status.sddual && dot != std::string::npos && dot > 0) {
+        cart_name.resize(dot);
+    }
+    const bool cart_in = !cart_name.empty();
+    if (opens(strip.cartridge("##cart", fonts.ui, ui_px, cart_in ? cart_name.c_str() : tr("Cart"), cart_in ? skin.label : skin.muted),
+              kCartMenu)) {
+        ImGui::OpenPopup(kCartMenu);
+    }
+    const float cart_x = ImGui::GetItemRectMin().x;
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s: %s", tr("Cartridge"), cart_in ? cart_name.c_str() : tr("empty"));
+    }
     strip.divider();
     const std::string preset(status.presets.empty() ? std::string_view{} : status.presets[status.preset].name);
     if (opens(strip.tvc("##preset", skin.label), kMachineMenu)) {
@@ -495,88 +505,50 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     }
 
     strip.divider();
-    char state[32];
-    if (status.paused) {
-        std::snprintf(state, sizeof state, "%s", tr("paused"));
-    } else if (status.speed_percent < 0.0) {
-        std::snprintf(state, sizeof state, "%s", tr("running"));
-    } else {
-        std::snprintf(state, sizeof state, "%3.0f %%", status.speed_percent);
-    }
-    const Colour state_colour = status.paused ? skin.role(Role::Notice).on_case : skin.label;
-    actions.toggle_pause |= status.paused ? strip.button("##state", state, fonts.ui, ui_px, state_colour)
-                                          : strip.button("##state", state, fonts.data, data_px, state_colour);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", status.paused ? tr("Paused: click or Pause to resume")
-                                              : tr("Speed in percent of a real TVC: click or Pause to pause"));
-    }
-
-    strip.divider();
     const bool symbolic = status.mapping == KeyMapping::Symbolic;
-    if (strip.button("##mapping", symbolic ? tr("symbolic keys") : tr("positional keys"), fonts.ui, ui_px, skin.label)) {
-        actions.mapping = static_cast<int>(symbolic ? KeyMapping::Positional : KeyMapping::Symbolic);
+    if (opens(strip.keyboard("##mapping", skin.label), kKeysMenu)) {
+        ImGui::OpenPopup(kKeysMenu);
     }
+    const float keys_x = ImGui::GetItemRectMin().x;
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", symbolic ? tr("PC characters type the same TVC characters: click for positional")
-                                         : tr("PC keys sit where the Hungarian TVC legends are: click for symbolic"));
+        ImGui::SetTooltip("%s", symbolic ? tr("symbolic keys") : tr("positional keys"));
     }
 
     strip.divider();
     const char* sound = !status.audio ? tr("no sound") : status.muted ? tr("muted") : tr("sound");
-    if (strip.button("##sound", sound, fonts.ui, ui_px, status.audio && !status.muted ? skin.label : skin.muted) && status.audio) {
+    if (strip.speaker("##sound", status.audio && !status.muted ? skin.label : skin.muted, !status.audio || status.muted,
+                      skin.role(Role::Exec).on_case) &&
+        status.audio) {
         actions.toggle_mute = true;
     }
-    strip.divider();
-
-    // The play/stop key, before the deck: play with no tape picks one first
-    const bool stop_key = status.tape_loaded && status.tape_state != "stop";
-    if (strip.transport("##tape_key", stop_key, stop_key && status.tape_moving ? skin.role(Role::Notice).on_case : skin.label)) {
-        if (stop_key) {
-            actions.tape_stop = true;
-        } else if (status.tape_loaded) {
-            actions.tape_play = true;
-        } else if (status.can_browse) {
-            actions.tape_insert_play = true;
-        }
-    }
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", stop_key ? tr("Stop") : status.tape_loaded ? tr("Play") : tr("Insert a tape and play it"));
+        ImGui::SetTooltip("%s", sound);
     }
-
-    // The deck, always there: state and counter, in the notice colour while the tape moves; the item opens the Tape menu
-    if (status.tape_loaded) {
-        char tape[48];
-        std::snprintf(tape, sizeof tape, "%s %.*s %.*s", tr("tape"), static_cast<int>(status.tape_state.size()), status.tape_state.data(),
-                      static_cast<int>(status.tape_counter.size()), status.tape_counter.data());
-        const Colour colour = status.tape_moving ? skin.role(Role::Notice).on_case : skin.label;
-        if (opens(strip.button("##tape", tape, fonts.data, data_px, colour), kTapeMenu)) {
-            ImGui::OpenPopup(kTapeMenu);
-        }
-        if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("%s", status.tape_moving ? tr("The tape moves: PLAY or RECORD is down and the motor is on")
-                                                       : tr("The tape deck; the ROM turns the motor on and off"));
-        }
-    } else if (opens(strip.button("##tape", tr("no tape"), fonts.ui, ui_px, skin.muted), kTapeMenu)) {
-        ImGui::OpenPopup(kTapeMenu);
-    }
-    const float tape_x = ImGui::GetItemRectMin().x;
     strip.divider();
 
     // The drive light: in the notice colour while the controller works with a drive; the item opens the Disk menu
-    float disk_x = tape_x;
-    if (status.disk_card) {
-        char disk[32];
-        if (status.disk_busy >= 0) {
-            std::snprintf(disk, sizeof disk, "%s %c:", tr("disk"), 'A' + status.disk_busy);
-        } else {
-            std::snprintf(disk, sizeof disk, "%s", tr("disk"));
+    float disk_x = 0.0f;
+    {
+        Colour colour = status.disk_busy >= 0 ? skin.role(Role::Notice).on_case : skin.label;
+        if (!status.disk_card) {
+            colour = skin.muted;
+            colour.a = static_cast<std::uint8_t>(colour.a * 0.45f);
         }
-        if (opens(strip.button("##disk", disk, fonts.data, data_px, status.disk_busy >= 0 ? skin.role(Role::Notice).on_case : skin.label),
-                  kDiskMenu)) {
+        bool disk_hovered = false;
+        if (opens(strip.floppy("##disk", colour), kDiskMenu)) {
             ImGui::OpenPopup(kDiskMenu);
         }
         disk_x = ImGui::GetItemRectMin().x;
-        if (ImGui::IsItemHovered()) {
+        disk_hovered |= ImGui::IsItemHovered();
+        if (status.disk_busy >= 0) {
+            char drive[8];
+            std::snprintf(drive, sizeof drive, "%c:", 'A' + status.disk_busy);
+            if (opens(strip.button("##disk_drive", drive, fonts.data, data_px, colour), kDiskMenu)) {
+                ImGui::OpenPopup(kDiskMenu);
+            }
+            disk_hovered |= ImGui::IsItemHovered();
+        }
+        if (disk_hovered && status.disk_card) {
             std::string drives;
             for (std::size_t d = 0; d < status.disks.size(); ++d) {
                 drives += std::string(1, static_cast<char>('A' + d)) + ": " +
@@ -588,7 +560,94 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
         strip.divider();
     }
 
-    // REC and the camera: a click acts, a right click opens their menu
+    // The deck, always there: state and counter, in the notice colour while the tape moves; the item opens the Tape menu
+    if (status.tape_loaded) {
+        char tape[48];
+        std::snprintf(tape, sizeof tape, "%s %.*s %.*s", tr("tape"), static_cast<int>(status.tape_state.size()), status.tape_state.data(),
+                      static_cast<int>(status.tape_counter.size()), status.tape_counter.data());
+        const Colour colour = status.tape_moving ? skin.role(Role::Notice).on_case : skin.label;
+        if (opens(strip.cassette("##tape_icon", colour), kTapeMenu)) {
+            ImGui::OpenPopup(kTapeMenu);
+        }
+        if (opens(strip.button("##tape", tape, fonts.data, data_px, colour), kTapeMenu)) {
+            ImGui::OpenPopup(kTapeMenu);
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", status.tape_moving ? tr("The tape moves: PLAY or RECORD is down and the motor is on")
+                                                       : tr("The tape deck; the ROM turns the motor on and off"));
+        }
+    } else {
+        Colour faded = skin.muted;
+        faded.a = static_cast<std::uint8_t>(faded.a * 0.45f);
+        if (opens(strip.cassette("##tape_icon", faded), kTapeMenu)) {
+            ImGui::OpenPopup(kTapeMenu);
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", tr("no tape"));
+        }
+    }
+    const float tape_x = ImGui::GetItemRectMin().x;
+    // The play/stop key after the deck: grey and idle until a tape is in
+    const bool stop_key = status.tape_loaded && status.tape_state != "stop";
+    const Colour key_colour = !status.tape_loaded ? skin.rib : stop_key && status.tape_moving ? skin.role(Role::Notice).on_case : skin.label;
+    if (strip.transport("##tape_key", stop_key, key_colour) && status.tape_loaded) {
+        if (stop_key) {
+            actions.tape_stop = true;
+        } else {
+            actions.tape_play = true;
+        }
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", stop_key ? tr("Stop") : status.tape_loaded ? tr("Play") : tr("no tape"));
+    }
+
+    strip.divider();
+
+    const float last_x = ImGui::GetItemRectMax().x;
+
+    // Nameplate at the right end: "free" in the muted colour, "TVC" like the case lettering
+    const ImVec2 free_size = fonts.ui->CalcTextSizeA(ui_px, FLT_MAX, 0.0f, "free");
+    const ImVec2 tvc_size = fonts.strong->CalcTextSizeA(ui_px, FLT_MAX, 0.0f, "TVC");
+    const ImVec2 plate_size{free_size.x + tvc_size.x + pad * 4.0f, strip_h};
+    const ImVec2 plate_pos{std::max(last_x, viewport->Pos.x + viewport->Size.x - plate_size.x), strip_top};
+    ImGui::SetCursorScreenPos(plate_pos);
+    if (opens(ImGui::InvisibleButton("##nameplate", plate_size), kMainMenu)) {
+        ImGui::OpenPopup(kMainMenu);
+    }
+    strip.draw_hover(plate_pos, plate_size);
+    const float text_y = plate_pos.y + (strip_h - free_size.y) / 2.0f;
+    draw->AddText(fonts.ui, ui_px, {plate_pos.x + pad * 2.0f, text_y}, to_imgui(skin.muted), "free");
+    draw->AddText(fonts.strong, ui_px, {plate_pos.x + pad * 2.0f + free_size.x, text_y}, to_imgui(skin.label), "TVC");
+    draw->AddLine({plate_pos.x, strip_top + strip_h * 0.25f}, {plate_pos.x, strip_top + strip_h * 0.75f}, to_imgui(skin.rib));
+    // The speed, left of the nameplate: a click pauses or resumes
+    char state[32];
+    if (status.paused) {
+        std::snprintf(state, sizeof state, "%s", tr("paused"));
+    } else if (status.speed_percent < 0.0) {
+        std::snprintf(state, sizeof state, "%s", tr("running"));
+    } else {
+        std::snprintf(state, sizeof state, "%3.0f %%", status.speed_percent);
+    }
+    const Colour state_colour = status.paused ? skin.role(Role::Notice).on_case : skin.label;
+    ImFont* const state_font = status.paused ? fonts.ui : fonts.data;
+    const float state_px = status.paused ? ui_px : data_px;
+    const float state_w = state_font->CalcTextSizeA(state_px, FLT_MAX, 0.0f, state).x + pad * 2.0f;
+    const float state_x = plate_pos.x - state_w;
+    actions.toggle_pause |= strip.button("##state", state, state_font, state_px, state_colour, true, state_x - ImGui::GetWindowPos().x);
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", status.paused ? tr("Paused: click or Pause to resume")
+                                              : tr("Speed in percent of a real TVC: click or Pause to pause"));
+    }
+    draw->AddLine({state_x, strip_top + strip_h * 0.25f}, {state_x, strip_top + strip_h * 0.75f}, to_imgui(skin.rib));
+    // REC and the camera left of the speed: a click acts, a right click opens their menu
+    char time[16];
+    const int seconds = static_cast<int>(status.record_seconds);
+    std::snprintf(time, sizeof time, "%02d:%02d", seconds / 60, seconds % 60);
+    const float key_w = rec_width(fonts.strong, ui_px * 0.8f, strip_h);
+    const float time_w = status.recording ? fonts.data->CalcTextSizeA(data_px, FLT_MAX, 0.0f, time).x + pad * 2.0f : 0.0f;
+    const float media_x = state_x - key_w * 2.0f - time_w;
+    ImGui::SameLine(media_x - ImGui::GetWindowPos().x, 0.0f);
+    ImGui::Dummy({0.0f, strip_h});
     const Colour red = skin.role(Role::Exec).on_case;
     const bool lit = !status.recording || std::fmod(status.record_seconds, 1.0) < 0.6;
     actions.toggle_record |= strip.rec("##rec", fonts.strong, ui_px * 0.8f, status.recording ? red : skin.label, red, lit);
@@ -601,9 +660,6 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
                                                  : tr("Record a video of the TV picture and sound: click to start; right click for the menu"));
     }
     if (status.recording) {
-        char time[16];
-        const int s = static_cast<int>(status.record_seconds);
-        std::snprintf(time, sizeof time, "%02d:%02d", s / 60, s % 60);
         actions.toggle_record |= strip.button("##rec_time", time, fonts.data, data_px, red);
     }
     actions.screenshot |= strip.camera("##shot", fonts.strong, ui_px * 0.8f, skin.label);
@@ -614,7 +670,7 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("%s", tr("Screenshot of the TV picture as a PNG: click to take one; right click for the menu"));
     }
-    strip.divider();
+    draw->AddLine({media_x, strip_top + strip_h * 0.25f}, {media_x, strip_top + strip_h * 0.75f}, to_imgui(skin.rib));
 
     if (!status.notice.empty()) {
         const double lifetime = status.notice_is_error ? kErrorSeconds : kNoticeSeconds;
@@ -622,8 +678,8 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
         if (alpha > 0.0f) {
             // Right-aligned after the strip's last item (the cursor has wrapped to the next line by now); too long: cut, whole on hover
             const std::string notice(status.notice);
-            const float left = ImGui::GetItemRectMax().x + pad;
-            const float right = viewport->Pos.x + viewport->Size.x - pad * 2.0f;
+            const float left = last_x + pad;
+            const float right = media_x - pad * 2.0f;
             std::string shown = notice;
             if (ImGui::CalcTextSize(shown.c_str()).x > right - left) {
                 const float dots = ImGui::CalcTextSize("...").x;
@@ -649,7 +705,7 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     const float menu_top = strip_top - groove;
     // The strip's menus in the strip's text size
     ImGui::PushFont(nullptr, skin.font_ui_size * strip_ratio);
-    if (begin_menu(kMainMenu, plate_pos.x, menu_top, actions)) {
+    if (begin_menu(kMainMenu, plate_pos.x + plate_size.x, menu_top, actions, 1.0f)) {
         draw_main_menu(status, actions);
         draw_ports_menu(status, actions);
         ImGui::EndPopup();
@@ -660,6 +716,36 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     }
     if (begin_menu(kCardsMenu, cards_x, menu_top, actions)) {
         draw_cards_menu(status, actions);
+        ImGui::EndPopup();
+    }
+    if (begin_menu(kCartMenu, cart_x, menu_top, actions)) {
+        draw_cart_menu(status, actions);
+        ImGui::EndPopup();
+    }
+    if (begin_menu(kKeysMenu, keys_x, menu_top, actions)) {
+        ImGui::SeparatorText(tr("Keyboard"));
+        if (ImGui::MenuItem(tr("Symbolic"), nullptr, status.mapping == KeyMapping::Symbolic)) {
+            actions.mapping = static_cast<int>(KeyMapping::Symbolic);
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", tr("PC characters type the same TVC characters: click for positional"));
+        }
+        if (ImGui::MenuItem(tr("Positional"), nullptr, status.mapping == KeyMapping::Positional)) {
+            actions.mapping = static_cast<int>(KeyMapping::Positional);
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", tr("PC keys sit where the Hungarian TVC legends are: click for symbolic"));
+        }
+        if (ImGui::BeginMenu(tr("Key layout"))) {
+            for (const KeymapEntry& entry : status.layouts) {
+                if (ImGui::MenuItem(entry.name.c_str(), nullptr, entry.name == status.layout)) {
+                    actions.layout = entry.path.string();
+                }
+            }
+            ImGui::Separator();
+            actions.edit_layout |= ImGui::MenuItem(tr("Edit the layout..."));
+            ImGui::EndMenu();
+        }
         ImGui::EndPopup();
     }
     if (begin_menu(kTapeMenu, tape_x, menu_top, actions)) {
@@ -703,6 +789,14 @@ PlayActions draw_play(const PlayStatus& status, const Skin& skin, const SkinFont
             const float r = std::max(4.0f, shown.size.y * 0.018f);
             background->AddCircleFilled({shown.min.x + shown.size.x - r * 2.5f, shown.min.y + r * 2.5f}, r,
                                         to_imgui(skin.role(Role::Exec).on_case));
+        }
+        if (status.splash != ImTextureID_Invalid && status.splash_alpha > 0.0f && status.splash_size.x > 0.0f) {
+            const float a = status.splash_alpha;
+            background->AddRectFilled(shown.min, shown.min + shown.size, IM_COL32(0, 0, 0, static_cast<int>(a * 255.0f)));
+            const float fit = std::min(shown.size.x * 0.8f / status.splash_size.x, shown.size.y * 0.8f / status.splash_size.y);
+            const ImVec2 size{status.splash_size.x * fit, status.splash_size.y * fit};
+            const ImVec2 p0{shown.min.x + (shown.size.x - size.x) * 0.5f, shown.min.y + (shown.size.y - size.y) * 0.5f};
+            background->AddImage(status.splash, p0, p0 + size, {0, 0}, {1, 1}, IM_COL32(255, 255, 255, static_cast<int>(a * 0.45f * 255.0f)));
         }
     }
     draw_strip(status, skin, fonts, actions);

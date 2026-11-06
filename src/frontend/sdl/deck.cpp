@@ -143,7 +143,6 @@ void corners(ImDrawList* draw, ImVec2 min, ImVec2 max, float arm, float thick, I
 
 }  // namespace
 
-// The REC key's width: its marks, dot and text
 float rec_width(ImFont* font, float size, float height) {
     const ImVec2 text = font->CalcTextSizeA(size, FLT_MAX, 0.0f, "REC");
     return height * 0.2f * 2.0f + height * 0.18f + text.y * 0.64f + text.y * 0.25f + text.x + height * 0.18f;
@@ -212,6 +211,123 @@ bool DeckRow::camera(const char* id, ImFont* font, float size, Colour colour) {
     draw->AddRect({mid.x - w / 2.0f, mid.y - h / 2.0f}, {mid.x + w / 2.0f, mid.y + h / 2.0f}, c, thick, thick);
     draw->AddRectFilled({mid.x - w * 0.18f, mid.y - h / 2.0f - h * 0.28f}, {mid.x + w * 0.18f, mid.y - h / 2.0f}, c, thick * 0.5f);
     draw->AddCircle(mid, h * 0.3f, c, 0, thick);
+    return clicked;
+}
+
+ImVec2 DeckRow::icon_key(const char* id, float grid_w, bool& clicked, float& g) {
+    ImGui::SameLine(0.0f, 0.0f);
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const float k = height_ / 45.0f;
+    const float width = grid_w * k;
+    clicked = ImGui::InvisibleButton(id, {width, height_});
+    draw_hover(pos, {width, height_});
+    // At 90 % of the key, centred, like the machine key
+    g = k * 0.9f;
+    return {pos.x + (width - grid_w * g) / 2.0f, pos.y + (height_ - 45.0f * g) / 2.0f};
+}
+
+bool DeckRow::keyboard(const char* id, Colour colour) {
+    bool clicked = false;
+    float g = 0.0f;
+    const ImVec2 o = icon_key(id, 60.0f, clicked, g);
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, 2.2f * g);
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    draw->AddRect(p(5.0f, 11.0f), p(55.0f, 35.0f), c, 2.5f * g, thick);
+    for (const float x : {10.0f, 17.0f, 24.0f, 31.0f, 38.0f, 45.0f}) {
+        draw->AddLine(p(x, 17.0f), p(x + 4.0f, 17.0f), c, thick);
+    }
+    for (const float x : {12.0f, 19.0f, 26.0f, 33.0f, 40.0f, 47.0f}) {
+        draw->AddLine(p(x, 23.0f), p(x + 3.5f, 23.0f), c, thick);
+    }
+    draw->AddLine(p(18.0f, 29.0f), p(42.0f, 29.0f), c, thick);
+    return clicked;
+}
+
+bool DeckRow::speaker(const char* id, Colour colour, bool slashed, Colour slash) {
+    bool clicked = false;
+    float g = 0.0f;
+    const ImVec2 o = icon_key(id, 50.0f, clicked, g);
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, 2.2f * g);
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    const ImVec2 body[] = {p(8.0f, 18.0f), p(15.0f, 18.0f), p(25.0f, 10.0f), p(25.0f, 35.0f), p(15.0f, 27.0f), p(8.0f, 27.0f)};
+    draw->AddPolyline(body, 6, c, thick, ImDrawFlags_Closed);
+    constexpr float kPi = 3.14159265f;
+    draw->PathArcTo(p(25.0f, 22.5f), 8.0f * g, -kPi * 0.27f, kPi * 0.27f);
+    draw->PathStroke(c, thick);
+    draw->PathArcTo(p(25.0f, 22.5f), 14.0f * g, -kPi * 0.3f, kPi * 0.3f);
+    draw->PathStroke(c, thick);
+    if (slashed) {
+        draw->AddLine(p(6.0f, 38.0f), p(42.0f, 7.0f), to_imgui(slash), thick * 1.2f);
+    }
+    return clicked;
+}
+
+bool DeckRow::cassette(const char* id, Colour colour) {
+    bool clicked = false;
+    float g = 0.0f;
+    const ImVec2 o = icon_key(id, 64.0f, clicked, g);
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, 2.2f * g);
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    draw->AddRect(p(5.0f, 8.0f), p(59.0f, 39.0f), c, 2.5f * g, thick);
+    draw->AddRect(p(13.0f, 13.0f), p(51.0f, 26.0f), c, 1.5f * g, thick);
+    draw->AddCircle(p(23.0f, 19.5f), 3.2f * g, c, 0, thick);
+    draw->AddCircle(p(41.0f, 19.5f), 3.2f * g, c, 0, thick);
+    draw->AddLine(p(26.2f, 19.5f), p(37.8f, 19.5f), c, thick);
+    const ImVec2 head[] = {p(15.0f, 39.0f), p(18.5f, 32.0f), p(45.5f, 32.0f), p(49.0f, 39.0f)};
+    draw->AddPolyline(head, 4, c, thick, ImDrawFlags_None);
+    return clicked;
+}
+
+bool DeckRow::floppy(const char* id, Colour colour) {
+    bool clicked = false;
+    float g = 0.0f;
+    const ImVec2 o = icon_key(id, 48.0f, clicked, g);
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, 2.2f * g);
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    // The sleeve, the hub hole, the head slot and the write-protect notch
+    draw->AddRect(p(7.0f, 7.0f), p(41.0f, 39.0f), c, 0.0f, thick);
+    draw->AddCircle(p(24.0f, 21.0f), 4.5f * g, c, 0, thick);
+    draw->AddRect(p(21.5f, 29.0f), p(26.5f, 37.0f), c, 2.5f * g, thick);
+    const ImVec2 notch[] = {p(41.0f, 12.0f), p(38.0f, 12.0f), p(38.0f, 16.0f), p(41.0f, 16.0f)};
+    draw->AddPolyline(notch, 4, c, thick, ImDrawFlags_None);
+    return clicked;
+}
+
+bool DeckRow::cartridge(const char* id, ImFont* font, float size, const char* text, Colour colour) {
+    ImGui::SameLine(0.0f, 0.0f);
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const float k = height_ / 45.0f;
+    const float g = k * 0.9f;
+    const float icon_w = 36.0f * k;
+    const float pad = ImGui::GetStyle().FramePadding.x;
+    const ImVec2 text_size = font->CalcTextSizeA(size, FLT_MAX, 0.0f, text);
+    const float width = icon_w + text_size.x + pad;
+    const bool clicked = ImGui::InvisibleButton(id, {width, height_});
+    draw_hover(pos, {width, height_});
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, 2.0f * g);
+    const ImVec2 o{pos.x + (icon_w - 36.0f * g) / 2.0f, pos.y + (height_ - 45.0f * g) / 2.0f};
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    // The case with its grip ribs, the contact edge with its teeth
+    draw->AddRect(p(6.0f, 9.5f), p(26.0f, 35.5f), c, 1.5f * g, thick);
+    for (const float y : {14.5f, 18.5f, 22.5f, 26.5f, 30.5f}) {
+        draw->AddLine(p(10.0f, y), p(16.0f, y), c, thick);
+    }
+    const ImVec2 edge[] = {p(26.0f, 32.5f), p(31.0f, 32.5f), p(31.0f, 12.5f), p(26.0f, 12.5f)};
+    draw->AddPolyline(edge, 4, c, thick, ImDrawFlags_None);
+    for (const float y : {16.5f, 20.5f, 24.5f, 28.5f}) {
+        draw->AddLine(p(31.0f, y), p(28.5f, y), c, thick);
+    }
+    draw->AddText(font, size, {pos.x + icon_w, pos.y + (height_ - text_size.y) / 2.0f}, c, text);
     return clicked;
 }
 

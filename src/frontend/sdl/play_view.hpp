@@ -26,11 +26,17 @@ using freetvc::ScreenArea;
 
 struct PlayStatus {
     ImTextureID screen = ImTextureID_Invalid;  // the framebuffer texture, 800 x 314
+    // At start: a faint photo of the machine over a dark screen until the machine is ready; 0 = gone
+    ImTextureID splash = ImTextureID_Invalid;
+    ImVec2 splash_size{};
+    float splash_alpha = 0.0f;
     std::span<const Preset> presets;
     std::size_t preset = 0;
     bool paused = false;
     double speed_percent = -1.0;  // negative until the first measurement
     KeyMapping mapping = KeyMapping::Symbolic;
+    std::span<const KeymapEntry> layouts;  // host key layouts
+    std::string_view layout;
     bool audio = false;  // an audio device is open
     bool muted = false;
     bool fullscreen = false;
@@ -91,7 +97,9 @@ struct PlayStatus {
 };
 
 struct PlayActions {
-    bool menu_open = false;  // keys must not reach the TVC while it is
+    bool menu_open = false;
+    std::string layout;        // a host key layout file to use
+    bool edit_layout = false;  // the keyboard editor opens  // keys must not reach the TVC while it is
     bool toggle_pause = false;
     bool reset = false;
     bool power_cycle = false;

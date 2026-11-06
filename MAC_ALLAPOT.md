@@ -55,3 +55,6 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
   - RAM-ciklus 20,0 T; VRAM olvasás/írás 22,0 T és kód VRAM-ból 20,0 T (a hardverleírás táblázata szerint pontosan);
     képkocka 62 800 T (49,76 Hz).
   - Valódi géppel még nincs összevetve (ötlet: ugyanaz a mérőprogram .dsk-n a valódi TVC-n).
+
+## GUI (2026-11-07)
+- Induló gépfotó és új alsó sáv (ikonok) — részletek a TERVEK.md „FOLYAMATBAN: GUI-átalakítás” részében.

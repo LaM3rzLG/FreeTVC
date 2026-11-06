@@ -86,7 +86,14 @@ a felhasználó a GUI-ban végignézte és jóváhagyta az alábbiakat; release 
 - **Fényképező ikon** (REC-szélességű, ugyanolyan sarokjelek): PNG az Asztalra (`screenshot_dir`), a főmenü
   „Képernyőkép” is. Kép és videó 4:3-ban: 1534×1148 (sor ×4, vízszintesen területátlag, `kPixelAspect` a
   `framebuffer.hpp`-ben, `pal_width()`), a videó ffmpeg-gel `scale=…neighbor,scale=…area`.
-- Hátra a GUI-ból: a felhasználó még variál a menükön; Nyomtató/Cartridge végleges helye; Ctrl/Cmd+R gyorsbillentyű
+- **Induló kép**: `data/about/tvc64kplus.png` (a felhasználó fotója, fehér háttér és árnyék kivágva) halványan a TV-kép
+  helyén induláskor, bekapcsoláskor és kártyacserénél; a gép közben fut; legalább 2,5 s, amíg a gép nem rajzol (a 64k
+  ~5 s fekete), max. 10 s, 0,5 s elhalványulás (`show_machine()` a `main.cpp`-ben).
+- **Sáv (2026-11-07)**: slotok · Cart (elforgatott cartridge ikon + „Cart”/név, egy gomb, Cartridge menü) · gép ·
+  billentyűzet ikon (menü: Szimbolikus/Pozíciós/Kiosztás ▸) · hangszóró (némítva piros áthúzás) · 5,25" floppy (kártya
+  nélkül halvány) · kazetta (szalag nélkül halvány) · ▶ (szürke szalag nélkül) … üzenet … REC · fénykép · % · freeTVC
+  (jobbra, főmenü). Gépmenü fejléce „Verzió” középen.
+- Hátra a GUI-ból: a felhasználó még variál a menükön (freeTVC főmenü); Nyomtató végleges helye; Ctrl/Cmd+R gyorsbillentyű
   (a CTRL a TVC-nek is kell — megbeszélni); cartridge-mappa (javaslat: `cartridges/` a felhasználói adatmappában, a
   „Cartridge betétele” ott nyílik — a felhasználó még nem döntött); docs (ui.md: strip, menük; user-guide 4.8 GUI rész);
   monitor/MCP parancs a felvételhez; Windowson kipróbálni (felvétel, ffmpeg.exe).
