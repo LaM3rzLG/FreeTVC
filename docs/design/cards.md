@@ -732,7 +732,7 @@ Vaczkó Károly's graphics coprocessor card (2026, for the TVC and the Enterpris
 - **Resolution**: every 2dfx pixel in 2-colour mode, every 2nd pixel doubled in 4- and 16-colour mode, as Ep128web ⚑. Every 4th in 16-colour mode (the first reading of the pixel clock) broke the dither of the Wolf3D title into black lines.
 - **Interrupt**: the raster latches (54h–57h) hold the slot's /INT low until `58h`.
 - **Reset**: the reset button is a power cycle for the card (back to the `50h` wake gate), as Ep128web's README says ⚑.
-- **State**: a TVCS snapshot keeps the card in its slot but not the card's state (`twodfx_emu_save_snapshot` is not wired yet); machine copies (rewind, the prompt state) share one device, so rewinding does not rewind the 2dfx.
+- **State**: the `CARD` chunk holds the library's own snapshot (`twodfx_emu_save_snapshot`, format v13, its 8 MiB resource RAM included) PackBits-packed, then the card's raster position; a TVCS file at the Wolf3D title is 482 KB and resumes with the picture. Rewind keeps the same bytes each second. Loading gives the card a device of its own; machine copies made without a snapshot share one.
 
 ### Front ends
 
@@ -754,7 +754,7 @@ Vaczkó Károly's graphics coprocessor card (2026, for the TVC and the Enterpris
 ### Known limits
 
 - Open ⚑: where the frame sits on a moved paper; 4-colour mode at full or half resolution; reset.
-- Not built: the card's state in snapshots and rewind, the built-in demos from a menu.
+- Not built: the built-in demos from a menu.
 
 ## SID card
 

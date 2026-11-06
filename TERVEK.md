@@ -59,7 +59,8 @@ Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC gépp
   Kipróbálva még: AnyShow2dfx (tvc.homeserver.hu 2026/Kis_Róbert(AnyStone), 15 kép) — jó.
 - Dokumentálva (2026-11-06): cards.md „2dfx graphics card”, tvc-hardware.md §9, media.md, status.md, MAC_ALLAPOT.md, skill.
 - MCP `media` `twodfx_on`/`twodfx_off` + `status`, monitor `2dfx` kész (2026-11-06).
-- Hiányzik: mentés (`twodfx_emu_save_snapshot`), unit teszt.
+- Mentés kész: pillanatkép és visszatekerés (a könyvtár mentése tömörítve; Wolf3D címképnél 482 KB, visszatöltve jó).
+- Hiányzik: unit teszt.
 - A Windows-gépen az Intelligens alkalmazásvezérlés (Smart App Control) letiltja a friss, aláíratlan fordítást.
 
 ## Elkészült

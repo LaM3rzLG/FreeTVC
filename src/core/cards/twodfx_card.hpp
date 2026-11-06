@@ -29,8 +29,9 @@ public:
     std::uint8_t mem_read(std::uint16_t) const override { return 0xFF; }
     void mem_write(std::uint16_t, std::uint8_t) override {}
     std::span<std::uint8_t> window() override { return {}; }
-    void save(ChunkWriter&) const override {}
-    void load(ChunkReader&) override {}
+    // The library's own snapshot (its 8 MiB resource RAM included, PackBits-packed) and the raster position
+    void save(ChunkWriter& w) const override;
+    void load(ChunkReader& r) override;
     VideoOverlay* overlay() override { return this; }
     bool irq() const override;
 

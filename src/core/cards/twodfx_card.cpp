@@ -3,6 +3,10 @@
 
 #include "twodfx_emu.h"
 
+#include <vector>
+
+#include "core/snapshot/snapshot.hpp"
+
 namespace freetvc {
 
 namespace {
@@ -25,6 +29,39 @@ void TwoDfxCard::power_on() {
     }
     last_vsync_ = last_display_ = paper_seen_ = false;
     chars_ = line_ = 0;
+    coverage_.fill(0);
+}
+
+void TwoDfxCard::save(ChunkWriter& w) const {
+    std::vector<std::uint8_t> blob(dev_ ? twodfx_emu_snapshot_size() : 0);
+    if (!blob.empty() && !twodfx_emu_save_snapshot(dev_.get(), blob.data(), blob.size())) {
+        blob.clear();
+    }
+    w.packed(blob);
+    w.boolean(last_vsync_);
+    w.boolean(last_display_);
+    w.boolean(paper_seen_);
+    for (const unsigned v : {chars_, line_, line_chars_, last_paper_char_, first_paper_line_, paper_origin_, paper_px_}) {
+        w.u32(v);
+    }
+}
+
+void TwoDfxCard::load(ChunkReader& r) {
+    // A device of its own: machine copies share the old one
+    dev_ = std::shared_ptr<twodfx_emu>(twodfx_emu_create(TWODFX_EMU_TVC), twodfx_emu_destroy);
+    const std::size_t size = twodfx_emu_snapshot_size();
+    std::vector<std::uint8_t> blob(size);
+    r.packed(blob);
+    if (r.failed() || !dev_ || !twodfx_emu_load_snapshot(dev_.get(), blob.data(), blob.size())) {
+        r.fail();
+        return;
+    }
+    last_vsync_ = r.boolean();
+    last_display_ = r.boolean();
+    paper_seen_ = r.boolean();
+    for (unsigned* v : {&chars_, &line_, &line_chars_, &last_paper_char_, &first_paper_line_, &paper_origin_, &paper_px_}) {
+        *v = r.u32();
+    }
     coverage_.fill(0);
 }
 
