@@ -12,6 +12,31 @@ Közös (Windows + Mac), nem platformfüggő fejlesztések. A Mac-es fordítás/
   (a MacBookon nincs jobb Ctrl = FIRE és számbillentyűzet = 2. joystick; ~1 óra), esetleg gamepad (~1 óra).
 - 4. About + „Bronze” sötét betű: **ELVETVE** (a felhasználó döntése, 2026-11-02)
 
+## Ep128web (kks2003.github.io/Ep128web) — mit tud, amit mi nem (felmérés 2026-11-06)
+Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC géppel. A tények angolul:
+`docs/hardware/tvc-hardware.md` §9 (2dfx, UPM). Repó: github.com/kks2003/Ep128web.
+- **MCP-ben nem több**: Node + Playwright vezérli a böngészőt (`mcp/server.js`, 19 eszköz: start, gépválasztás, fájl,
+  gépelés, képernyőszöveg, kép, memória, disasm, töréspont, snapshot, `eval_js`). Ötletnek: `wait_text`, `screen_text`.
+- **Debuggerben ötletek**: visszalépés (utolsó 40 állapot), 65536 utasításos trace, Lua- és JS-szkript.
+- **UPM** — mi már most is elfogadjuk az UPM kártya-EPROM-ot (B3A567AD) `hbf.rom` néven, de nincs kipróbálva. Teendő:
+  1. ROM-ok: UPM kártya-EPROM (tvc.homeserver.hu `cas/odor/UPM.FDR`) és UPM cartridge (49202, `tvcupm_c.rom`) felvétele
+     az autofetch-be saját néven (pl. `hbfupm.rom`, `upm.rom`), `--disk-rom upm`, menü: „Lemezkártya: UPM”. ~1-2 óra.
+  2. Kipróbálás egy UPM lemezzel (CP/M 2.2, 720 KiB, 4 foglalt sáv, 2 KiB blokk); a FDC-emuláció elvileg kész.
+  3. Lemez-autostart: CP/M lemez felismerése (nem FAT12) → UPM ROM + cartridge, RETURN a `*` után. ~2-3 óra.
+  4. Üres UPM lemez létrehozása (E5h-val töltött kép) a lemez menüben. ~1 óra. Összesen ~1 nap, kockázat kicsi.
+- **2dfx grafikus kártya** (Vaczkó Károly): saját sprite/2D/3D grafika F8h/F9h porton, a TVC képe fölé (/EXTC). A mi
+  TVC256k++ overlay-ünk ugyanazon az úton jön be, erre ráépülhet. Két út:
+  - A) **A szerző MIT-es C99 könyvtárát átvenni** `third_party/twodfx/`-be (THIRD_PARTY.md), az Elite/Wriggler demóadatok
+    nélkül (azok nem MIT-esek → a C9h, D3h–D5h demó kimarad). Bekötés: port F8h/F9h, VSYNC/HSYNC hívás, /INT, overlay a
+    paper területén, snapshot. A szerző a hardverrel vetette össze. ~2-3 nap.
+  - B) Tiszta szobás újraírás a `COMMAND_REFERENCE.md`-ből (32 KiB leírás): sok hét, és a demók nélkül nincs mihez mérni.
+  - Javaslat: A). Kérdés a felhasználónak: az AGENTS.md „clean room” szabálya más emulátorok kódjára vonatkozik; ez a
+    kártya szerzőjének saját, MIT-es könyvtára (mint a reSID) — rendben van-e így átvenni?
+  - Ütközések: a mi SID kártyánk E0h–FFh-t foglal (benne F8h/F9h) → 2dfx mellett a SID kártya E0h–F7h-ra szűkül, vagy
+    a kettő kizárja egymást. Az Ep128web-ben a 2dfx és a TVC256k++ nem mehet együtt (mindkettő overlay).
+  - 8 MiB erőforrás-RAM: a visszatekerés (rewind) snapshotjaiba csak a változott részt szabad tenni, különben túl nagy.
+  - Nyitott: Graphics 4 módban teljes vagy fél felbontás? (Ep128web: fél; a mi HBA-2 olvasatunk: teljes.)
+
 ## Elkészült
 
 ### Kártyahely választása a felületen (2026-11-01, kérésre)

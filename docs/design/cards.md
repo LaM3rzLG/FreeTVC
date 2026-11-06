@@ -807,6 +807,6 @@ There is no printer by default, so an `LPRINT` waits after its first character u
 ## Devices not emulated
 
 - Original Videoton cards beyond the HBF and HBS: HBU parallel (49105), HBI-2 IEC-625 (49106), HBE EPROM programmer, TVC-NET ([tvc-hardware.md](../hardware/tvc-hardware.md) §9). The HBM 32 KiB RAM card (49102) is part of the 32k + HBM preset ([machine.md](machine.md)).
-- SoundQuartett, the Hanák 6-channel SAA1099 modification, UPM on the disk card.
+- SoundQuartett, the Hanák 6-channel SAA1099 modification, UPM on the disk card (not checked), the 2dfx graphics card (ports F8h/F9h; [tvc-hardware.md](../hardware/tvc-hardware.md) §9).
 - YATE's SDCart (no hardware known, [SD Dual](#sd-dual)), the single-socket SD cartridges and the 2009 slot-card SD interface.
 - The MultiCart's 512 KiB RAM fit-out and other flash chips.
