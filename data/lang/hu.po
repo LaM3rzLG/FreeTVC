@@ -3721,3 +3721,39 @@ msgstr "Kimásolva"
 #: src/frontend/sdl/about_view.cpp
 msgid "Copy build info"
 msgstr "Változatadatok másolása"
+
+msgid "2dfx graphics card"
+msgstr "2dfx grafikus kártya"
+
+msgid "2dfx graphics card in slot %d"
+msgstr "2dfx grafikus kártya (%d. kártyahely)"
+
+msgid "2dfx graphics card in slot %d; powered on"
+msgstr "2dfx grafikus kártya: %d. kártyahely; hidegindítás"
+
+msgid "2dfx graphics card out; powered on"
+msgstr "2dfx grafikus kártya kivéve; hidegindítás"
+
+msgid "2dfx card left out: %s"
+msgstr "a 2dfx kártya kimaradt: %s"
+
+msgid ""
+"Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper, ports "
+"F8h/F9h; not with the SID card or the TVC256k++; the machine powers on"
+msgstr ""
+"Vaczkó Károly kártyája: sprite-ok, 2D és 3D grafika a papír fölött, F8h/F9h "
+"port; a SID-kártyával és a TVC256k++-szal nem megy együtt; hidegindítás"
+
+msgid ""
+"the SID card cannot go in beside the 2dfx card (both use ports F8h/F9h)"
+msgstr "a SID-kártya nem tehető be a 2dfx kártya mellé (mindkettő az F8h/F9h portot használja)"
+
+msgid ""
+"the TVC256k++ cannot go in beside the 2dfx card (both drive EC0-3 and /EXTC)"
+msgstr "a TVC256k++ nem tehető be a 2dfx kártya mellé (mindkettő az EC0-3 és /EXTC vonalat hajtja)"
+
+msgid "not with the SID card (both use ports F8h/F9h)"
+msgstr "a SID-kártyával nem megy együtt (mindkettő az F8h/F9h portot használja)"
+
+msgid "not with the TVC256k++ (both drive EC0-3 and /EXTC)"
+msgstr "a TVC256k++-szal nem megy együtt (mindkettő az EC0-3 és /EXTC vonalat hajtja)"

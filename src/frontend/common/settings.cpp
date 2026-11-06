@@ -17,7 +17,7 @@ constexpr std::string_view kHeader =
     "; freeTVC settings (docs/design/ui.md \"Settings file and ROM search\"). The Settings window writes its keys as they\n"
     "; change; on exit freeTVC rewrites preset, skin, keymap, language, the cards and their media. Command-line options are\n"
     "; not saved. Keys: rom_dir, preset, skin, keymap, language, audio, volume, fullscreen, full_raster, disk_card, disk_rom,\n"
-    "; gamecard, multichip, sid_card, card256, card256_usb, card256_flash, nanosd, nanosd_sd, nanosd_menu, nanosd_sort,\n"
+    "; gamecard, multichip, sid_card, card256, card256_usb, card256_flash, twodfx, nanosd, nanosd_sd, nanosd_menu, nanosd_sort,\n"
     "; printer, serial_card, serial_line, serial_flow, monitor, mcp, mcp_allow_monitor, dzrp, dzrp_banks, gdb, renderer,\n"
     "; picture, colour_switch, keys.\n";
 
@@ -171,21 +171,24 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
             } else {
                 fail(msg("keymap is symbolic or positional"));
             }
-        } else if ((key == "gamecard" || key == "multichip" || key == "card256" || key == "nanosd" || key == "serial_card") &&
+        } else if ((key == "gamecard" || key == "multichip" || key == "card256" || key == "twodfx" || key == "nanosd" ||
+                    key == "serial_card") &&
                    value.size() == 1 && value[0] >= '0' && value[0] <= '3') {
             const auto slot = static_cast<unsigned>(value[0] - '0');
             (key == "gamecard"    ? s.gamecard
              : key == "multichip" ? s.multichip
              : key == "card256"   ? s.card256
+             : key == "twodfx"    ? s.twodfx
              : key == "nanosd"    ? s.nanosd
                                   : s.serial_card) = true;
             (key == "gamecard"    ? s.gamecard_slot
              : key == "multichip" ? s.multichip_slot
              : key == "card256"   ? s.card256_slot
+             : key == "twodfx"    ? s.twodfx_slot
              : key == "nanosd"    ? s.nanosd_slot
                                   : s.serial_slot) = slot;
         } else if (key == "audio" || key == "full_raster" || key == "disk_card" || key == "gamecard" || key == "multichip" ||
-                   key == "card256" || key == "nanosd" || key == "nanosd_menu" || key == "serial_card" || key == "fullscreen" ||
+                   key == "card256" || key == "twodfx" || key == "nanosd" || key == "nanosd_menu" || key == "serial_card" || key == "fullscreen" ||
                    key == "dzrp_banks" || key == "mcp_allow_monitor") {
             const auto flag = parse_flag(value);
             if (!flag) {
@@ -197,6 +200,7 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
                  : key == "gamecard"    ? s.gamecard
                  : key == "multichip"   ? s.multichip
                  : key == "nanosd"      ? s.nanosd
+                 : key == "twodfx"      ? s.twodfx
                  : key == "nanosd_menu" ? s.nanosd_menu
                  : key == "serial_card" ? s.serial_card
                  : key == "fullscreen"  ? s.fullscreen

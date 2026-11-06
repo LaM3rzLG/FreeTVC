@@ -219,6 +219,17 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
         }
         ImGui::Unindent();
     }
+    if (status.twodfx_slot >= 0) {
+        std::snprintf(item, sizeof item, tr("2dfx graphics card in slot %d"), status.twodfx_slot);
+    } else {
+        std::snprintf(item, sizeof item, "%s", tr("2dfx graphics card"));
+    }
+    actions.toggle_twodfx |= ImGui::MenuItem(item, nullptr, status.twodfx_slot >= 0);
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper, ports F8h/F9h; not with the SID "
+                                   "card or the TVC256k++; the machine powers on"));
+    }
+    slot_choice(status, CardKind::TwoDfx, status.twodfx_slot, "twodfx", actions);
     if (status.nanosd_slot >= 0) {
         std::snprintf(item, sizeof item, tr("NanoSD in slot %d"), status.nanosd_slot);
     } else {

@@ -151,6 +151,10 @@ public:
     // The image for a GameCard: the one given, else gamecard.rom from the ROM search, else empty (a message says so).
     std::vector<std::uint8_t> gamecard_rom();
     bool multichip(bool on, unsigned slot, std::string& error) override;
+    // The 2dfx graphics card (no ROM) into `slot` (kCardSlots: slot 2, else the first free) or out; powers on.
+    // Not with the SID card (both use F8h/F9h) or the TVC256k++ (both drive EC0-3 and /EXTC).
+    bool twodfx(bool on, unsigned slot, std::string& error);
+    int twodfx_slot() const;
     bool sid_card(const std::string& model, std::string& error) override;
     // --sid-clock: the clock a SID card gets when it goes in (default a PAL C64's)
     void set_sid_clock(std::uint32_t hz) { sid_clock_hz_ = hz; }

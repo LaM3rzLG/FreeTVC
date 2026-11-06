@@ -134,6 +134,7 @@ void draw_machine(const Sheet& s, const PlayStatus& status, const SettingsStatus
     const SlotCard cards[] = {{tr("GameCard"), CardKind::GameCard, status.gamecard_slot, play.toggle_gamecard},
                               {tr("Multichip sound card"), CardKind::Multichip, status.multichip_slot, play.toggle_multichip},
                               {tr("TVC256k++"), CardKind::Card256, status.card256_slot, play.toggle_card256},
+                              {tr("2dfx graphics card"), CardKind::TwoDfx, status.twodfx_slot, play.toggle_twodfx},
                               {tr("NanoSD"), CardKind::NanoSd, status.nanosd_slot, play.toggle_nanosd},
                               {tr("Serial card"), CardKind::Serial, status.serial_slot, play.toggle_serial}};
     // The slot buttons line up in a column right of the longest name

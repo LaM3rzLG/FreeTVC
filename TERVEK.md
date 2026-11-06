@@ -42,8 +42,8 @@ Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC gépp
   demó nélkül (Wriggler/Elite adatok). A TVC256k++ és a 2dfx kizárja egymást (Ep128web: mindkettő EC0-3, /EXTC);
   a SID kártya és a 2dfx is (F8h/F9h).
 - Kész: `CardKind::TwoDfx` (`src/core/cards/twodfx_card.*`), bármely slot; F8h/F9h a `Machine::io_read/io_write`-ban;
-  overlay a papíron (raw X 126, Y 49 = a BASIC papír bal felső sarka), 4 színben minden 2., 16 színben minden 4.
-  2dfx-pixel ⚑; /INT a raszter-latch-ekből; reset = bekapcsolás (Ep128web README ⚑); headless `--2dfx [SLOT]`
+  overlay a papíron (raw X 126, Y 49 = a BASIC papír bal felső sarka), 4 és 16 színben minden 2. 2dfx-pixel,
+  duplázva (Ep128web; a „minden 4.” a Wolf3D címképének ditherét csíkokra bontotta); /INT a raszter-latch-ekből; reset = bekapcsolás (Ep128web README ⚑); headless `--2dfx [SLOT]`
   (alap 2; SID-del és `--card256`-tal hiba); pillanatkép elfogadja a kártyát, de a 2dfx állapotát NEM menti.
 - Másolatok (rewind) egy közös 2dfx-eszközön osztoznak (8 MiB RAM nem másolódik) → a rewind a 2dfx-et nem állítja vissza.
 - Kipróbálva (headless, 64k+-2.2): Cube (tvc.homeserver.hu `Cube_2dfx.zip`) — forgó kocka hat színnel, egyezik a
@@ -52,8 +52,10 @@ Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC gépp
   volt: a gazdagépes kazetta a nyers `.bin` adatfájlokat CAS-nak nézte, és 144 bájtot levágott belőlük. Most a nem
   `.CAS` kiterjesztésű fájlt bájtra pontosan, pufferelt fájlként adja, ahogy a NanoSD kártya (`host_cassette.cpp`).
   A 9300h–9400h körüli ciklus csak a SPACE/ESC-re váró billentyűolvasás volt.
-- Hiányzik: GUI (Kártyák menü, Beállítások, ini `twodfx`), MCP `media` 2dfx, mentés (`twodfx_emu_save_snapshot`),
-  `data/lang/hu.po` szövegek, docs (cards.md „2dfx” fejezet, status.md), ellenőrzés a GUI-ban.
+- GUI (2026-11-06, a felhasználó kipróbálta): Kártyák menü és Beállítások → Kártyák „2dfx grafikus kártya” slotválasztóval,
+  ini `twodfx` (yes/no/0-3), `--2dfx [SLOT]`; a SID kártya és a TVC256k++ mindkét irányban ki van zárva. hu.po kész.
+  Kipróbálva még: AnyShow2dfx (tvc.homeserver.hu 2026/Kis_Róbert(AnyStone), 15 kép) — jó.
+- Hiányzik: MCP `media` 2dfx, mentés (`twodfx_emu_save_snapshot`), docs (cards.md „2dfx” fejezet, status.md).
 - A Windows-gépen az Intelligens alkalmazásvezérlés (Smart App Control) letiltja a friss, aláíratlan fordítást.
 
 ## Elkészült

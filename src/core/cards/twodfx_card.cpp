@@ -87,8 +87,9 @@ void TwoDfxCard::video_character(bool display, bool vsync, std::uint8_t mode, st
         return;
     }
     if (px) {
-        // B9 latches at the mode's pixel clock: every 2nd 2dfx pixel in 4-colour mode, every 4th in 16-colour ⚑
-        const unsigned mask = mode == 0 ? ~0u : mode == 1 ? ~1u : ~3u;
+        // [2DFX] every 2nd 2dfx pixel, doubled, in 4- and 16-colour mode (Ep128web zzzz-2dfx.patch; the HBA-2 sheet 9
+        // reading gives the same for 16 colours). Every 4th broke the Wolf3D title's checkerboard dither into stripes.
+        const unsigned mask = mode == 0 ? ~0u : ~1u;
         for (unsigned k = 0; k < 8; ++k) {
             const unsigned q = (paper_px_ + k) & mask;
             if (q < kLine && coverage_[q]) {

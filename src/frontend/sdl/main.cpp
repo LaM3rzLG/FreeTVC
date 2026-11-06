@@ -455,6 +455,11 @@ int main(int argc, char** argv) {
     bool gamecard_given = false;
     std::string gamecard_rom_path;
     std::optional<unsigned> multichip_slot;
+    std::optional<unsigned> twodfx_slot;
+    if (settings.values.twodfx.value_or(false)) {
+        twodfx_slot = settings.values.twodfx_slot.value_or(freetvc::kCardSlots);
+    }
+    bool twodfx_given = false;
     if (settings.values.multichip.value_or(false)) {
         multichip_slot = settings.values.multichip_slot.value_or(freetvc::kMultichipSlot);
     }
@@ -553,6 +558,12 @@ int main(int argc, char** argv) {
                 return 1;
             }
             sid_clock = static_cast<std::uint32_t>(hz);
+        } else if (arg == "--2dfx") {
+            twodfx_slot = 2u;
+            twodfx_given = true;
+            if (i + 1 < argc && std::string_view(argv[i + 1]).size() == 1 && argv[i + 1][0] >= '0' && argv[i + 1][0] <= '3') {
+                twodfx_slot = static_cast<unsigned>(argv[++i][0] - '0');
+            }
         } else if (arg == "--nanosd") {
             nanosd_slot = freetvc::kNanoSdSlot;
             nanosd_given = true;
@@ -731,7 +742,7 @@ int main(int argc, char** argv) {
                                  "[--cart FILE] [--cart-type plain|kilocart|megacart|multicart|sddual] [--cart-bank N] [--snapshot FILE] "
                                  "[--sddual] [--sddual-gm] [--sddual-rom FILE] [--sddual-flash-write] [--sd FILE] [--sd2 FILE] "
                                  "[--disk-card] [--disk-rom 1.1|1.2|FILE] [--disk [A-D:]FILE] [--gamecard [SLOT]] [--gamecard-rom FILE] "
-                                 "[--multichip [SLOT]] [--multichip-rom FILE] [--sid-card [6581|8580]] [--sid-clock HZ] [--nanosd [SLOT]] [--nanosd-rom FILE] [--nanosd-sd DIR] [--printer FILE|on] [--serial-card [SLOT]] [--serial PEER] [--serial-flow rts|none] [--serial-send FILE] [--serial-capture FILE] "
+                                 "[--multichip [SLOT]] [--multichip-rom FILE] [--sid-card [6581|8580]] [--sid-clock HZ] [--2dfx [SLOT]] [--nanosd [SLOT]] [--nanosd-rom FILE] [--nanosd-sd DIR] [--printer FILE|on] [--serial-card [SLOT]] [--serial PEER] [--serial-flow rts|none] [--serial-send FILE] [--serial-capture FILE] "
                                  "[--card256 [SLOT]] [--card256-rom FILE] [--card256-usb DIR|mouse|none] [--card256-flash FILE|DIR] "
                                  "[--keymap symbolic|positional] [--language en|hu] "
                                  "[--skin NAME|FILE] [--keys NAME|FILE] [--picture NAME|FILE] [--renderer gl|sdl] [--full-raster] [--no-audio] [--frames N] [--remote-monitor] "
@@ -1121,6 +1132,13 @@ int main(int argc, char** argv) {
         }
         notice.show(true, "NanoSD left out: %s", error.c_str());
     }
+    if (twodfx_slot && !tape.twodfx(true, *twodfx_slot, error)) {
+        if (twodfx_given) {
+            std::fprintf(stderr, "freetvc: --2dfx: %s\n", error.c_str());
+            return 1;
+        }
+        notice.show(true, "2dfx card left out: %s", error.c_str());
+    }
     // The TVC256k++: from freetvc.ini or the command line
     if (!card256_rom_path.empty()) {
         auto rom = freetvc::read_file(card256_rom_path, freetvc::Card256::kRomSize, error);
@@ -1166,6 +1184,7 @@ int main(int argc, char** argv) {
     }
     const int gamecard_at_start = tape.gamecard_slot();
     const int multichip_at_start = tape.multichip_slot();
+    const int twodfx_at_start = tape.twodfx_slot();
     const std::string sid_card_at_start = tape.sid_card_model();
     const int card256_at_start = tape.card256_slot();
     const int nanosd_at_start = tape.nanosd_slot();
@@ -1428,6 +1447,10 @@ int main(int argc, char** argv) {
         const int multichip_now = tape.multichip_slot();
         if ((!multichip_given && (settings.values.multichip.has_value() || multichip_now >= 0)) || multichip_now != multichip_at_start) {
             values.emplace_back("multichip", card_setting(multichip_now, freetvc::kMultichipSlot));
+        }
+        const int twodfx_now = tape.twodfx_slot();
+        if ((!twodfx_given && (settings.values.twodfx.has_value() || twodfx_now >= 0)) || twodfx_now != twodfx_at_start) {
+            values.emplace_back("twodfx", card_setting(twodfx_now, 2));
         }
         const std::string sid_now = tape.sid_card_model();
         if ((!sid_card_given && (settings.values.sid_card.has_value() || sid_now != "off")) || sid_now != sid_card_at_start) {
@@ -2138,6 +2161,7 @@ int main(int argc, char** argv) {
         status.fast_disk = fast_disk;
         status.gamecard_slot = tape.gamecard_slot();
         status.multichip_slot = tape.multichip_slot();
+        status.twodfx_slot = tape.twodfx_slot();
         const std::string sid_model = tape.sid_card_model();
         status.sid_card = sid_model == "6581" ? 1 : sid_model == "8580" ? 2 : 0;
         status.card256_slot = tape.card256_slot();
@@ -2184,6 +2208,9 @@ int main(int argc, char** argv) {
                 break;
             case freetvc::CardKind::Serial:
                 slot_cards[s] = freetvc::sdl::tr("Serial card");
+                break;
+            case freetvc::CardKind::TwoDfx:
+                slot_cards[s] = freetvc::sdl::tr("2dfx graphics card");
                 break;
             case freetvc::CardKind::None:
                 break;
@@ -2789,6 +2816,21 @@ int main(int argc, char** argv) {
                 notice.set(error, true);
             }
         }
+        if (actions.toggle_twodfx) {
+            const bool on = tape.twodfx_slot() < 0;
+            if (tape.twodfx(on, freetvc::kCardSlots, error)) {
+                debugger->cancel_step();
+                monitor->machine_changed();
+                input.machine_replaced();
+                if (on) {
+                    notice.show(false, "2dfx graphics card in slot %d; powered on", tape.twodfx_slot());
+                } else {
+                    notice.show_text(false, "2dfx graphics card out; powered on");
+                }
+            } else {
+                notice.set(error, true);
+            }
+        }
         if (actions.toggle_multichip) {
             const bool on = tape.multichip_slot() < 0;
             if (tape.multichip(on, freetvc::kMultichipSlot, error)) {
@@ -2835,6 +2877,11 @@ int main(int argc, char** argv) {
             case freetvc::CardKind::Serial:
                 if ((placed = tape.serial_card(true, slot, error))) {
                     notice.show(false, "serial card in slot %d; powered on", n);
+                }
+                break;
+            case freetvc::CardKind::TwoDfx:
+                if ((placed = tape.twodfx(true, slot, error))) {
+                    notice.show(false, "2dfx graphics card in slot %d; powered on", n);
                 }
                 break;
             default:
