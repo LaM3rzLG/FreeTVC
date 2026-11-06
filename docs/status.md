@@ -37,11 +37,11 @@ What freeTVC emulates today, how its accuracy was checked, and what is still mis
 | Linux x86-64, GCC 13 and Clang 18 | built and tested |
 | Windows x86-64 | cross-built with MinGW-w64 from Linux; tests and the GUI run under Wine |
 | Windows, native build (MSYS2 GCC or MSVC) | described in [windows.md](windows.md), not built or tested |
-| macOS (Apple Silicon) | built with `tools/mac/build_mac.sh` and used daily (GUI, headless, MCP); no tests run ([MAC_ALLAPOT.md](../MAC_ALLAPOT.md)) |
+| macOS 13 or newer | packages for Apple Silicon and Intel (`tools/mac/make_mac_release.sh`, not notarized); used daily on Apple Silicon (GUI, headless, MCP); the Intel package is built but not run; no tests run ([MAC_ALLAPOT.md](../MAC_ALLAPOT.md)) |
 
 ## Known gaps
 
-- **Releases:** a Windows zip and a Linux tarball (glibc 2.38 or newer), built by `tools/release/make_release.sh`; no AppImage, no installer, no code signing, no CI.
+- **Releases:** a Windows zip, a Linux tarball (glibc 2.39 or newer) and two macOS zips; GitHub Actions builds the Windows and Linux ones with `tools/release/make_release.sh` (no tests there), the macOS ones are built on a Mac; no AppImage, no installer, no code signing or notarization.
 - **Hardware questions:** the open ❓ items in [tvc-hardware.md](hardware/tvc-hardware.md) and [cards.md](design/cards.md) need a real machine: for example the disk card's READY, disk-change and reset wiring.
 - **Tape:** one real recording (Space Sapper, third file) does not load: a sync half-wave of 3 counts falls under the ROM's 4-count threshold.
 - **Printer and serial:** no host serial port (COM, `/dev/tty*`) and no Epson ESC/P rendering; printer output is a byte or text file.
