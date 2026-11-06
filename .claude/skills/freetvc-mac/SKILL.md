@@ -48,6 +48,20 @@ about/` beside them (move the whole folder, never the binary alone). The CMake p
 - NanoSD in the GUI: SD folder = the program's folder, ESC to BASIC, `LOAD"WOLF2DFX"`, `RUN`. Headless typing: start
   with `\n\n` (the first keys are lost), e.g. `--key ESC@400 --type '\n\nLOAD"WOLF2DFX"\n@650' --type 'RUN\n@1700'`.
 
+## GUI windows, video, release (2026-11-06)
+- Start the GUI in the background, then move it to the external monitor (the user wants it there):
+  `osascript -e "tell application \"System Events\" to tell (first process whose unix id is PID) to set position of window 1 to {-900, -1340}"`.
+  Restart after a build: `pkill -f 'mac-release/src/freetvc --preset'`, then start again.
+- Video: `freetvc-headless --video OUT.mp4` (after `--autostart` from the program's start); GUI: REC key in the strip.
+  Needs `ffmpeg/ffmpeg` next to the program: `sh tools/release/build_ffmpeg.sh native build/ffmpeg-out-macos-arm64` and
+  copy it to `build/mac-release/src/ffmpeg/`. Check a video: `ffmpeg -i X` (stream info), `qlmanage -t -s 700 -o DIR X`
+  (a frame via macOS), sound: `afconvert -f WAVE -d LEI16 X out.wav`.
+- Release: version in CMakeLists.txt + CHANGELOG.md / CHANGELOG.hu.md section; `gh workflow run release.yml` builds
+  Linux + Windows (with ffmpeg) as an artifact; `sh tools/mac/make_mac_release.sh OUT` builds both macOS zips; tag
+  `vX.Y.Z` (annotated, the user's name) and `gh release create` from the user's account with all packages, both
+  SHA256SUMS and the ffmpeg/x264 source archives; notes = the English section + the Hungarian section. Only on request.
+- UPM test: see TERVEK.md (UPM.FDR + the EFCA95FC cartridge, `--key RETURN@250`).
+
 ## MCP (drive the user's running GUI)
 - Start: `build/mac-release/src/freetvc --mcp-http --mcp-token claudeteszt` (port 6584, 127.0.0.1 only).
 - `tools/mac/mcp.sh TOOL 'JSON' [image.png]` (env `FREETVC_MCP_TOKEN`, `FREETVC_MCP_PORT`).

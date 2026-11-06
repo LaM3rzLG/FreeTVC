@@ -31,6 +31,12 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 - A release-t Claude hozza létre a felhasználó fiókjáról (`gh release create`), mind a négy csomaggal, angol és
   magyar változásnaplóval (`CHANGELOG.md`, `CHANGELOG.hu.md`).
 
+## Videófelvétel és GUI (2026-11-06)
+- Saját kis ffmpeg (`tools/release/build_ffmpeg.sh native|macos-x86_64|mingw OUT`, Homebrew nasm + pkgconf), a program
+  mellett `ffmpeg/`-ben (`build/mac-release/src/ffmpeg/` kézzel másolva; a csomagokba a szkriptek teszik).
+- GUI-átalakítás és UPM: `gui-upm` ág, részletek a `TERVEK.md` „FOLYAMATBAN” részében.
+- A GUI-t a külső monitoron kell megnyitni (3440×1440; System Events `set position of window 1 to {-900, -1340}`).
+
 ## Tudás a repóban
 - Tervek, GitHub-hibajegyek (nem Mac-es): `TERVEK.md`.
 - `CLAUDE.md` (munkaszabályok), `.claude/skills/freetvc-mac/` (fordítás, futtatás, MCP, időzítésmérés).

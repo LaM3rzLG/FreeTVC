@@ -3752,3 +3752,129 @@ msgstr "a TVC256k++ nem tehető be a 2dfx kártya mellé (mindkettő az EC0-3 é
 
 msgid "not with the TVC256k++ (both drive EC0-3 and /EXTC)"
 msgstr "a TVC256k++-szal nem megy együtt (mindkettő az EC0-3 és /EXTC vonalat hajtja)"
+
+msgid "Recording: click to stop; right click for the menu"
+msgstr "Felvétel folyik: kattintás = leállítás; jobb klikk = menü"
+
+msgid "Record a video of the TV picture and sound: click to start; right click for the menu"
+msgstr "Videófelvétel a TV-képről és a hangról: kattintás = indítás; jobb klikk = menü"
+
+msgid "Screenshot of the TV picture as a PNG: click to take one; right click for the menu"
+msgstr "Képernyőkép a TV-képről PNG-be: kattintás = kép készítése; jobb klikk = menü"
+
+msgid "Video recording"
+msgstr "Videófelvétel"
+
+msgid "Start recording"
+msgstr "Felvétel indítása"
+
+msgid "Stop recording"
+msgstr "Felvétel leállítása"
+
+msgid "Recordings folder..."
+msgstr "Felvételek helye..."
+
+msgid "Open the recordings folder"
+msgstr "Felvételek mappájának megnyitása"
+
+msgid "Take a screenshot"
+msgstr "Képernyőkép készítése"
+
+msgid "Screenshots folder..."
+msgstr "Képernyőképek helye..."
+
+msgid "Open the screenshots folder"
+msgstr "Képernyőképek mappájának megnyitása"
+
+msgid "recording to %s"
+msgstr "felvétel: %s"
+
+msgid "recording failed: %s"
+msgstr "a felvétel nem sikerült: %s"
+
+msgid "no ffmpeg for recording: the ffmpeg folder next to freeTVC is missing"
+msgstr "nincs ffmpeg a felvételhez: hiányzik az ffmpeg mappa a freeTVC mellől"
+
+msgid "saved %s (%.0f s)"
+msgstr "elmentve: %s (%.0f mp)"
+
+msgid "recordings go to %s"
+msgstr "a felvételek helye: %s"
+
+msgid "screenshots go to %s"
+msgstr "a képernyőképek helye: %s"
+
+msgid "Empty"
+msgstr "Üres"
+
+msgid "Slot"
+msgstr "Slot"
+
+msgid "slot %d empty; powered on"
+msgstr "a %d. slot üres; hidegindítás"
+
+msgid "The HBF disk card goes in slot 0 only"
+msgstr "A HBF lemezkártya csak a 0. slotba tehető"
+
+msgid "HBF card in slot 0: LOAD and SAVE use the disks, not the cassette"
+msgstr "HBF kártya a 0. slotban: a LOAD és a SAVE a lemezt használja, nem a kazettát"
+
+msgid ""
+"dikdom's card: SN76489 sound, joysticks 3 and 4 on gamepads 3 and 4, a boot "
+"menu with four games"
+msgstr ""
+"dikdom kártyája: SN76489 hang, 3. és 4. joystick a 3. és 4. gamepaden, "
+"indítómenü négy játékkal"
+
+msgid "Vass Sándor's card: SN76489, SAA1099 and YM3812 (OPL2) on the TV's sound"
+msgstr "Vass Sándor kártyája: SN76489, SAA1099 és YM3812 (OPL2) a TV hangján"
+
+msgid ""
+"dikdom's card: 256 KiB fast RAM, 8 MiB paged RAM, sprites and overlay "
+"graphics, drives, a mouse, vSID"
+msgstr ""
+"dikdom kártyája: 256 KiB gyors RAM, 8 MiB lapozható RAM, sprite-ok és "
+"overlay-grafika, meghajtók, egér, vSID"
+
+msgid ""
+"Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper; not with "
+"the TVC256k++"
+msgstr ""
+"Vaczkó Károly kártyája: sprite-ok, 2D és 3D grafika a papír fölött; a "
+"TVC256k++-szal nem megy együtt"
+
+msgid ""
+"Vass Sándor's card: an SD card through an Arduino Nano; LOAD and SAVE go to it"
+msgstr ""
+"Vass Sándor kártyája: SD-kártya egy Arduino Nanón át; a LOAD és a SAVE oda megy"
+
+msgid "Videoton's RS-232 card (an 8251A): BASIC's device #6"
+msgstr "A Videoton RS-232 kártyája (8251A): a BASIC 6-os eszköze"
+
+msgid "disk card in slot 0; powered on"
+msgstr "lemezkártya a 0. slotban; hidegindítás"
+
+msgid "SYS and EXT 2.x ROMs"
+msgstr "SYS és EXT 2.x ROM-ok"
+
+msgid "SYS 1.2 and EXT 1.x ROMs"
+msgstr "SYS 1.2 és EXT 1.x ROM-ok"
+
+msgid "Disk system"
+msgstr "Lemezes rendszer"
+
+msgid "UPM (CP/M)"
+msgstr "UPM (CP/M)"
+
+msgid "Videoton's CP/M: its card EPROM and cartridge are not in the ROM download yet"
+msgstr "A Videoton CP/M-je: a kártya-EPROM és a cartridge még nincs a ROM-letöltésben"
+
+msgid "HBM 32 KiB RAM card"
+msgstr "HBM 32 KiB RAM-kártya"
+
+msgid ""
+"Videoton's RAM card for the 32K machine: 32 KiB more, as U2 and U3; the "
+"machine powers on"
+msgstr ""
+"A Videoton RAM-kártyája a 32K-s géphez: plusz 32 KiB (U2 és U3); "
+"hidegindítás"

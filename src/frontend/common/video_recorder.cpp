@@ -33,6 +33,7 @@ namespace {
 constexpr const char* kFrameRate = "3125000/62800";
 constexpr unsigned kFrameTicks = 62800;
 constexpr double kClock = 3125000.0;
+constexpr int kLineScale = 4;
 
 // Arguments are UTF-8 on every system
 std::string utf8(const fs::path& p) {
@@ -297,9 +298,10 @@ bool VideoRecorder::start(const fs::path& out, const fs::path& ffmpeg, ScreenAre
         error = msg("cannot write '%s'", utf8(audio_tmp_).c_str());
         return false;
     }
-    // Pixels doubled with nearest neighbour, so the 4:2:0 colour keeps every TVC pixel sharp
+    // Each line 4 times and each pixel 4 times, then the width to the PAL aspect by area averaging (4:3 for the TV area)
     const std::string size = std::to_string(area.width) + "x" + std::to_string(area.height);
-    const std::string scale = "scale=" + std::to_string(area.width * 2) + ":" + std::to_string(area.height * 2) + ":flags=neighbor";
+    const std::string scale = "scale=iw*" + std::to_string(kLineScale) + ":ih*" + std::to_string(kLineScale) + ":flags=neighbor,scale=" +
+                              std::to_string(pal_width(area, kLineScale)) + ":" + std::to_string(area.height * kLineScale) + ":flags=area";
     const std::vector<std::string> args{utf8(ffmpeg), "-hide_banner", "-loglevel", "error", "-y",
                                         "-f", "rawvideo", "-pix_fmt", "rgb24", "-video_size", size,
                                         "-framerate", kFrameRate, "-i", "-",

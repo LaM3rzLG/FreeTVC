@@ -28,7 +28,7 @@ public:
     VideoRecorder(const VideoRecorder&) = delete;
     VideoRecorder& operator=(const VideoRecorder&) = delete;
 
-    // Starts ffmpeg encoding `area` of each frame, doubled, into a temporary file beside `out`; sound at `audio_rate`
+    // Starts ffmpeg encoding `area` of each frame at the PAL aspect into a temporary file beside `out`; sound at `audio_rate`
     bool start(const std::filesystem::path& out, const std::filesystem::path& ffmpeg, ScreenArea area, unsigned audio_rate,
                std::string& error);
     // Ends the recording and joins picture and sound into `out`; false with `error` set (the temporary files are removed)

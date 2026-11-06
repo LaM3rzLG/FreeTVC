@@ -10,12 +10,6 @@
 
 namespace freetvc::sdl {
 
-namespace {
-
-// Width/height of one framebuffer pixel on a 4:3 PAL screen: square-pixel clock 14.75 MHz vs 12.5 MHz, one raster line = two interlaced lines.
-constexpr float kPixelAspect = (14.75f / 12.5f) / 2.0f;
-
-}  // namespace
 
 ImU32 with_alpha(Colour c, float alpha) {
     c.a = static_cast<std::uint8_t>(c.a * std::clamp(alpha, 0.0f, 1.0f));
@@ -126,6 +120,98 @@ bool DeckRow::transport(const char* id, bool stop, Colour colour) {
         draw->AddTriangleFilled({c.x - side * 0.4f, c.y - side / 2.0f}, {c.x + side * 0.6f, c.y}, {c.x - side * 0.4f, c.y + side / 2.0f},
                                 to_imgui(colour));
     }
+    return clicked;
+}
+
+namespace {
+
+// Four rounded corner marks inside the square or rectangle at `min`-`max`
+void corners(ImDrawList* draw, ImVec2 min, ImVec2 max, float arm, float thick, ImU32 colour) {
+    const float r = thick * 1.2f;
+    for (int i = 0; i < 4; ++i) {
+        const float x = i & 1 ? max.x : min.x;
+        const float y = i & 2 ? max.y : min.y;
+        const float dx = i & 1 ? -1.0f : 1.0f;
+        const float dy = i & 2 ? -1.0f : 1.0f;
+        draw->PathLineTo({x + dx * arm, y});
+        draw->PathLineTo({x + dx * r, y});
+        draw->PathBezierQuadraticCurveTo({x, y}, {x, y + dy * r});
+        draw->PathLineTo({x, y + dy * arm});
+        draw->PathStroke(colour, thick);
+    }
+}
+
+}  // namespace
+
+// The REC key's width: its marks, dot and text
+float rec_width(ImFont* font, float size, float height) {
+    const ImVec2 text = font->CalcTextSizeA(size, FLT_MAX, 0.0f, "REC");
+    return height * 0.2f * 2.0f + height * 0.18f + text.y * 0.64f + text.y * 0.25f + text.x + height * 0.18f;
+}
+
+bool DeckRow::rec(const char* id, ImFont* font, float size, Colour colour, Colour dot, bool lit) {
+    ImGui::SameLine(0.0f, 0.0f);
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const ImVec2 text = font->CalcTextSizeA(size, FLT_MAX, 0.0f, "REC");
+    const float inset = height_ * 0.2f;
+    const float radius = text.y * 0.32f;
+    const float width = rec_width(font, size, height_);
+    const bool clicked = ImGui::InvisibleButton(id, {width, height_});
+    draw_hover(pos, {width, height_});
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const float thick = std::max(1.0f, height_ * 0.06f);
+    corners(draw, {pos.x + inset, pos.y + inset}, {pos.x + width - inset, pos.y + height_ - inset}, height_ * 0.16f, thick, to_imgui(colour));
+    const float cy = pos.y + height_ / 2.0f;
+    const float dot_x = pos.x + inset + height_ * 0.18f + radius;
+    draw->AddCircleFilled({dot_x, cy}, radius, lit ? to_imgui(dot) : with_alpha(dot, 0.35f));
+    draw->AddText(font, size, {dot_x + radius + text.y * 0.25f, cy - text.y / 2.0f}, to_imgui(colour), "REC");
+    return clicked;
+}
+
+bool DeckRow::tvc(const char* id, Colour colour) {
+    ImGui::SameLine(0.0f, 0.0f);
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    // Drawn on a 68 x 45 grid scaled to the strip's height
+    const float k = height_ / 45.0f;
+    const float width = 68.0f * k;
+    const bool clicked = ImGui::InvisibleButton(id, {width, height_});
+    draw_hover(pos, {width, height_});
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    // The drawing at 90 % of the key, centred
+    const float g = k * 0.9f;
+    const ImVec2 o{pos.x + (width - 68.0f * g) / 2.0f, pos.y + (height_ - 45.0f * g) / 2.0f};
+    const float thick = std::max(1.0f, 2.2f * g);
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    draw->AddRect(p(6.0f, 9.0f), p(62.0f, 36.0f), c, 2.5f * g, thick);
+    for (const float x : {10.0f, 14.0f, 18.0f, 22.0f}) {
+        draw->AddLine(p(x, 9.0f), p(x, 18.0f), c, thick);
+    }
+    draw->AddRect(p(12.0f, 22.0f), p(46.0f, 32.0f), c, 1.5f * g, thick);
+    draw->AddLine(p(15.0f, 25.3f), p(43.0f, 25.3f), c, thick);
+    draw->AddLine(p(15.0f, 28.7f), p(43.0f, 28.7f), c, thick);
+    draw->AddLine(p(54.0f, 31.0f), p(54.0f, 25.0f), c, thick);
+    draw->AddCircleFilled(p(54.0f, 24.0f), 2.6f * g, c);
+    return clicked;
+}
+
+bool DeckRow::camera(const char* id, ImFont* font, float size, Colour colour) {
+    ImGui::SameLine(0.0f, 0.0f);
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const float width = rec_width(font, size, height_);
+    const bool clicked = ImGui::InvisibleButton(id, {width, height_});
+    draw_hover(pos, {width, height_});
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, height_ * 0.06f);
+    const float inset = height_ * 0.2f;
+    corners(draw, {pos.x + inset, pos.y + inset}, {pos.x + width - inset, pos.y + height_ - inset}, height_ * 0.16f, thick, c);
+    const ImVec2 mid{pos.x + width / 2.0f, pos.y + height_ / 2.0f + height_ * 0.03f};
+    const float w = height_ * 0.36f;
+    const float h = height_ * 0.24f;
+    draw->AddRect({mid.x - w / 2.0f, mid.y - h / 2.0f}, {mid.x + w / 2.0f, mid.y + h / 2.0f}, c, thick, thick);
+    draw->AddRectFilled({mid.x - w * 0.18f, mid.y - h / 2.0f - h * 0.28f}, {mid.x + w * 0.18f, mid.y - h / 2.0f}, c, thick * 0.5f);
+    draw->AddCircle(mid, h * 0.3f, c, 0, thick);
     return clicked;
 }
 

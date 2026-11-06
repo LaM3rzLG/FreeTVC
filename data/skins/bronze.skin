@@ -38,9 +38,10 @@ font.strong    = AtkinsonHyperlegibleNext-Medium.ttf
 font.data      = AtkinsonHyperlegibleMono-Regular.ttf
 font.ui.size   = 15
 font.data.size = 15
+font.strip.size = 22  ; the status strip's text (font.ui.size when not set)
 
 ; Metrics in points
-metric.strip.height  = 30  ; status strip
+metric.strip.height  = 45  ; status strip
 metric.screen.margin = 16  ; frame between window edge and screen
 metric.groove        = 2   ; groove line above the strip
 metric.rounding      = 0   ; corner radius of controls and popups

@@ -34,6 +34,14 @@ inline constexpr ScreenArea kTvArea{131, 23, 650, 287};
 // Everything the beam traces, sync and blanking included
 inline constexpr ScreenArea kFullRaster{0, 0, Framebuffer::kWidth, Framebuffer::kHeight};
 
+// Width/height of one framebuffer pixel on a 4:3 PAL screen: square-pixel clock 14.75 MHz vs 12.5 MHz, one raster line = two interlaced lines.
+inline constexpr float kPixelAspect = (14.75f / 12.5f) / 2.0f;
+
+// A picture of `area` at the PAL aspect with every line `scale` times: its width, even
+inline constexpr int pal_width(ScreenArea area, int scale) {
+    return static_cast<int>(static_cast<float>(area.width) * kPixelAspect * static_cast<float>(scale) / 2.0f + 0.5f) * 2;
+}
+
 // 0xRRGGBB per index. [OS]: component = C * (4/7 + I * 3/7), so dark = 146 and bright = 255; I alone is a second black (tvc-hardware.md §5, levels ❓).
 inline constexpr std::array<std::uint32_t, Framebuffer::kColours> kRgbPalette = [] {
     std::array<std::uint32_t, Framebuffer::kColours> rgb{};

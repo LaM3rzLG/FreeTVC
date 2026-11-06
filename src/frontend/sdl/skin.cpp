@@ -45,6 +45,7 @@ const NamedField kFields[] = {
     {"font.data", &Skin::font_data},
     {"font.ui.size", &Skin::font_ui_size},
     {"font.data.size", &Skin::font_data_size},
+    {"font.strip.size", &Skin::font_strip_size},
     {"metric.strip.height", &Skin::strip_height},
     {"metric.screen.margin", &Skin::screen_margin},
     {"metric.groove", &Skin::groove_width},

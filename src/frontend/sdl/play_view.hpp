@@ -65,6 +65,10 @@ struct PlayStatus {
     int sid_card = 0;         // the SID card at E0h-FFh: 0 out, 1 MOS 6581, 2 MOS 8580
     int card256_slot = -1;   // the TVC256k++'s slot, -1 = out
     int twodfx_slot = -1;    // the 2dfx graphics card's slot, -1 = out
+    std::array<CardKind, kCardSlots> slot_kinds{};
+    std::string_view disk_rom;     // the disk card's EPROM: "1.1", "1.2" or a file  // the card in each slot (None = empty)
+    bool recording = false;        // a video is being recorded
+    double record_seconds = 0.0;   // its machine time so far
     int card256_usb = 0;     // its USB port: 0 empty, 1 pendrive, 2 mouse
     std::string_view card256_pendrive;  // the pendrive folder's name
     std::string_view card256_flash;     // the flash drive's image or folder name; empty = none
@@ -129,6 +133,13 @@ struct PlayActions {
     bool card256_mouse = false;     // the mouse on its USB port
     bool card256_unplug = false;    // nothing on its USB port
     bool card256_flash = false;     // file dialog, then that image is its flash drive
+    std::string disk_rom;              // "1.1" or "1.2": the disk card's new EPROM (powers on while the card is in)
+    int slot_clear = -1;               // the card in this slot comes out and the machine powers on
+    bool toggle_record = false;        // the REC key: a video starts (named after the program and the time) or stops
+    bool video_dir = false;            // folder dialog, then recordings go there
+    bool open_video_dir = false;
+    bool screenshot_dir = false;       // folder dialog, then screenshots go there
+    bool open_screenshot_dir = false;
     bool toggle_twodfx = false;     // the 2dfx card goes in (slot 2, else the first free) or out and the machine powers on
     bool toggle_nanosd = false;     // the NanoSD goes in (slot 3) or out and the machine powers on
     bool nanosd_sd = false;         // folder dialog, then that folder is its SD card

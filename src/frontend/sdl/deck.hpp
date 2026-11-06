@@ -48,6 +48,12 @@ public:
     bool slot_ribs(float scale, std::span<const std::string_view> cards);
     // A square tape-transport key: a play triangle, or a stop square when `stop`
     bool transport(const char* id, bool stop, Colour colour);
+    // The REC key: corner marks, a dot (`dot` colour; dimmed when `lit` is false) and REC
+    bool rec(const char* id, ImFont* font, float size, Colour colour, Colour dot, bool lit);
+    // The machine key: a small TVC seen from the front (case, slot ribs, keyboard, joystick)
+    bool tvc(const char* id, Colour colour);
+    // The screenshot key: corner marks around a camera, as wide as the REC key
+    bool camera(const char* id, ImFont* font, float size, Colour colour);
     void draw_hover(ImVec2 pos, ImVec2 size) const;
     float height() const { return height_; }
 

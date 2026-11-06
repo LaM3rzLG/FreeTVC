@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <cmath>
 #include <cstdio>
 
 #include "frontend/sdl/deck.hpp"
@@ -21,6 +22,8 @@ constexpr const char* kMachineMenu = "##machine_menu";
 constexpr const char* kCardsMenu = "##cards_menu";
 constexpr const char* kTapeMenu = "##tape_menu";
 constexpr const char* kDiskMenu = "##disk_menu";
+constexpr const char* kRecordMenu = "##record_menu";
+constexpr const char* kShotMenu = "##shot_menu";
 
 // Opens `id` above the strip at window x `anchor`; true while it is open (EndPopup is the caller's)
 bool begin_menu(const char* id, float anchor, float strip_top, PlayActions& actions) {
@@ -102,13 +105,36 @@ void draw_main_menu(const PlayStatus& status, PlayActions& actions) {
     actions.quit |= ImGui::MenuItem(tr("Quit"));
 }
 
-void draw_machine_menu(const PlayStatus& status, PlayActions& actions) {
-    ImGui::SeparatorText(tr("Machine"));
+// The preset with this board, or -1
+int preset_of(const PlayStatus& status, Model model) {
     for (std::size_t i = 0; i < status.presets.size(); ++i) {
-        const std::string name(status.presets[i].name);
-        if (ImGui::MenuItem(name.c_str(), nullptr, i == status.preset) && i != status.preset) {
+        if (status.presets[i].model == model) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}
+
+void draw_machine_menu(const PlayStatus& status, PlayActions& actions) {
+    // The factory machines: the board, and its BASIC beside it; the HBM RAM card is in the Cards menu
+    ImGui::SeparatorText(tr("Machine"));
+    const Model current = status.presets[status.preset].model;
+    for (std::size_t i = 0; i < status.presets.size(); ++i) {
+        const Preset& p = status.presets[i];
+        if (p.model == Model::Tvc32kHbm) {
+            continue;
+        }
+        const char* board = p.model == Model::Tvc32k ? "TVC 32K" : p.model == Model::Tvc64k ? "TVC 64K" : "TVC 64K+";
+        const std::string basic = "BASIC " + std::string(p.name.substr(p.name.rfind('-') + 1));
+        const bool on = i == status.preset || (p.model == Model::Tvc32k && current == Model::Tvc32kHbm);
+        ImGui::PushID(static_cast<int>(i));  // two rows read "TVC 64K+"
+        if (ImGui::MenuItem(board, basic.c_str(), on) && !on) {
             actions.preset = static_cast<int>(i);
         }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", p.model == Model::Tvc64kPlus ? tr("SYS and EXT 2.x ROMs") : tr("SYS 1.2 and EXT 1.x ROMs"));
+        }
+        ImGui::PopID();
     }
     actions.fetch_roms |= ImGui::MenuItem(tr("Download ROMs"));
     if (ImGui::IsItemHovered()) {
@@ -120,85 +146,29 @@ void draw_machine_menu(const PlayStatus& status, PlayActions& actions) {
     actions.power_cycle |= ImGui::MenuItem(tr("Power cycle"));
 }
 
-// The slot a card goes into, or moves to; a slot with another card shows it, greyed out
-void slot_choice(const PlayStatus& status, CardKind kind, int slot, const char* id, PlayActions& actions) {
-    ImGui::Indent();
-    const std::string label = std::string(slot >= 0 ? tr("Move to slot") : tr("Put in slot")) + "##" + id;
-    if (ImGui::BeginMenu(label.c_str())) {
-        char item[160];
-        for (int s = 0; s < static_cast<int>(kCardSlots); ++s) {
-            const bool free = status.slot_cards[s].empty();
-            if (free || s == slot) {
-                std::snprintf(item, sizeof item, tr("Slot %d, ports %d0h-%dFh"), s, s + 1, s + 1);
-            } else {
-                const std::string holder(status.slot_cards[s]);
-                std::snprintf(item, sizeof item, tr("Slot %d, ports %d0h-%dFh: %s"), s, s + 1, s + 1, holder.c_str());
-            }
-            if (ImGui::MenuItem(item, nullptr, s == slot, free || s == slot) && s != slot) {
-                actions.slot_card = kind;
-                actions.slot_card_to = s;
-            }
-        }
-        ImGui::EndMenu();
-    }
-    ImGui::Unindent();
-}
+void draw_disk_menu(const PlayStatus& status, PlayActions& actions);
 
-void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
-    // design/cards.md: switching a card powers the machine on
-    ImGui::SeparatorText(tr("Cards"));
-    actions.toggle_disk_card |= ImGui::MenuItem(tr("Disk card in slot 0"), nullptr, status.disk_card);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("HBF card in slot 0: LOAD and SAVE use the disks, not the cassette; the machine powers on"));
-    }
+// A card's own media and cable, under its slot; none of this powers the machine on
+void draw_card_extras(CardKind kind, const PlayStatus& status, PlayActions& actions) {
     char item[160];
-    if (status.gamecard_slot >= 0) {
-        std::snprintf(item, sizeof item, tr("GameCard in slot %d"), status.gamecard_slot);
-    } else {
-        std::snprintf(item, sizeof item, "%s", tr("GameCard"));
-    }
-    actions.toggle_gamecard |= ImGui::MenuItem(item, nullptr, status.gamecard_slot >= 0);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("dikdom's card: SN76489 sound, joysticks 3 and 4 on gamepads 3 and 4, a boot menu with four games; "
-                                   "the machine powers on"));
-    }
-    slot_choice(status, CardKind::GameCard, status.gamecard_slot, "gamecard", actions);
-    if (status.multichip_slot >= 0) {
-        std::snprintf(item, sizeof item, tr("Multichip sound card in slot %d"), status.multichip_slot);
-    } else {
-        std::snprintf(item, sizeof item, "%s", tr("Multichip sound card"));
-    }
-    actions.toggle_multichip |= ImGui::MenuItem(item, nullptr, status.multichip_slot >= 0);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("Vass Sándor's card: SN76489, SAA1099 and YM3812 (OPL2) on the TV's sound; its start-up screen plays "
-                                   "a demo on each chip after SPACE; the machine powers on"));
-    }
-    slot_choice(status, CardKind::Multichip, status.multichip_slot, "multichip", actions);
-    // Outside the slots, so no slot number; one chip at a time
-    for (const int chip : {1, 2}) {
-        if (ImGui::MenuItem(chip == 1 ? tr("SID card, MOS 6581") : tr("SID card, MOS 8580"), nullptr, status.sid_card == chip)) {
-            actions.sid_card = status.sid_card == chip ? 0 : chip;
+    switch (kind) {
+    case CardKind::Hbf: {
+        draw_disk_menu(status, actions);
+        // The card's EPROM: the disk system it boots
+        ImGui::SeparatorText(tr("Disk system"));
+        for (const auto& [choice, label] : {std::pair{"1.1", "VT-DOS 1.1"}, std::pair{"1.2", "VT-DOS 1.2"}}) {
+            if (ImGui::MenuItem(label, nullptr, status.disk_rom == choice) && status.disk_rom != choice) {
+                actions.disk_rom = choice;
+            }
         }
-        if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("%s", tr("A SID chip at ports E0h-FFh, outside the slots, where WinTVC puts it (no real card's documentation "
-                                       "is known); reSID on the TV's sound; the machine powers on"));
+        ImGui::MenuItem(tr("UPM (CP/M)"), nullptr, false, false);
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+            ImGui::SetTooltip("%s", tr("Videoton's CP/M: its card EPROM and cartridge are not in the ROM download yet"));
         }
+        break;
     }
-    if (status.card256_slot >= 0) {
-        std::snprintf(item, sizeof item, tr("TVC256k++ in slot %d"), status.card256_slot);
-    } else {
-        std::snprintf(item, sizeof item, "%s", tr("TVC256k++"));
-    }
-    actions.toggle_card256 |= ImGui::MenuItem(item, nullptr, status.card256_slot >= 0);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("dikdom's card: 256 KiB fast RAM in place of U2/U3, 8 MiB paged RAM, sprites and overlay graphics, "
-                                   "drives for LOAD and SAVE, a mouse, its EXT command line (EXT and the slot number), its vSID sound; "
-                                   "the machine powers on"));
-    }
-    slot_choice(status, CardKind::Card256, status.card256_slot, "card256", actions);
-    if (status.card256_slot >= 0) {
+    case CardKind::Card256: {
         // One USB port, so the pendrive and the mouse take turns; none of this powers the machine on
-        ImGui::Indent();
         const std::string pendrive(status.card256_pendrive);
         std::snprintf(item, sizeof item, tr("Pendrive %s..."), pendrive.c_str());
         actions.card256_pendrive |= ImGui::MenuItem(status.card256_usb == 1 ? item : tr("Pendrive folder..."), nullptr, status.card256_usb == 1,
@@ -217,33 +187,10 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("%s", tr("A littlefs image as drive 2, read only: the card's launcher and games (card256-flash.bin)"));
         }
-        ImGui::Unindent();
+        break;
     }
-    if (status.twodfx_slot >= 0) {
-        std::snprintf(item, sizeof item, tr("2dfx graphics card in slot %d"), status.twodfx_slot);
-    } else {
-        std::snprintf(item, sizeof item, "%s", tr("2dfx graphics card"));
-    }
-    actions.toggle_twodfx |= ImGui::MenuItem(item, nullptr, status.twodfx_slot >= 0);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper, ports F8h/F9h (a SID card keeps "
-                                   "E0h-F7h); not with the TVC256k++; the machine powers on"));
-    }
-    slot_choice(status, CardKind::TwoDfx, status.twodfx_slot, "twodfx", actions);
-    if (status.nanosd_slot >= 0) {
-        std::snprintf(item, sizeof item, tr("NanoSD in slot %d"), status.nanosd_slot);
-    } else {
-        std::snprintf(item, sizeof item, "%s", tr("NanoSD"));
-    }
-    actions.toggle_nanosd |= ImGui::MenuItem(item, nullptr, status.nanosd_slot >= 0);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("Vass Sándor's card: an SD card through an Arduino Nano; LOAD and SAVE go to it, a file-select menu at "
-                                   "power-on (ESC skips it), its command line with EXT 0; the machine powers on"));
-    }
-    slot_choice(status, CardKind::NanoSd, status.nanosd_slot, "nanosd", actions);
-    if (status.nanosd_slot >= 0) {
+    case CardKind::NanoSd: {
         // The SD card comes and goes like on the card, without powering on; the Nano notices
-        ImGui::Indent();
         const std::string sd(status.nanosd_sd);
         std::snprintf(item, sizeof item, tr("SD card %s..."), sd.c_str());
         actions.nanosd_sd |= ImGui::MenuItem(sd.empty() ? tr("SD card folder...") : item, nullptr, !sd.empty(), status.can_browse);
@@ -251,21 +198,10 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
             ImGui::SetTooltip("%s", tr("A host folder as the SD card: the card sees 8.3 names only, files are written at once"));
         }
         actions.nanosd_eject |= ImGui::MenuItem(tr("Take the SD card out"), nullptr, false, !sd.empty());
-        ImGui::Unindent();
+        break;
     }
-    if (status.serial_slot >= 0) {
-        std::snprintf(item, sizeof item, tr("Serial card in slot %d"), status.serial_slot);
-    } else {
-        std::snprintf(item, sizeof item, "%s", tr("Serial card (RS-232)"));
-    }
-    actions.toggle_serial |= ImGui::MenuItem(item, nullptr, status.serial_slot >= 0);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("Videoton's RS-232 card (an 8251A): BASIC's device #6 (LIST #6, SAVE #6, LOAD #6); the machine powers on"));
-    }
-    slot_choice(status, CardKind::Serial, status.serial_slot, "serial", actions);
-    if (status.serial_slot >= 0) {
+    case CardKind::Serial: {
         // The cable and its files change without powering on
-        ImGui::Indent();
         actions.serial_line = ImGui::MenuItem(tr("Cable unplugged"), nullptr, status.serial_line == "off") ? 0 : actions.serial_line;
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("%s", tr("No peer: sending waits for DSR until STOP (CTRL+ESC)"));
@@ -294,9 +230,106 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("%s", tr("What the TVC sends is appended to the file (with no other peer the cable then goes to the host)"));
         }
-        ImGui::Unindent();
+        break;
     }
+    default:
+        break;
+    }
+}
 
+bool has_card_extras(CardKind kind) { return kind == CardKind::Hbf || kind == CardKind::Card256 || kind == CardKind::NanoSd || kind == CardKind::Serial; }
+
+void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
+    // design/cards.md: a slot's list puts a card in (moving it from another slot, taking out what was there); the machine powers on
+    ImGui::SeparatorText(tr("Cards"));
+    struct Choice {
+        CardKind kind;
+        const char* name;
+        const char* tip;
+    };
+    const Choice choices[] = {
+        {CardKind::None, tr("Empty"), nullptr},
+        {CardKind::Hbf, tr("HBF disk card"), tr("HBF card in slot 0: LOAD and SAVE use the disks, not the cassette")},
+        {CardKind::GameCard, tr("GameCard"), tr("dikdom's card: SN76489 sound, joysticks 3 and 4 on gamepads 3 and 4, a boot menu with four games")},
+        {CardKind::Multichip, tr("Multichip sound card"), tr("Vass Sándor's card: SN76489, SAA1099 and YM3812 (OPL2) on the TV's sound")},
+        {CardKind::Card256, tr("TVC256k++"), tr("dikdom's card: 256 KiB fast RAM, 8 MiB paged RAM, sprites and overlay graphics, drives, a mouse, vSID")},
+        {CardKind::TwoDfx, tr("2dfx graphics card"), tr("Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper; not with the TVC256k++")},
+        {CardKind::NanoSd, tr("NanoSD"), tr("Vass Sándor's card: an SD card through an Arduino Nano; LOAD and SAVE go to it")},
+        {CardKind::Serial, tr("Serial card (RS-232)"), tr("Videoton's RS-232 card (an 8251A): BASIC's device #6")},
+    };
+    // A column of card names after "Slot n"; an empty slot says so, centred on the longest name shown
+    const char* empty = tr("Empty");
+    float longest = 0.0f;
+    float slot_w = 0.0f;
+    char slot[32];
+    for (int s = 0; s < static_cast<int>(kCardSlots); ++s) {
+        const std::string name(status.slot_cards[static_cast<std::size_t>(s)]);
+        longest = std::max(longest, ImGui::CalcTextSize(name.empty() ? empty : name.c_str()).x);
+        std::snprintf(slot, sizeof slot, "%s %d", tr("Slot"), s);
+        slot_w = std::max(slot_w, ImGui::CalcTextSize(slot).x);
+    }
+    const float gap = ImGui::CalcTextSize("    ").x;
+    const std::string pad(static_cast<std::size_t>(std::ceil((slot_w + gap + longest) / ImGui::CalcTextSize(" ").x)), ' ');
+    for (int s = 0; s < static_cast<int>(kCardSlots); ++s) {
+        const CardKind held = status.slot_kinds[static_cast<std::size_t>(s)];
+        const std::string name(status.slot_cards[static_cast<std::size_t>(s)]);
+        std::snprintf(slot, sizeof slot, "%s %d", tr("Slot"), s);
+        ImDrawList* draw = ImGui::GetWindowDrawList();
+        const ImVec2 at = ImGui::GetCursorScreenPos();
+        const std::string label = pad + "###slot" + std::to_string(s);
+        const bool open = ImGui::BeginMenu(label.c_str());
+        // The label is blank space: the slot and the card are drawn over it
+        draw->AddText({at.x, at.y}, ImGui::GetColorU32(ImGuiCol_Text), slot);
+        if (name.empty()) {
+            const float w = ImGui::CalcTextSize(empty).x;
+            draw->AddText({at.x + slot_w + gap + (longest - w) / 2.0f, at.y}, ImGui::GetColorU32(ImGuiCol_TextDisabled), empty);
+        } else {
+            draw->AddText({at.x + slot_w + gap, at.y}, ImGui::GetColorU32(ImGuiCol_Text), name.c_str());
+        }
+        if (!open) {
+            continue;
+        }
+        for (const Choice& c : choices) {
+            const bool allowed = c.kind != CardKind::Hbf || s == 0;
+            // The card in the slot with settings of its own opens them beside it
+            if (c.kind == held && has_card_extras(held)) {
+                if (ImGui::BeginMenu(c.name)) {
+                    draw_card_extras(held, status, actions);
+                    ImGui::EndMenu();
+                }
+                continue;
+            }
+            if (ImGui::MenuItem(c.name, nullptr, c.kind == held, allowed) && c.kind != held) {
+                if (c.kind == CardKind::None) {
+                    actions.slot_clear = s;
+                } else {
+                    actions.slot_card = c.kind;
+                    actions.slot_card_to = s;
+                }
+            }
+            if (c.tip && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                ImGui::SetTooltip("%s", c.kind == CardKind::Hbf && !allowed ? tr("The HBF disk card goes in slot 0 only") : c.tip);
+            }
+        }
+        ImGui::EndMenu();
+    }
+    // The HBM 32 KiB RAM card fits the 32K machine only (a board of its own in the presets)
+    const Model current = status.presets[status.preset].model;
+    if (current == Model::Tvc32k || current == Model::Tvc32kHbm) {
+        ImGui::Separator();
+        const bool hbm = current == Model::Tvc32kHbm;
+        if (ImGui::MenuItem(tr("HBM 32 KiB RAM card"), nullptr, hbm)) {
+            actions.preset = preset_of(status, hbm ? Model::Tvc32k : Model::Tvc32kHbm);
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", tr("Videoton's RAM card for the 32K machine: 32 KiB more, as U2 and U3; the machine powers on"));
+        }
+    }
+}
+
+// The main board's printer port and the cartridge port
+void draw_ports_menu(const PlayStatus& status, PlayActions& actions) {
+    char item[160];
     // design/machine.md "Printer port": the main board's own port; nothing plugged in by default
     ImGui::SeparatorText(tr("Printer port"));
     const std::string printer(status.printer_file);
@@ -434,8 +467,9 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
 
     // Nameplate: "free" in the muted colour, "TVC" like the case lettering
     const float pad = ImGui::GetStyle().FramePadding.x;
-    const float ui_px = skin.font_ui_size * scale;
-    const float data_px = skin.font_data_size * scale;
+    const float strip_ratio = skin.font_strip_size > 0.0f ? skin.font_strip_size / skin.font_ui_size : 1.0f;
+    const float ui_px = skin.font_ui_size * strip_ratio * scale;
+    const float data_px = skin.font_data_size * strip_ratio * scale;
     const ImVec2 free_size = fonts.ui->CalcTextSizeA(ui_px, FLT_MAX, 0.0f, "free");
     const ImVec2 tvc_size = fonts.strong->CalcTextSizeA(ui_px, FLT_MAX, 0.0f, "TVC");
     ImGui::SameLine(0.0f, 0.0f);
@@ -452,12 +486,12 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
 
     strip.divider();
     const std::string preset(status.presets.empty() ? std::string_view{} : status.presets[status.preset].name);
-    if (opens(strip.button("##preset", preset.c_str(), fonts.ui, ui_px, skin.label), kMachineMenu)) {
+    if (opens(strip.tvc("##preset", skin.label), kMachineMenu)) {
         ImGui::OpenPopup(kMachineMenu);
     }
     const float machine_x = ImGui::GetItemRectMin().x;
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("Machine and ROMs"));
+        ImGui::SetTooltip("%s: %s", tr("Machine and ROMs"), preset.c_str());
     }
 
     strip.divider();
@@ -554,6 +588,34 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
         strip.divider();
     }
 
+    // REC and the camera: a click acts, a right click opens their menu
+    const Colour red = skin.role(Role::Exec).on_case;
+    const bool lit = !status.recording || std::fmod(status.record_seconds, 1.0) < 0.6;
+    actions.toggle_record |= strip.rec("##rec", fonts.strong, ui_px * 0.8f, status.recording ? red : skin.label, red, lit);
+    const float rec_x = ImGui::GetItemRectMin().x;
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+        ImGui::OpenPopup(kRecordMenu);
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", status.recording ? tr("Recording: click to stop; right click for the menu")
+                                                 : tr("Record a video of the TV picture and sound: click to start; right click for the menu"));
+    }
+    if (status.recording) {
+        char time[16];
+        const int s = static_cast<int>(status.record_seconds);
+        std::snprintf(time, sizeof time, "%02d:%02d", s / 60, s % 60);
+        actions.toggle_record |= strip.button("##rec_time", time, fonts.data, data_px, red);
+    }
+    actions.screenshot |= strip.camera("##shot", fonts.strong, ui_px * 0.8f, skin.label);
+    const float shot_x = ImGui::GetItemRectMin().x;
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+        ImGui::OpenPopup(kShotMenu);
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("Screenshot of the TV picture as a PNG: click to take one; right click for the menu"));
+    }
+    strip.divider();
+
     if (!status.notice.empty()) {
         const double lifetime = status.notice_is_error ? kErrorSeconds : kNoticeSeconds;
         const float alpha = static_cast<float>(lifetime - status.notice_age);
@@ -585,8 +647,11 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     }
 
     const float menu_top = strip_top - groove;
+    // The strip's menus in the strip's text size
+    ImGui::PushFont(nullptr, skin.font_ui_size * strip_ratio);
     if (begin_menu(kMainMenu, plate_pos.x, menu_top, actions)) {
         draw_main_menu(status, actions);
+        draw_ports_menu(status, actions);
         ImGui::EndPopup();
     }
     if (begin_menu(kMachineMenu, machine_x, menu_top, actions)) {
@@ -605,6 +670,21 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
         draw_disk_menu(status, actions);
         ImGui::EndPopup();
     }
+    if (begin_menu(kRecordMenu, rec_x, menu_top, actions)) {
+        ImGui::SeparatorText(tr("Video recording"));
+        actions.toggle_record |= ImGui::MenuItem(status.recording ? tr("Stop recording") : tr("Start recording"));
+        actions.video_dir |= ImGui::MenuItem(tr("Recordings folder..."), nullptr, false, status.can_browse);
+        actions.open_video_dir |= ImGui::MenuItem(tr("Open the recordings folder"));
+        ImGui::EndPopup();
+    }
+    if (begin_menu(kShotMenu, shot_x, menu_top, actions)) {
+        ImGui::SeparatorText(tr("Screenshot"));
+        actions.screenshot |= ImGui::MenuItem(tr("Take a screenshot"));
+        actions.screenshot_dir |= ImGui::MenuItem(tr("Screenshots folder..."), nullptr, false, status.can_browse);
+        actions.open_screenshot_dir |= ImGui::MenuItem(tr("Open the screenshots folder"));
+        ImGui::EndPopup();
+    }
+    ImGui::PopFont();
     ImGui::End();
 }
 
@@ -616,7 +696,14 @@ PlayActions draw_play(const PlayStatus& status, const Skin& skin, const SkinFont
     background->AddRectFilled(viewport->Pos, viewport->Pos + viewport->Size, to_imgui(skin.frame));
     if (status.screen != ImTextureID_Invalid) {
         const ImVec2 area{viewport->Size.x - status.side_panel - margin * 2.0f, viewport->Size.y - strip_space(skin, status.scale) - status.bottom_panel - margin * 2.0f};
-        draw_screen(background, status.screen, status.full_raster, viewport->Pos + ImVec2{margin, margin}, area, skin.label, &status.picture);
+        const ScreenRect shown = draw_screen(background, status.screen, status.full_raster, viewport->Pos + ImVec2{margin, margin}, area,
+                                             skin.label, &status.picture);
+        // Recording: a blinking red dot in the picture's top right corner (on the window only, not in the video)
+        if (status.recording && std::fmod(status.record_seconds, 1.0) < 0.6) {
+            const float r = std::max(4.0f, shown.size.y * 0.018f);
+            background->AddCircleFilled({shown.min.x + shown.size.x - r * 2.5f, shown.min.y + r * 2.5f}, r,
+                                        to_imgui(skin.role(Role::Exec).on_case));
+        }
     }
     draw_strip(status, skin, fonts, actions);
     return actions;

@@ -64,6 +64,46 @@ Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC gépp
 - Hiányzik: unit teszt.
 - A Windows-gépen az Intelligens alkalmazásvezérlés (Smart App Control) letiltja a friss, aláíratlan fordítást.
 
+## FOLYAMATBAN: GUI-átalakítás és UPM — átadás (2026-11-06 este, Mac)
+Ág: `gui-upm` (a `main`-ből; a `main` = v1.1.0 + videófelvétel headless). Minden lefordul (`ninja -C build/mac-release`),
+a felhasználó a GUI-ban végignézte és jóváhagyta az alábbiakat; release NEM volt, és ne is legyen kérés nélkül.
+- **Alsó sáv (strip)** 1,5×: bronze skin `metric.strip.height = 45`, új kulcs `font.strip.size = 22` (`Skin::font_strip_size`,
+  0 = `font.ui.size`); a sávból nyíló menük is ekkora betűvel (`PushFont(nullptr, …)` a menük körül, `play_view.cpp`).
+  A felhasználó `sajat.skin`-je még a régi bronze másolata (30/—).
+- **Gép gomb** = rajzolt mini TVC ikon (`DeckRow::tvc`, a választott „A” változat 90 %-on); súgó: „Gép és ROM-ok: <preset>”.
+- **Gépmenü**: `TVC 32K · BASIC 1.2`, `TVC 64K · BASIC 1.2`, `TVC 64K+ · BASIC 2.1`, `TVC 64K+ · BASIC 2.2` (MenuItem shortcut
+  oszlop = BASIC; `PushID` a két „TVC 64K+” miatt). A 32k+HBM preset nincs a listában: Kártyák menü alján „HBM 32 KiB
+  RAM-kártya” (csak 32K-n látszik, a 32k ↔ 32k+hbm presetet váltja).
+- **Kártyák menü**: csak `Slot 0`…`Slot 3` + a kártya neve (üresnél „Üres”, halványan, a leghosszabb név szélességén
+  középen; a címke szóköz-kitöltés, a szöveg rárajzolva). Slot ▸ lista: Üres, HBF (csak slot 0), GameCard, Multichip,
+  TVC256k++, 2dfx, NanoSD, soros. Csere: a régi kártya kikerül (`take_out`), a másik slotból áthelyez. A bent lévő,
+  beállítható kártya neve maga nyíló almenü (`draw_card_extras`): HBF (lemezek A–D, gyors lemez, „Lemezes rendszer”:
+  VT-DOS 1.1 / 1.2 / UPM — az UPM még szürke), TVC256k++ (pendrive, egér, flash), NanoSD (SD-mappa), soros (kábel, fájlok).
+  A SID-kártya csak a Beállításokban; Nyomtató + Cartridge ideiglenesen a főmenü (névtábla) végén (`draw_ports_menu`).
+- **REC ikon** (rajzolt, sarokjelek + piros pont + REC): bal klikk indít/leállít (név: `<program> ÉÉÉÉ-HH-NN óó-pp-mm.mp4`,
+  alap: Movies/Videók, `video_dir`), mellette az idő, a pont villog; felvétel közben a TV-kép jobb felső sarkában is
+  villog egy piros pont (csak az ablakon). Jobb klikk: menü (indít/leállít, mappa…, mappa megnyitása). Kilépéskor lezár.
+- **Fényképező ikon** (REC-szélességű, ugyanolyan sarokjelek): PNG az Asztalra (`screenshot_dir`), a főmenü
+  „Képernyőkép” is. Kép és videó 4:3-ban: 1534×1148 (sor ×4, vízszintesen területátlag, `kPixelAspect` a
+  `framebuffer.hpp`-ben, `pal_width()`), a videó ffmpeg-gel `scale=…neighbor,scale=…area`.
+- Hátra a GUI-ból: a felhasználó még variál a menükön; Nyomtató/Cartridge végleges helye; Ctrl/Cmd+R gyorsbillentyű
+  (a CTRL a TVC-nek is kell — megbeszélni); cartridge-mappa (javaslat: `cartridges/` a felhasználói adatmappában, a
+  „Cartridge betétele” ott nyílik — a felhasználó még nem döntött); docs (ui.md: strip, menük; user-guide 4.8 GUI rész);
+  monitor/MCP parancs a felvételhez; Windowson kipróbálni (felvétel, ffmpeg.exe).
+- **UPM** (forrás: tvc.homeserver.hu/html/hardverrom.html#vtdosupm):
+  - Kártya-EPROM: `cas/odor/UPM.FDR` = CRC B3A567AD ✓ (a mi `hbf.rom`-ként is elfogadott UPM EPROM-unk).
+  - Cartridge: a `cas/odor/TVCUPM1–4.CAR` összefűzése (2868F331) ROSSZ (a gép elszáll). A JÓ: a gyári EPROM,
+    CRC **EFCA95FC** = a felhasználó `~/Downloads/UPM/cpmdos1_1/CUPM_DOS.256` első 16 KiB-ja; várhatóan a
+    `bin/rom/romgyujtes/(9)upm.zip`-ben is (letöltendő, ellenőrizendő) → autofetch innen, `data/roms.txt`.
+  - Kipróbálva (headless): `--preset 64k-1.2 --disk-rom UPM.FDR --cart <EFCA95FC> --disk A:upmlemez.img --key RETURN@250`
+    → `*`, `64K UPM SYS READY`, `A>`. Tesztlemez: `cas/upmlemezek.zip` (3 db 720 KiB, a rendszersávok üresek).
+  - `~/Downloads/UPM/cpmdos1_1|2`: a „VT-DOS/UPM átkapcsolás” mod EPROM-jai (32 KiB = 2×16 KiB, A14 vált): C = cartridge
+    (UPM + VT-DOS 1.1 ill. 1.2 cartridge), D = lemezkártya (UPM.FDR + VT-DOS 1.1 ill. 1.2). Ugyanez: `cas/odor/UPMDOS.CAR/FDR`.
+    Felhasználás: a HBF „Lemezes rendszer” választónál VT-DOS ↔ UPM váltás egy kattintással (ahogy a mod is).
+  - Teendő: (9)upm.zip autofetch (cart `upm-cart.rom`, kártya `upm.rom`), `--disk-rom upm` + az UPM cartridge betétele
+    egy választással (VT-DOS-ra vissza: a cartridge ki), a menüpont élesítése; RETURN a `*` után (autostart); UPM-lemez
+    felismerés (nem FAT12, E5h rendszersávok) → UPM autostart; üres UPM-lemez. Melyik gépen: 64K biztosan (32K ❓).
+
 ## Elkészült
 
 ### Kártyahely választása a felületen (2026-11-01, kérésre)

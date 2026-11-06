@@ -7,6 +7,7 @@
 #include <array>
 #include <atomic>
 #include <cctype>
+#include <cstring>
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>
@@ -34,6 +35,7 @@
 #include "frontend/common/presets.hpp"
 #include "frontend/common/rom_fetch.hpp"
 #include "frontend/common/settings.hpp"
+#include "frontend/common/video_recorder.hpp"
 #include "frontend/sdl/bench_view.hpp"
 #include "frontend/sdl/host_input.hpp"
 #include "frontend/sdl/play_view.hpp"
@@ -130,33 +132,90 @@ bool is_snapshot_file(const std::string& path) {
     return ext == ".tvcs" || ext == ".tvs";
 }
 
-std::string save_screenshot(const freetvc::Framebuffer& frame, freetvc::sdl::ScreenArea area, const fs::path& user_dir,
-                            std::string_view preset, std::string& error) {
-    const fs::path dir = user_dir / "screenshots";
-    std::error_code ec;
-    fs::create_directories(dir, ec);
+// "<name> 2026-11-06 22-15-30<ext>": the program (or preset) and the local time
+std::string timestamped(std::string_view name, const char* ext) {
     SDL_DateTime now{};
     SDL_Time ticks = 0;
     if (!SDL_GetCurrentTime(&ticks) || !SDL_TimeToDateTime(ticks, &now, true)) {
         now = {};
     }
-    char name[96];
-    std::snprintf(name, sizeof name, "freetvc-%.*s-%04d%02d%02d-%02d%02d%02d.png", static_cast<int>(preset.size()),
-                  preset.data(), now.year, now.month, now.day, now.hour, now.minute, now.second);
-    SDL_Surface* surface = SDL_CreateSurface(area.width, area.height, SDL_PIXELFORMAT_XRGB8888);
+    std::string clean(name);
+    for (char& c : clean) {
+        if (std::string_view("/\\:*?\"<>|").find(c) != std::string_view::npos) {
+            c = '_';
+        }
+    }
+    char text[160];
+    std::snprintf(text, sizeof text, "%s %04d-%02d-%02d %02d-%02d-%02d%s", clean.c_str(), now.year, now.month, now.day, now.hour,
+                  now.minute, now.second, ext);
+    return text;
+}
+
+std::string utf8(const fs::path& p) {
+    const auto u = p.u8string();
+    return std::string(u.begin(), u.end());
+}
+
+// A user folder from the OS (desktop, videos), else `fallback`
+fs::path user_folder(SDL_Folder folder, const fs::path& fallback) {
+    const char* dir = SDL_GetUserFolder(folder);
+    return dir && *dir ? fs::path(std::u8string(reinterpret_cast<const char8_t*>(dir))) : fallback;
+}
+
+// Opens a folder in the system's file manager
+void open_folder(const fs::path& dir) {
+    std::error_code ec;
+    fs::create_directories(dir, ec);
+    std::string url = "file://";
+    for (const unsigned char c : utf8(fs::absolute(dir, ec))) {
+        if (std::isalnum(c) || std::string_view("/-_.~").find(static_cast<char>(c)) != std::string_view::npos) {
+            url += static_cast<char>(c);
+        } else {
+            char hex[4];
+            std::snprintf(hex, sizeof hex, "%%%02X", c);
+            url += hex;
+        }
+    }
+    SDL_OpenURL(url.c_str());
+}
+
+// A PNG of `area` in `dir` at the PAL aspect (4:3 for the TV area): every line 4 times, the pixels area-averaged across;
+// returns its path, empty with `error` set on failure
+std::string save_screenshot(const freetvc::Framebuffer& frame, freetvc::sdl::ScreenArea area, const fs::path& dir,
+                            std::string_view name, std::string& error) {
+    constexpr int kLineScale = 4;
+    std::error_code ec;
+    fs::create_directories(dir, ec);
+    const int width = freetvc::pal_width(area, kLineScale);
+    SDL_Surface* surface = SDL_CreateSurface(width, area.height * kLineScale, SDL_PIXELFORMAT_XRGB8888);
     if (!surface) {
         error = SDL_GetError();
         return {};
     }
+    const double step = static_cast<double>(area.width) / width;  // source pixels per output pixel
     for (int y = 0; y < area.height; ++y) {
-        auto* row = reinterpret_cast<std::uint32_t*>(static_cast<std::uint8_t*>(surface->pixels) + y * surface->pitch);
-        for (int x = 0; x < area.width; ++x) {
-            const std::size_t at = static_cast<std::size_t>(area.y + y) * freetvc::Framebuffer::kWidth + static_cast<std::size_t>(area.x + x);
-            const std::uint8_t index = frame.pixels[at];
-            row[x] = freetvc::kRgbPalette[index < freetvc::Framebuffer::kColours ? index : 0];
+        const std::uint8_t* src = &frame.pixels[static_cast<std::size_t>(area.y + y) * freetvc::Framebuffer::kWidth + area.x];
+        auto* row = reinterpret_cast<std::uint32_t*>(static_cast<std::uint8_t*>(surface->pixels) + y * kLineScale * surface->pitch);
+        for (int x = 0; x < width; ++x) {
+            const double from = x * step;
+            const double to = from + step;
+            double rgb[3] = {0.0, 0.0, 0.0};
+            for (int sx = static_cast<int>(from); sx < area.width && sx < to; ++sx) {
+                const double weight = std::min<double>(sx + 1, to) - std::max<double>(sx, from);
+                const std::uint32_t c = freetvc::kRgbPalette[src[sx] < freetvc::Framebuffer::kColours ? src[sx] : 0];
+                rgb[0] += weight * (c >> 16 & 0xFF);
+                rgb[1] += weight * (c >> 8 & 0xFF);
+                rgb[2] += weight * (c & 0xFF);
+            }
+            const auto channel = [&](double v) { return static_cast<std::uint32_t>(std::min(255.0, v / step + 0.5)); };
+            row[x] = channel(rgb[0]) << 16 | channel(rgb[1]) << 8 | channel(rgb[2]);
+        }
+        for (int k = 1; k < kLineScale; ++k) {
+            std::memcpy(static_cast<std::uint8_t*>(surface->pixels) + (y * kLineScale + k) * surface->pitch, row,
+                        static_cast<std::size_t>(width) * 4);
         }
     }
-    const std::string path = (dir / name).string();
+    const std::string path = utf8(dir / fs::path(std::u8string(reinterpret_cast<const char8_t*>(timestamped(name, ".png").c_str()))));
     const bool saved = SDL_SavePNG(surface, path.c_str());
     SDL_DestroySurface(surface);
     if (!saved) {
@@ -214,7 +273,7 @@ struct FileChoice {
     // SD Dual card image, a new SD card's files and then its image
     enum class Purpose {
         Program, Tape, Record, Cart, SnapshotSave, SnapshotLoad, Disk, Pendrive, Flash, SdCard, MultiCartFiles, MultiCartImage,
-        SdImage, SdNewFiles, SdNewImage, PrinterFile, SerialSend, SerialCapture, Symbols, RomDir, DiskRom
+        SdImage, SdNewFiles, SdNewImage, PrinterFile, SerialSend, SerialCapture, Symbols, RomDir, DiskRom, VideoDir, ShotDir
     };
     std::mutex mutex;
     bool showing = false;
@@ -1532,6 +1591,33 @@ int main(int argc, char** argv) {
     };
     // A new rom_dir (empty: the default places); the machine powers on only when the preset's ROMs differ
     int rom_reload = -1;
+    // Video recording and screenshots: the folders from freetvc.ini, else the OS's videos folder and desktop
+    std::string video_dir_setting = settings.values.video_dir.value_or("");
+    std::string screenshot_dir_setting = settings.values.screenshot_dir.value_or("");
+    const auto video_dir = [&] {
+        return video_dir_setting.empty() ? user_folder(SDL_FOLDER_VIDEOS, user_dir / "videos") : fs::path(video_dir_setting);
+    };
+    const auto screenshot_dir = [&] {
+        return screenshot_dir_setting.empty() ? user_folder(SDL_FOLDER_DESKTOP, user_dir / "screenshots") : fs::path(screenshot_dir_setting);
+    };
+    // The running program's name for file names, else the machine's
+    const auto media_name = [&]() -> std::string {
+        const std::string cassette(tape.media().cassette().attached_name());
+        return cassette.empty() ? std::string(freetvc::kPresets[preset_index].name) : cassette;
+    };
+    freetvc::VideoRecorder recorder;
+    const auto stop_recording = [&] {
+        machine.set_frame_sink(nullptr);
+        std::vector<float> rest(machine.audio_available());
+        machine.read_audio(rest);
+        recorder.audio(rest);
+        std::string why;
+        if (recorder.stop(why)) {
+            notice.show(false, "saved %s (%.0f s)", utf8(recorder.file()).c_str(), recorder.seconds());
+        } else {
+            notice.show(true, "recording failed: %s", why.c_str());
+        }
+    };
     const auto use_rom_dir = [&](const std::string& dir) {
         rom_dir_setting = dir;
         rom_search = freetvc::rom_places(rom_dir_option, rom_dir_setting, base_dir, user_dir);
@@ -1976,6 +2062,12 @@ int main(int argc, char** argv) {
                     } else {
                         notice.set(error, true);
                     }
+                } else if (file_choice.purpose == FileChoice::Purpose::VideoDir || file_choice.purpose == FileChoice::Purpose::ShotDir) {
+                    const bool video = file_choice.purpose == FileChoice::Purpose::VideoDir;
+                    const std::string dir = fs::absolute(path).lexically_normal().string();
+                    (video ? video_dir_setting : screenshot_dir_setting) = dir;
+                    save_settings({{video ? "video_dir" : "screenshot_dir", dir}});
+                    notice.show(false, video ? N_("recordings go to %s") : N_("screenshots go to %s"), dir.c_str());
                 } else if (file_choice.purpose == FileChoice::Purpose::SdCard) {
                     if (tape.nanosd_sd(path, error)) {
                         notice.show(false, "NanoSD: SD card %s", fs::path(path).filename().string().c_str());
@@ -2100,6 +2192,9 @@ int main(int argc, char** argv) {
             samples.resize(machine.audio_available());
             machine.read_audio(samples);  // discarded: keeps the buffer from filling
         }
+        if (recorder.recording()) {
+            recorder.audio(samples);
+        }
         last_ns = now_ns;
         speed_ticks += ran;
         if (stopped) {
@@ -2141,6 +2236,8 @@ int main(int argc, char** argv) {
         status.notice_age = static_cast<double>(now_ns - notice.since_ns) / 1e9;
         status.scale = skins.scale;
         status.cassette = tape.media().cassette().attached_name();
+        status.recording = recorder.recording();
+        status.record_seconds = recorder.seconds();
         {
             const std::lock_guard lock(file_choice.mutex);
             status.can_browse = !file_choice.showing;
@@ -2216,6 +2313,8 @@ int main(int argc, char** argv) {
                 break;
             }
             status.slot_cards[s] = slot_cards[s];
+            status.slot_kinds[s] = machine.config().cards[s].kind;
+            status.disk_rom = disk_rom_path;
         }
         const std::string cart_name = tape.cart_name();
         status.cartridge = cart_name;
@@ -2849,11 +2948,48 @@ int main(int argc, char** argv) {
                 notice.set(error, true);
             }
         }
+        // The card in a slot comes out: for an empty choice, or to make room for another card
+        const auto take_out = [&](unsigned slot) -> bool {
+            switch (machine.config().cards[slot].kind) {
+            case freetvc::CardKind::Hbf: return tape.disk_card(false, error);
+            case freetvc::CardKind::GameCard: return tape.gamecard(false, slot, error);
+            case freetvc::CardKind::Multichip: return tape.multichip(false, slot, error);
+            case freetvc::CardKind::Card256: return tape.card256(false, slot, error);
+            case freetvc::CardKind::TwoDfx: return tape.twodfx(false, slot, error);
+            case freetvc::CardKind::NanoSd: return tape.nanosd(false, slot, error);
+            case freetvc::CardKind::Serial: return tape.serial_card(false, slot, error);
+            case freetvc::CardKind::None: return true;
+            }
+            return true;
+        };
+        if (!actions.disk_rom.empty()) {
+            use_disk_rom(actions.disk_rom);
+        }
+        if (actions.slot_clear >= 0) {
+            if (take_out(static_cast<unsigned>(actions.slot_clear))) {
+                debugger->cancel_step();
+                monitor->machine_changed();
+                input.machine_replaced();
+                notice.show(false, "slot %d empty; powered on", actions.slot_clear);
+            } else {
+                notice.set(error, true);
+            }
+        }
         if (actions.slot_card != freetvc::CardKind::None && actions.slot_card_to >= 0) {
             const auto slot = static_cast<unsigned>(actions.slot_card_to);
             const int n = actions.slot_card_to;
             bool placed = false;
+            const freetvc::CardKind occupant = machine.config().cards[slot].kind;
+            if (occupant != freetvc::CardKind::None && occupant != actions.slot_card && !take_out(slot)) {
+                actions.slot_card = freetvc::CardKind::None;
+                notice.set(error, true);
+            }
             switch (actions.slot_card) {
+            case freetvc::CardKind::Hbf:
+                if ((placed = tape.disk_card(true, error))) {
+                    notice.show(false, "disk card in slot 0; powered on");
+                }
+                break;
             case freetvc::CardKind::GameCard:
                 if ((placed = tape.gamecard(true, slot, error))) {
                     notice.show(false, "GameCard in slot %d; powered on", n);
@@ -2982,8 +3118,7 @@ int main(int argc, char** argv) {
         }
         if (actions.screenshot) {
             const auto area = full_raster ? freetvc::sdl::kFullRaster : freetvc::sdl::kTvArea;
-            const std::string path = save_screenshot(machine.framebuffer(), area, user_dir,
-                                                     freetvc::kPresets[preset_index].name, error);
+            const std::string path = save_screenshot(machine.framebuffer(), area, screenshot_dir(), media_name(), error);
             if (path.empty()) {
                 notice.show(true, "screenshot failed: %s", error.c_str());
             } else {
@@ -3004,6 +3139,40 @@ int main(int argc, char** argv) {
                 pending_skin = skins.path;
             }
         }
+        if (actions.toggle_record) {
+            if (recorder.recording()) {
+                stop_recording();
+            } else if (const auto ffmpeg = freetvc::find_ffmpeg(base_dir)) {
+                std::error_code ec;
+                fs::create_directories(video_dir(), ec);
+                std::vector<float> before(machine.audio_available());
+                machine.read_audio(before);
+                const fs::path out = video_dir() / fs::path(std::u8string(reinterpret_cast<const char8_t*>(timestamped(media_name(), ".mp4").c_str())));
+                if (recorder.start(out, *ffmpeg, full_raster ? freetvc::kFullRaster : freetvc::kTvArea, machine.audio_rate(), error)) {
+                    machine.set_frame_sink(&recorder);
+                    notice.show(false, "recording to %s", utf8(out.filename()).c_str());
+                } else {
+                    notice.show(true, "recording failed: %s", error.c_str());
+                }
+            } else {
+                notice.show_text(true, "no ffmpeg for recording: the ffmpeg folder next to freeTVC is missing");
+            }
+        }
+        if (actions.video_dir || actions.screenshot_dir) {
+            {
+                const std::lock_guard lock(file_choice.mutex);
+                file_choice.showing = true;
+                file_choice.purpose = actions.video_dir ? FileChoice::Purpose::VideoDir : FileChoice::Purpose::ShotDir;
+            }
+            const std::string start = utf8(actions.video_dir ? video_dir() : screenshot_dir());
+            SDL_ShowOpenFolderDialog(&FileChoice::done, &file_choice, window, start.c_str(), false);
+        }
+        if (actions.open_video_dir) {
+            open_folder(video_dir());
+        }
+        if (actions.open_screenshot_dir) {
+            open_folder(screenshot_dir());
+        }
         running &= !actions.quit;
 
         // freetvc.ini follows the state: every frame while the sheet is open, else once a second
@@ -3022,6 +3191,9 @@ int main(int argc, char** argv) {
 
     if (const freetvc::SettingValues values = collect_settings(); values != saved_settings) {
         save_settings(values);
+    }
+    if (recorder.recording()) {
+        stop_recording();
     }
 
     if (audio) {
