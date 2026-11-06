@@ -93,7 +93,12 @@ a felhasználó a GUI-ban végignézte és jóváhagyta az alábbiakat; release 
   billentyűzet ikon (menü: Szimbolikus/Pozíciós/Kiosztás ▸) · hangszóró (némítva piros áthúzás) · 5,25" floppy (kártya
   nélkül halvány) · kazetta (szalag nélkül halvány) · ▶ (szürke szalag nélkül) … üzenet … REC · fénykép · % · freeTVC
   (jobbra, főmenü). Gépmenü fejléce „Verzió” középen.
-- Hátra a GUI-ból: a felhasználó még variál a menükön (freeTVC főmenü); Nyomtató végleges helye; Ctrl/Cmd+R gyorsbillentyű
+- **freeTVC főmenü (2026-11-07)**: Program betöltése · Legutóbbi programok ▸ (10, ini `recent`, `|` választja el) ·
+  Újraindítás · Pillanatkép ▸ · Teljes képernyő · Kinézet ▸ · Nyelv ▸ · ROM-ok letöltése · Beállítások · Munkapad ·
+  Névjegy · Kilépés. Billentyűzet, képernyőkép, teljes raszter, kazetta kivétele kikerült. Nyomtató: saját ikon a REC
+  előtt (halvány/világos/sárga nyomtatáskor). Magnó: kazetta (forgáskor analóg hullám a valódi jelből, 1,5 ms) ·
+  ▶ + számláló · ■ · ◀◀; menü csak a kazettán; a magnó és a lemez menüje fejléc nélkül.
+- Hátra a GUI-ból: Nyomtató végleges helye; Ctrl/Cmd+R gyorsbillentyű
   (a CTRL a TVC-nek is kell — megbeszélni); cartridge-mappa (javaslat: `cartridges/` a felhasználói adatmappában, a
   „Cartridge betétele” ott nyílik — a felhasználó még nem döntött); docs (ui.md: strip, menük; user-guide 4.8 GUI rész);
   monitor/MCP parancs a felvételhez; Windowson kipróbálni (felvétel, ffmpeg.exe).

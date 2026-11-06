@@ -19,7 +19,7 @@ constexpr std::string_view kHeader =
     "; not saved. Keys: rom_dir, preset, skin, keymap, language, audio, volume, fullscreen, full_raster, disk_card, disk_rom,\n"
     "; gamecard, multichip, sid_card, card256, card256_usb, card256_flash, twodfx, nanosd, nanosd_sd, nanosd_menu, nanosd_sort,\n"
     "; printer, serial_card, serial_line, serial_flow, video_dir, screenshot_dir, monitor, mcp, mcp_allow_monitor, dzrp, dzrp_banks, gdb, renderer,\n"
-    "; picture, colour_switch, keys.\n";
+    "; picture, colour_switch, keys, recent.\n";
 
 std::string_view trim(std::string_view s) {
     const auto first = s.find_first_not_of(" \t\r");
@@ -86,6 +86,8 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
         } else if (key == "rom_dir" || key == "card256_flash" || key == "video_dir" || key == "screenshot_dir") {
             const std::filesystem::path dir(value);
             (key == "rom_dir" ? s.rom_dir : key == "video_dir" ? s.video_dir : key == "screenshot_dir" ? s.screenshot_dir : s.card256_flash) = (dir.is_relative() && !base.empty() ? base / dir : dir).lexically_normal().string();
+        } else if (key == "recent") {
+            s.recent = value;
         } else if (key == "nanosd_sd") {
             const std::filesystem::path dir(value);
             s.nanosd_sd = value == "none" ? value : (dir.is_relative() && !base.empty() ? base / dir : dir).lexically_normal().string();

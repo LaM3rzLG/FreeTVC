@@ -701,6 +701,9 @@ msgstr "%s · %llu hívás"
 msgid "Machine"
 msgstr "Gép"
 
+msgid "Recent programs"
+msgstr "Legutóbbi programok"
+
 msgid "Version"
 msgstr "Verzió"
 

@@ -208,6 +208,7 @@ public:
     bool printer_plug(const std::string& raw, const std::string& text, std::string& error) override;
     void printer_unplug() override;
     bool printer_plugged() const override { return printer_.plugged(); }
+    std::uint64_t printer_printed() const { return printer_.printed(); }
     std::string printer_take() override { return printer_.take(); }
     std::string printer_describe() const override { return printer_.describe(); }
     // The printer setting's form: "off", "on", or its files joined by '|'

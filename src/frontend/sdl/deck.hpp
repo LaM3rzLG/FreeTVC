@@ -62,7 +62,13 @@ public:
     // A speaker with sound waves; `slashed` crosses it out in the `slash` colour
     bool speaker(const char* id, Colour colour, bool slashed, Colour slash);
     bool cassette(const char* id, Colour colour);
+    // The cassette key while the tape moves: the signal under the head as an analog-looking wave; `runs` are the
+    // level runs in the window, oldest first, as a fraction of its width, positive high and negative low
+    bool tape_wave(const char* id, Colour colour, std::span<const float> runs);
+    // A rewind key: two triangles pointing left
+    bool rewind(const char* id, Colour colour);
     bool floppy(const char* id, Colour colour);  // a 5.25" disk
+    bool printer(const char* id, Colour colour);
     // A cartridge lying on its side, its contact edge to the right, and `text` after it, as one key
     bool cartridge(const char* id, ImFont* font, float size, const char* text, Colour colour);
     void draw_hover(ImVec2 pos, ImVec2 size) const;

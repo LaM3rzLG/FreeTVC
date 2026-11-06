@@ -1777,7 +1777,36 @@ int main(int argc, char** argv) {
         sync_preset();
         notice.show(false, "snapshot loaded: %s", fs::path(path).filename().string().c_str());
     };
+    // The recent programs: newest first, at most ten, kept in the settings file
+    std::vector<std::string> recent;
+    if (settings.values.recent) {
+        for (std::string_view rest = *settings.values.recent; !rest.empty();) {
+            const std::size_t bar = rest.find('|');
+            if (const std::string_view one = rest.substr(0, bar); !one.empty()) {
+                recent.emplace_back(one);
+            }
+            rest = bar == std::string_view::npos ? std::string_view{} : rest.substr(bar + 1);
+        }
+    }
+    const auto remember_program = [&](const std::string& path) {
+        std::error_code ec;
+        const std::string full = fs::absolute(path, ec).lexically_normal().string();
+        if (ec || full.find_first_of("|;") != std::string::npos) {
+            return;  // '|' separates the list and ';' starts a comment in the settings file
+        }
+        std::erase(recent, full);
+        recent.insert(recent.begin(), full);
+        if (recent.size() > 10) {
+            recent.resize(10);
+        }
+        std::string joined;
+        for (const std::string& one : recent) {
+            joined += (joined.empty() ? "" : "|") + one;
+        }
+        save_settings({{"recent", joined}});
+    };
     const auto open_program = [&](const std::string& path, bool attach_only) {
+        remember_program(path);
         if (freetvc::HostTape::is_cart_file(path)) {
             insert_cart(path);
             return;
@@ -1868,6 +1897,11 @@ int main(int argc, char** argv) {
     std::uint64_t skin_poll_ns = last_ns;
     fs::path pending_skin;
     long frames = 0;
+    std::vector<float> tape_wave;
+    std::size_t wave_run = 0;       // the run that holds the wave's start, and where it starts
+    std::uint64_t wave_start = 0;
+    std::uint64_t printer_count = 0;    // bytes printed so far, and when that last grew: the printer key lights
+    std::uint64_t printer_seen_ns = 0;
     bool running = true;
     while (running) {
         // Fonts may only change between frames
@@ -2277,6 +2311,7 @@ int main(int argc, char** argv) {
         status.speed_percent = speed_percent;
         status.mapping = input.mapping();
         status.layouts = keymaps;
+        status.recent = recent;
         status.layout = input.keymap().name;
         status.audio = audio != nullptr;
         status.muted = muted;
@@ -2308,6 +2343,33 @@ int main(int argc, char** argv) {
         status.tape_state = tape_state == freetvc::TapeState::Playing ? "play" : tape_state == freetvc::TapeState::Recording ? "rec" : "stop";
         status.tape_counter = tape_counter;
         status.tape_moving = deck.moving();
+        // The wave: the last 1.5 ms of tape before the head, as runs; the read cursor is kept between frames
+        tape_wave.clear();
+        if (deck.moving() && !deck.signal().runs.empty()) {
+            const std::vector<std::uint32_t>& runs = deck.signal().runs;
+            const std::uint64_t span = freetvc::kTapeTicksPerSecond * 3 / 2000;
+            const std::uint64_t from = deck.position() > span ? deck.position() - span : 0;
+            if (from < wave_start || wave_run >= runs.size()) {
+                wave_run = 0;
+                wave_start = 0;
+            }
+            while (wave_run + 1 < runs.size() && wave_start + runs[wave_run] <= from) {
+                wave_start += runs[wave_run++];
+            }
+            std::uint64_t at = from;
+            bool level = deck.signal().first_level ^ ((wave_run & 1) != 0);
+            std::uint64_t run_end = wave_start + runs[wave_run];
+            for (std::size_t r = wave_run; r < runs.size() && at < from + span; ++r) {
+                const std::uint64_t end = std::min(run_end, from + span);
+                tape_wave.push_back(static_cast<float>(end - at) / static_cast<float>(span) * (level ? 1.0f : -1.0f));
+                at = end;
+                level = !level;
+                if (r + 1 < runs.size()) {
+                    run_end += runs[r + 1];
+                }
+            }
+        }
+        status.tape_wave = tape_wave;
         status.tape_recording = tape_state == freetvc::TapeState::Recording;
         status.fast_tape = fast_tape;
         status.fast_disk = fast_disk;
@@ -2324,6 +2386,11 @@ int main(int argc, char** argv) {
         status.card256_flash = card256_host.has_flash() ? std::string_view(card256_host.flash_name()) : std::string_view();
         status.nanosd_slot = tape.nanosd_slot();
         status.printer = tape.printer_plugged();
+        if (tape.printer_printed() != printer_count) {
+            printer_count = tape.printer_printed();
+            printer_seen_ns = SDL_GetTicksNS();
+        }
+        status.printing = printer_seen_ns != 0 && SDL_GetTicksNS() - printer_seen_ns < 600'000'000;
         printer_name = tape.printer_setting();
         status.printer_file = printer_name == "on" || printer_name == "off" ? std::string_view() : std::string_view(printer_name);
         if (const auto slash = status.printer_file.find_last_of("/\\"); slash != std::string_view::npos) {
@@ -2541,6 +2608,9 @@ int main(int argc, char** argv) {
             if (const auto shipped = find_keymap(name)) {
                 use_keymap(*shipped);
             }
+        }
+        if (!actions.open_recent.empty()) {
+            open_program(actions.open_recent, false);
         }
         if (actions.edit_layout) {
             keyboard_editor.open();

@@ -36,6 +36,7 @@ struct PlayStatus {
     double speed_percent = -1.0;  // negative until the first measurement
     KeyMapping mapping = KeyMapping::Symbolic;
     std::span<const KeymapEntry> layouts;  // host key layouts
+    std::span<const std::string> recent;   // the last programs loaded, newest first
     std::string_view layout;
     bool audio = false;  // an audio device is open
     bool muted = false;
@@ -57,6 +58,7 @@ struct PlayStatus {
     std::string_view tape_state;  // "play", "rec" or "stop"
     std::string_view tape_counter;  // "1:23"
     bool tape_moving = false;       // PLAY or RECORD down and the motor on
+    std::span<const float> tape_wave;  // the signal before the head while it moves (DeckRow::tape_wave)
     bool tape_recording = false;
     bool fast_tape = true;
     std::string_view cartridge;  // file name of the cartridge; empty = none
@@ -85,6 +87,7 @@ struct PlayStatus {
     bool mouse_captured = false;
     bool printer = false;              // a printer on the Centronics port; none by default
     std::string_view printer_file;     // its output file's name; empty = kept in memory only
+    bool printing = false;             // bytes reached the printer in the last moment
     int serial_slot = -1;              // the serial card's slot, -1 = out
     std::string_view serial_line;      // its cable: "off", "on", "listen:PORT", "connect:PORT"
     bool serial_connected = false;     // a peer is there (/CTS and /DSR on)
@@ -99,6 +102,7 @@ struct PlayStatus {
 struct PlayActions {
     bool menu_open = false;
     std::string layout;        // a host key layout file to use
+    std::string open_recent;   // a program from the recent list to load
     bool edit_layout = false;  // the keyboard editor opens  // keys must not reach the TVC while it is
     bool toggle_pause = false;
     bool reset = false;

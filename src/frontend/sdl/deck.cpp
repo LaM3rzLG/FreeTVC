@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <cmath>
 #include <cstdio>
 #include <string>
 
@@ -284,6 +285,51 @@ bool DeckRow::cassette(const char* id, Colour colour) {
     return clicked;
 }
 
+bool DeckRow::tape_wave(const char* id, Colour colour, std::span<const float> runs) {
+    bool clicked = false;
+    float g = 0.0f;
+    const ImVec2 o = icon_key(id, 64.0f, clicked, g);
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, 2.2f * g);
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    draw->AddRect(p(5.0f, 8.0f), p(59.0f, 39.0f), c, 2.5f * g, thick);
+    // Each run is half a sine, up for a high level and down for a low one
+    const float left = 8.0f;
+    const float width = 48.0f;
+    const float mid = 23.5f;
+    const float amp = 10.0f;
+    draw->PushClipRect(p(left, 10.0f), p(left + width, 37.0f), true);
+    float x = left;
+    for (const float run : runs) {
+        const float w = std::abs(run) * width;
+        const int steps = std::max(2, static_cast<int>(w * g / 2.0f));
+        for (int i = 0; i <= steps; ++i) {
+            const float t = static_cast<float>(i) / static_cast<float>(steps);
+            draw->PathLineTo(p(x + w * t, mid - (run > 0.0f ? amp : -amp) * std::sin(3.14159265f * t)));
+        }
+        x += w;
+    }
+    draw->PathStroke(c, std::max(1.0f, 1.8f * g));
+    draw->PopClipRect();
+    return clicked;
+}
+
+bool DeckRow::rewind(const char* id, Colour colour) {
+    ImGui::SameLine(0.0f, 0.0f);
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const bool clicked = ImGui::InvisibleButton(id, {height_, height_});
+    draw_hover(pos, {height_, height_});
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const float side = height_ * 0.36f;
+    const ImVec2 c{pos.x + height_ / 2.0f, pos.y + height_ / 2.0f};
+    for (const float dx : {-side * 0.5f, side * 0.5f}) {
+        draw->AddTriangleFilled({c.x + dx + side * 0.5f, c.y - side / 2.0f}, {c.x + dx - side * 0.5f, c.y}, {c.x + dx + side * 0.5f, c.y + side / 2.0f},
+                                to_imgui(colour));
+    }
+    return clicked;
+}
+
 bool DeckRow::floppy(const char* id, Colour colour) {
     bool clicked = false;
     float g = 0.0f;
@@ -298,6 +344,26 @@ bool DeckRow::floppy(const char* id, Colour colour) {
     draw->AddRect(p(21.5f, 29.0f), p(26.5f, 37.0f), c, 2.5f * g, thick);
     const ImVec2 notch[] = {p(41.0f, 12.0f), p(38.0f, 12.0f), p(38.0f, 16.0f), p(41.0f, 16.0f)};
     draw->AddPolyline(notch, 4, c, thick, ImDrawFlags_None);
+    return clicked;
+}
+
+bool DeckRow::printer(const char* id, Colour colour) {
+    bool clicked = false;
+    float g = 0.0f;
+    const ImVec2 o = icon_key(id, 52.0f, clicked, g);
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, 2.2f * g);
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    // The paper going in, the body with its light, the sheet coming out with two lines of print
+    const ImVec2 feed[] = {p(15.0f, 17.0f), p(15.0f, 7.0f), p(37.0f, 7.0f), p(37.0f, 17.0f)};
+    draw->AddPolyline(feed, 4, c, thick, ImDrawFlags_None);
+    const ImVec2 body[] = {p(15.0f, 32.0f), p(7.0f, 32.0f), p(7.0f, 17.0f), p(45.0f, 17.0f), p(45.0f, 32.0f), p(37.0f, 32.0f)};
+    draw->AddPolyline(body, 6, c, thick, ImDrawFlags_None);
+    draw->AddRect(p(15.0f, 27.0f), p(37.0f, 39.0f), c, 0.0f, thick);
+    draw->AddLine(p(19.0f, 32.0f), p(33.0f, 32.0f), c, thick);
+    draw->AddLine(p(19.0f, 36.0f), p(29.0f, 36.0f), c, thick);
+    draw->AddCircleFilled(p(39.0f, 22.0f), 1.3f * g, c);
     return clicked;
 }
 

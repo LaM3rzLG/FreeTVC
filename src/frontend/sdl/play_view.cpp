@@ -24,6 +24,7 @@ constexpr const char* kTapeMenu = "##tape_menu";
 constexpr const char* kDiskMenu = "##disk_menu";
 constexpr const char* kCartMenu = "##cart_menu";
 constexpr const char* kKeysMenu = "##keys_menu";
+constexpr const char* kPrinterMenu = "##printer_menu";
 constexpr const char* kRecordMenu = "##record_menu";
 constexpr const char* kShotMenu = "##shot_menu";
 
@@ -49,63 +50,70 @@ bool opens(bool clicked, const char* id) {
 
 void draw_main_menu(const PlayStatus& status, PlayActions& actions) {
     // design/media.md: a dropped .cas file autostarts too (Ctrl: attach only)
-    ImGui::SeparatorText(tr("Program"));
     actions.load_program |= ImGui::MenuItem(tr("Load program..."), nullptr, false, status.can_browse);
+    if (ImGui::BeginMenu(tr("Recent programs"), !status.recent.empty())) {
+        for (const std::string& path : status.recent) {
+            const std::size_t slash = path.find_last_of("/\\");
+            if (ImGui::MenuItem(slash == std::string::npos ? path.c_str() : path.c_str() + slash + 1)) {
+                actions.open_recent = path;
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("%s", path.c_str());
+            }
+        }
+        ImGui::EndMenu();
+    }
     const std::string cassette(status.cassette);
     char item[160];
     std::snprintf(item, sizeof item, tr("Run %s again"), cassette.c_str());
     actions.run_again |= ImGui::MenuItem(cassette.empty() ? tr("Run again") : item, nullptr, false, !cassette.empty());
-    std::snprintf(item, sizeof item, tr("Eject %s"), cassette.c_str());
-    actions.eject |= ImGui::MenuItem(cassette.empty() ? tr("Eject cassette") : item, nullptr, false, !cassette.empty());
-
-    // design/media.md "Snapshots": the whole machine, with the tape and cassette by path
-    ImGui::SeparatorText(tr("Snapshot"));
-    actions.quick_save |= ImGui::MenuItem(tr("Quick save"), "F9");
-    actions.quick_load |= ImGui::MenuItem(tr("Quick load"), "Shift+F9", false, status.quick_snapshot);
-    actions.snapshot_save |= ImGui::MenuItem(tr("Save snapshot..."), nullptr, false, status.can_browse);
-    actions.snapshot_load |= ImGui::MenuItem(tr("Load snapshot..."), nullptr, false, status.can_browse);
-
-    ImGui::SeparatorText(tr("Keyboard"));
-    if (ImGui::MenuItem(tr("Symbolic"), nullptr, status.mapping == KeyMapping::Symbolic)) {
-        actions.mapping = static_cast<int>(KeyMapping::Symbolic);
-    }
-    if (ImGui::MenuItem(tr("Positional"), nullptr, status.mapping == KeyMapping::Positional)) {
-        actions.mapping = static_cast<int>(KeyMapping::Positional);
-    }
-
-    ImGui::SeparatorText(tr("Skin"));
-    for (const SkinEntry& entry : status.skins) {
-        if (ImGui::MenuItem(entry.name.c_str(), nullptr, entry.name == status.skin_name)) {
-            actions.skin = entry.path.string();
-        }
-    }
-    actions.reload_skin |= ImGui::MenuItem(tr("Reload skin"));
-
-    // Each language under its own name
-    ImGui::SeparatorText(tr("Language"));
-    if (ImGui::MenuItem("English", nullptr, status.language == "en")) {
-        actions.language = "en";
-    }
-    for (const LanguageFile& file : status.languages) {
-        if (ImGui::MenuItem(file.name.c_str(), nullptr, status.language == file.code)) {
-            actions.language = file.code;
-        }
-    }
-
-    ImGui::SeparatorText(tr("Screen"));
-    actions.toggle_full_raster |= ImGui::MenuItem(tr("Full raster (debug)"), nullptr, status.full_raster);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("Show the whole beam path, sync and blanking included; the TV area is outlined"));
-    }
-    actions.screenshot |= ImGui::MenuItem(tr("Screenshot"));
-    actions.toggle_fullscreen |= ImGui::MenuItem(tr("Full screen"), "F11", status.fullscreen);
 
     ImGui::Separator();
+    if (ImGui::BeginMenu(tr("Snapshot"))) {
+        actions.quick_save |= ImGui::MenuItem(tr("Quick save"), "F9");
+        actions.quick_load |= ImGui::MenuItem(tr("Quick load"), "Shift+F9", false, status.quick_snapshot);
+        actions.snapshot_save |= ImGui::MenuItem(tr("Save snapshot..."), nullptr, false, status.can_browse);
+        actions.snapshot_load |= ImGui::MenuItem(tr("Load snapshot..."), nullptr, false, status.can_browse);
+        ImGui::EndMenu();
+    }
+
+    ImGui::Separator();
+    actions.toggle_fullscreen |= ImGui::MenuItem(tr("Full screen"), "F11", status.fullscreen);
+    if (ImGui::BeginMenu(tr("Skin"))) {
+        for (const SkinEntry& entry : status.skins) {
+            if (ImGui::MenuItem(entry.name.c_str(), nullptr, entry.name == status.skin_name)) {
+                actions.skin = entry.path.string();
+            }
+        }
+        ImGui::Separator();
+        actions.reload_skin |= ImGui::MenuItem(tr("Reload skin"));
+        ImGui::EndMenu();
+    }
+    // Each language under its own name
+    if (ImGui::BeginMenu(tr("Language"))) {
+        if (ImGui::MenuItem("English", nullptr, status.language == "en")) {
+            actions.language = "en";
+        }
+        for (const LanguageFile& file : status.languages) {
+            if (ImGui::MenuItem(file.name.c_str(), nullptr, status.language == file.code)) {
+                actions.language = file.code;
+            }
+        }
+        ImGui::EndMenu();
+    }
+
+    ImGui::Separator();
+    actions.fetch_roms |= ImGui::MenuItem(tr("Download ROMs"));
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("The TVC's ROMs from tvc.homeserver.hu and the cards' firmware from their authors' sites, with the system's curl, into the ROM folder chosen in Settings (rom_dir), else the user data folder"));
+    }
     actions.toggle_settings |= ImGui::MenuItem(tr("Settings..."), nullptr, status.settings);
     actions.toggle_bench |= ImGui::MenuItem(tr("Bench"), "F12", status.bench);
     actions.open_about |= ImGui::MenuItem(tr("About freeTVC..."));
     actions.quit |= ImGui::MenuItem(tr("Quit"));
 }
+
+void draw_ports_menu(const PlayStatus& status, PlayActions& actions);
 
 // The preset with this board, or -1
 int preset_of(const PlayStatus& status, Model model) {
@@ -139,10 +147,6 @@ void draw_machine_menu(const PlayStatus& status, PlayActions& actions) {
             ImGui::SetTooltip("%s", p.model == Model::Tvc64kPlus ? tr("SYS and EXT 2.x ROMs") : tr("SYS 1.2 and EXT 1.x ROMs"));
         }
         ImGui::PopID();
-    }
-    actions.fetch_roms |= ImGui::MenuItem(tr("Download ROMs"));
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("The TVC's ROMs from tvc.homeserver.hu and the cards' firmware from their authors' sites, with the system's curl, into the ROM folder chosen in Settings (rom_dir), else the user data folder"));
     }
     ImGui::Separator();
     actions.toggle_pause |= ImGui::MenuItem(tr("Pause"), "Pause", status.paused);
@@ -400,7 +404,6 @@ void draw_cart_menu(const PlayStatus& status, PlayActions& actions) {
 
 void draw_tape_menu(const PlayStatus& status, PlayActions& actions) {
     // design/media.md "Tape deck": the real signal, for loaders that do not use the OS
-    ImGui::SeparatorText(tr("Tape"));
     actions.tape_insert |= ImGui::MenuItem(tr("Insert tape..."), nullptr, false, status.can_browse);
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("%s", tr("A .wav or .ttp file, or a .cas played as a tape"));
@@ -419,7 +422,6 @@ void draw_tape_menu(const PlayStatus& status, PlayActions& actions) {
 
 void draw_disk_menu(const PlayStatus& status, PlayActions& actions) {
     // design/cards.md: drives A-D of the HBF card
-    ImGui::SeparatorText(tr("Disk"));
     char item[160];
     for (int d = 0; d < static_cast<int>(status.disks.size()); ++d) {
         const std::string disk(status.disks[static_cast<std::size_t>(d)]);
@@ -560,45 +562,50 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
         strip.divider();
     }
 
-    // The deck, always there: state and counter, in the notice colour while the tape moves; the item opens the Tape menu
-    if (status.tape_loaded) {
-        char tape[48];
-        std::snprintf(tape, sizeof tape, "%s %.*s %.*s", tr("tape"), static_cast<int>(status.tape_state.size()), status.tape_state.data(),
-                      static_cast<int>(status.tape_counter.size()), status.tape_counter.data());
-        const Colour colour = status.tape_moving ? skin.role(Role::Notice).on_case : skin.label;
-        if (opens(strip.cassette("##tape_icon", colour), kTapeMenu)) {
-            ImGui::OpenPopup(kTapeMenu);
+    // The deck: the cassette (a wave while the tape moves) opens the Tape menu; then play with the counter, stop, rewind
+    {
+        Colour icon = skin.label;
+        if (!status.tape_loaded) {
+            icon = skin.muted;
+            icon.a = static_cast<std::uint8_t>(icon.a * 0.45f);
+        } else if (status.tape_moving) {
+            icon = skin.role(Role::Notice).on_case;
         }
-        if (opens(strip.button("##tape", tape, fonts.data, data_px, colour), kTapeMenu)) {
-            ImGui::OpenPopup(kTapeMenu);
-        }
-        if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("%s", status.tape_moving ? tr("The tape moves: PLAY or RECORD is down and the motor is on")
-                                                       : tr("The tape deck; the ROM turns the motor on and off"));
-        }
-    } else {
-        Colour faded = skin.muted;
-        faded.a = static_cast<std::uint8_t>(faded.a * 0.45f);
-        if (opens(strip.cassette("##tape_icon", faded), kTapeMenu)) {
+        const bool clicked = status.tape_moving ? strip.tape_wave("##tape_icon", icon, status.tape_wave) : strip.cassette("##tape_icon", icon);
+        if (opens(clicked, kTapeMenu)) {
             ImGui::OpenPopup(kTapeMenu);
         }
         if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("%s", tr("no tape"));
+            ImGui::SetTooltip("%s", !status.tape_loaded ? tr("no tape")
+                                    : status.tape_moving ? tr("The tape moves: PLAY or RECORD is down and the motor is on")
+                                                         : tr("The tape deck; the ROM turns the motor on and off"));
         }
     }
     const float tape_x = ImGui::GetItemRectMin().x;
-    // The play/stop key after the deck: grey and idle until a tape is in
-    const bool stop_key = status.tape_loaded && status.tape_state != "stop";
-    const Colour key_colour = !status.tape_loaded ? skin.rib : stop_key && status.tape_moving ? skin.role(Role::Notice).on_case : skin.label;
-    if (strip.transport("##tape_key", stop_key, key_colour) && status.tape_loaded) {
-        if (stop_key) {
-            actions.tape_stop = true;
-        } else {
-            actions.tape_play = true;
-        }
+    const Colour active = skin.role(Role::Notice).on_case;
+    const bool playing = status.tape_state == "play";
+    if (strip.transport("##tape_play", false, !status.tape_loaded ? skin.rib : playing ? active : skin.label) && status.tape_loaded && !playing) {
+        actions.tape_play = true;
     }
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", stop_key ? tr("Stop") : status.tape_loaded ? tr("Play") : tr("no tape"));
+        ImGui::SetTooltip("%s", status.tape_loaded ? tr("Play") : tr("no tape"));
+    }
+    if (status.tape_loaded) {
+        const std::string counter(status.tape_counter);
+        strip.text(counter.c_str(), fonts.data, data_px, status.tape_moving ? active : skin.label);
+    }
+    const bool can_stop = status.tape_loaded && status.tape_state != "stop";
+    if (strip.transport("##tape_stop", true, can_stop ? skin.label : skin.rib) && can_stop) {
+        actions.tape_stop = true;
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("Stop"));
+    }
+    if (strip.rewind("##tape_rewind", status.tape_loaded ? skin.label : skin.rib) && status.tape_loaded) {
+        actions.tape_rewind = true;
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("Rewind"));
     }
 
     strip.divider();
@@ -645,9 +652,24 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     std::snprintf(time, sizeof time, "%02d:%02d", seconds / 60, seconds % 60);
     const float key_w = rec_width(fonts.strong, ui_px * 0.8f, strip_h);
     const float time_w = status.recording ? fonts.data->CalcTextSizeA(data_px, FLT_MAX, 0.0f, time).x + pad * 2.0f : 0.0f;
-    const float media_x = state_x - key_w * 2.0f - time_w;
+    const float printer_w = 52.0f * strip_h / 45.0f;
+    const float media_x = state_x - printer_w - key_w * 2.0f - time_w;
     ImGui::SameLine(media_x - ImGui::GetWindowPos().x, 0.0f);
     ImGui::Dummy({0.0f, strip_h});
+    // The printer: faded while none is on the port, in the notice colour while it prints
+    Colour printer_colour = status.printing ? skin.role(Role::Notice).on_case : skin.label;
+    if (!status.printer) {
+        printer_colour = skin.muted;
+        printer_colour.a = static_cast<std::uint8_t>(printer_colour.a * 0.45f);
+    }
+    if (opens(strip.printer("##printer", printer_colour), kPrinterMenu)) {
+        ImGui::OpenPopup(kPrinterMenu);
+    }
+    const float printer_x = ImGui::GetItemRectMin().x;
+    if (ImGui::IsItemHovered()) {
+        const std::string file(status.printer_file);
+        ImGui::SetTooltip("%s", !status.printer ? tr("No printer") : file.empty() ? tr("Printer port") : file.c_str());
+    }
     const Colour red = skin.role(Role::Exec).on_case;
     const bool lit = !status.recording || std::fmod(status.record_seconds, 1.0) < 0.6;
     actions.toggle_record |= strip.rec("##rec", fonts.strong, ui_px * 0.8f, status.recording ? red : skin.label, red, lit);
@@ -707,7 +729,6 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     ImGui::PushFont(nullptr, skin.font_ui_size * strip_ratio);
     if (begin_menu(kMainMenu, plate_pos.x + plate_size.x, menu_top, actions, 1.0f)) {
         draw_main_menu(status, actions);
-        draw_ports_menu(status, actions);
         ImGui::EndPopup();
     }
     if (begin_menu(kMachineMenu, machine_x, menu_top, actions)) {
@@ -720,6 +741,10 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     }
     if (begin_menu(kCartMenu, cart_x, menu_top, actions)) {
         draw_cart_menu(status, actions);
+        ImGui::EndPopup();
+    }
+    if (begin_menu(kPrinterMenu, printer_x, menu_top, actions)) {
+        draw_ports_menu(status, actions);
         ImGui::EndPopup();
     }
     if (begin_menu(kKeysMenu, keys_x, menu_top, actions)) {
