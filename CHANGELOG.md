@@ -5,7 +5,12 @@
 ### New
 
 - The slot of each expansion card can be chosen in the GUI ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): in the Cards menu, *Put in slot* (or *Move to slot* while the card is in) under the GameCard, the Multichip sound card, the TVC256k++, the NanoSD and the serial card lists slots 0–3 with their ports, a slot holding another card greyed out with its name; Settings → Machine has slot buttons 0–3 beside each card. `freetvc.ini` keeps the slot (`gamecard = 3`; `yes` is the card's own slot). The HBF disk card stays in slot 0.
+- The 2dfx graphics card (Vaczkó Károly's: sprites, 2D and 3D graphics over the paper, ports F8h/F9h), emulated with the creator's own MIT library (2dfx v1.1.0, `third_party/twodfx/`): any slot (default 2), Cards menu and Settings, `twodfx` in `freetvc.ini`, `--2dfx [SLOT]` in the GUI and headless, monitor `2dfx`, MCP `media` `twodfx_on`/`twodfx_off`. Every other card fits beside it except the TVC256k++; beside it the SID card keeps E0h–F7h. Checked with AnyStone's Cube, Wolfenstein 3D and AnyShow from tvc.homeserver.hu. Its state is not yet in snapshots or rewind.
 - MCP tool `card256` ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): the TVC256k++ card's state for debugging, read without side effects: every register, decoded; the 16 sprites with their pixels; the overlay's 32 × 30 tile codes and colours; the card's fast RAM and PSRAM.
+
+### Fixed
+
+- The host cassette read data files that are not `.CAS` (such as the 2dfx Wolfenstein 3D's `.bin` files) as CAS files and dropped their first 144 bytes; it now serves them byte for byte, as the NanoSD card does.
 
 ## 1.0.1 — 2026-10-31
 
