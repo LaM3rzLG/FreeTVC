@@ -1,0 +1,46 @@
+# Builds the Linux and Windows packages with tools/release/make_release.sh (the Windows one cross-built with MinGW-w64).
+# Run by hand: the packages as a workflow artifact. Push a tag vX.Y.Z: also a GitHub release with them and the
+# CHANGELOG section of that version. The tests are not run here (SKIP_TESTS=1).
+name: release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  packages:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build tools and SDL's development packages (docs/developer-guide.md)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build curl python3 pkg-config unzip zip mingw-w64 \
+            libx11-dev libxext-dev libxcursor-dev libxi-dev libxfixes-dev libxrandr-dev libxss-dev libxtst-dev \
+            libgl-dev libegl-dev libwayland-dev libxkbcommon-dev wayland-protocols libdecor-0-dev \
+            libasound2-dev libpulse-dev libpipewire-0.3-dev libudev-dev libdbus-1-dev libibus-1.0-dev
+
+      - name: Packages
+        env:
+          SKIP_TESTS: '1'
+          JOBS: '4'
+        run: sh tools/release/make_release.sh out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: freeTVC-packages
+          path: out/*
+
+      - name: GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          gh release create "$GITHUB_REF_NAME" --title "freeTVC $version" --notes-file out/RELEASE-NOTES.md \
+            out/freeTVC-*.tar.gz out/freeTVC-*.zip out/SHA256SUMS
