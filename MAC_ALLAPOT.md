@@ -25,6 +25,12 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
   Helyben: `2DFXCAS/` (git-ignore, `.git/info/exclude`), NanoSD-hez másolat: `~/Documents/TVC Projects/Wolf3D_2dfx`,
   `.../AnyShow_2dfx`. Részletek: `docs/design/cards.md` „2dfx graphics card”, tervek: `TERVEK.md`.
 
+## Kiadás (1.1.0-tól)
+- Linux + Windows: GitHub Actions (`.github/workflows/release.yml`, kézi indítás vagy `v*` tag) → artifact.
+- macOS: `sh tools/mac/make_mac_release.sh OUT` → arm64 és x86_64 zip (macOS 13+, ad-hoc aláírás, nincs notarizálás).
+- A release-t Claude hozza létre a felhasználó fiókjáról (`gh release create`), mind a négy csomaggal, angol és
+  magyar változásnaplóval (`CHANGELOG.md`, `CHANGELOG.hu.md`).
+
 ## Tudás a repóban
 - Tervek, GitHub-hibajegyek (nem Mac-es): `TERVEK.md`.
 - `CLAUDE.md` (munkaszabályok), `.claude/skills/freetvc-mac/` (fordítás, futtatás, MCP, időzítésmérés).

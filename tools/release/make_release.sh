@@ -51,7 +51,7 @@ package() {  # <build dir> <folder name> <program suffix>
     done
     cp -R "$stage/roms" "$dir/roms"
     cp -R docs "$dir/docs"
-    cp README.md LICENSE THIRD_PARTY.md CHANGELOG.md "$dir/"
+    cp README.md LICENSE THIRD_PARTY.md CHANGELOG.md CHANGELOG.hu.md "$dir/"
 }
 linux=freeTVC-$version-linux-x86_64
 windows=freeTVC-$version-windows-x64
