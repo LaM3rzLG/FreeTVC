@@ -34,6 +34,24 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(freetvc_resid PRIVATE -Wno-deprecated-enum-float-conversion)
 endif()
 
+# 2dfx portable emulator (MIT), Vaczkó Károly's 2dfx v1.1.0 from kks2003/Ep128web web/src/twodfx: the 2dfx card
+file(GLOB FREETVC_TWODFX_EGGS ${CMAKE_CURRENT_SOURCE_DIR}/twodfx/firmware_eggs/egg_*.c)
+add_library(freetvc_twodfx STATIC twodfx/core/twodfx_emu.c twodfx/core/twodfx_raster.c twodfx/core/twodfx_3d.c
+            twodfx/assets/logo_2dfx_asset.c twodfx/firmware_eggs/firmware_page.c ${FREETVC_TWODFX_EGGS})
+set_target_properties(freetvc_twodfx PROPERTIES C_STANDARD 99 C_EXTENSIONS OFF)
+target_include_directories(freetvc_twodfx SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/twodfx/include)
+target_include_directories(freetvc_twodfx PRIVATE twodfx/core twodfx/assets twodfx/firmware_eggs
+                           twodfx/firmware_eggs/portable)
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(freetvc_twodfx PRIVATE -w)
+endif()
+if(NOT WIN32 OR MINGW)
+    find_library(FREETVC_LIBM m)
+    if(FREETVC_LIBM)
+        target_link_libraries(freetvc_twodfx PRIVATE ${FREETVC_LIBM})
+    endif()
+endif()
+
 if(NOT FREETVC_BUILD_GUI)
     return()
 endif()

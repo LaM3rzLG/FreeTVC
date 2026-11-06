@@ -96,6 +96,8 @@ void print_usage(std::FILE* out) {
                  "  --sid-card [MODEL]  the SID card at ports E0h-FFh, outside the slots (WinTVC's layout): a MOS 6581\n"
                  "                      (default) or 8580 on reSID\n"
                  "  --sid-clock HZ      its clock (default 985248, a PAL C64's)\n"
+                 "  --2dfx [SLOT]       the 2dfx graphics card (ports F8h/F9h) in SLOT 0-3 (default 2); not with the\n"
+                 "                      TVC256k++ (both drive /EXTC) or the SID card\n"
                  "  --nanosd [SLOT]     the NanoSD IO card (an SD card through an Arduino Nano) in SLOT 0-3 (default 3); its\n"
                  "                      EEPROM nanosd.rom is found like the system ROMs; it takes over LOAD and SAVE\n"
                  "  --nanosd-rom FILE   the NanoSD with this 64 KiB EEPROM image\n"
@@ -382,6 +384,7 @@ int main(int argc, char** argv) {
     std::string multichip_rom_path;
     freetvc::SidCardConfig sid;
     std::optional<unsigned> nanosd_slot;
+    std::optional<unsigned> twodfx_slot;
     std::string printer_raw, printer_text;
     bool printer_on = false;
     std::optional<unsigned> serial_slot;
@@ -599,6 +602,11 @@ int main(int argc, char** argv) {
             (arg == "--serial" ? serial_peer : arg == "--serial-flow" ? serial_flow : arg == "--serial-send" ? serial_send : serial_capture) = argv[++i];
             if (!serial_slot) {
                 serial_slot = freetvc::kSerialSlot;
+            }
+        } else if (arg == "--2dfx") {
+            twodfx_slot = 2u;
+            if (has_value && std::string_view(argv[i + 1]).size() == 1 && argv[i + 1][0] >= '0' && argv[i + 1][0] <= '3') {
+                twodfx_slot = static_cast<unsigned>(argv[++i][0] - '0');
             }
         } else if (arg == "--nanosd") {
             nanosd_slot = freetvc::kNanoSdSlot;
@@ -940,6 +948,22 @@ int main(int argc, char** argv) {
                          error.substr(0, error.find("; searched")).c_str());
         }
         config.cards[*nanosd_slot] = {freetvc::CardKind::NanoSd, nanosd_rom};
+    }
+    if (twodfx_slot) {
+        if (config.cards[*twodfx_slot].kind != freetvc::CardKind::None) {
+            std::fprintf(stderr, "freetvc-headless: --2dfx: slot %u holds the %s\n", *twodfx_slot,
+                         freetvc::card_kind_name(config.cards[*twodfx_slot].kind));
+            return kExitUsage;
+        }
+        if (config.sid.model != freetvc::SidModel::None) {
+            std::fprintf(stderr, "freetvc-headless: --2dfx: not with the SID card (both use ports F8h/F9h)\n");
+            return kExitUsage;
+        }
+        if (card256_slot) {
+            std::fprintf(stderr, "freetvc-headless: --2dfx: not with the TVC256k++ (both drive EC0-3 and /EXTC)\n");
+            return kExitUsage;
+        }
+        config.cards[*twodfx_slot] = {freetvc::CardKind::TwoDfx, {}};
     }
     if (serial_slot) {
         if (config.cards[*serial_slot].kind != freetvc::CardKind::None) {

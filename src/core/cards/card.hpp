@@ -21,6 +21,7 @@ class ChunkReader;
 class FloppyDrives;
 struct Card256Media;
 struct NanoSdMedia;
+class TwoDfxCard;
 
 // What a card sees of the machine at an access.
 struct CardBus {
@@ -107,8 +108,10 @@ public:
     // The first card that serves RAM unit 2 or 3, else nullptr
     std::uint8_t* phantom_page(unsigned unit);
     void border_write(std::uint8_t value);
-    // The first card with an overlay; two would fight over the lines (the manual forbids it)
+    // The first card with an overlay; two would fight over EC0-3 and /EXTC (the TVC256k++ and the 2dfx exclude each other)
     VideoOverlay* overlay();
+    // The 2dfx card, which answers ports F8h/F9h from any slot, or nullptr
+    TwoDfxCard* twodfx();
     // Bit n set while slot n pulls /INT low
     std::uint8_t irq_lines() const;
     void clear_interrupt(unsigned slot, std::uint8_t value);

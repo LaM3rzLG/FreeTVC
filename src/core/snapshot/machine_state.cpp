@@ -47,7 +47,7 @@ std::optional<SnapshotNeeds> snapshot_needs(const Snapshot& snapshot, std::strin
         ChunkReader s(slot->body.data);
         for (CardConfig& card : n.cards) {
             const std::uint8_t kind = s.u8();
-            if (kind > static_cast<std::uint8_t>(CardKind::Serial)) {
+            if (kind > static_cast<std::uint8_t>(CardKind::TwoDfx)) {
                 error = msg("the snapshot has a card this version does not know");
                 return std::nullopt;
             }

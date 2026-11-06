@@ -9,6 +9,7 @@
 #include "core/cards/multichip.hpp"
 #include "core/cards/nanosd.hpp"
 #include "core/cards/serial_card.hpp"
+#include "core/cards/twodfx_card.hpp"
 
 namespace freetvc {
 
@@ -26,6 +27,8 @@ const char* card_kind_name(CardKind kind) {
         return "gamecard";
     case CardKind::Card256:
         return "card256";
+    case CardKind::TwoDfx:
+        return "2dfx";
     case CardKind::None:
         break;
     }
@@ -64,6 +67,9 @@ void CardSlots::configure(const std::array<CardConfig, kCardSlots>& configs) {
             break;
         case CardKind::Serial:
             cards_[i] = std::make_unique<SerialCard>();
+            break;
+        case CardKind::TwoDfx:
+            cards_[i] = std::make_unique<TwoDfxCard>();
             break;
         case CardKind::None:
             cards_[i].reset();
@@ -173,6 +179,15 @@ void CardSlots::border_write(std::uint8_t value) {
             c->border_write(value);
         }
     }
+}
+
+TwoDfxCard* CardSlots::twodfx() {
+    for (auto& c : cards_) {
+        if (c && c->kind() == CardKind::TwoDfx) {
+            return static_cast<TwoDfxCard*>(c.get());
+        }
+    }
+    return nullptr;
 }
 
 VideoOverlay* CardSlots::overlay() {

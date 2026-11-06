@@ -168,9 +168,16 @@ std::uint8_t Machine::keyboard_columns(unsigned row) const {
     }
 }
 
-// Port map: tvc-hardware.md §4. Only A0-A7 are decoded and A7 must be 0 for the machine; the SID card takes E0h-FFh.
+// Port map: tvc-hardware.md §4. Only A0-A7 are decoded and A7 must be 0 for the machine; the 2dfx card takes F8h-F9h,
+// the SID card the rest of E0h-FFh.
 void Machine::io_write(std::uint8_t port, std::uint8_t value) {
     if (port & 0x80) {
+        if ((port & 0xFE) == 0xF8) {
+            if (TwoDfxCard* fx = memory_.cards().twodfx()) {
+                fx->port_write(port & 1, value);
+                return;
+            }
+        }
         if (sid_ && port >= SidCard::kFirstPort) {
             sid_->write(port & 31, value, ticks_, audio_);
         }
@@ -267,6 +274,11 @@ void Machine::io_write(std::uint8_t port, std::uint8_t value) {
 
 std::uint8_t Machine::io_read(std::uint8_t port) {
     if (port & 0x80) {
+        if ((port & 0xFE) == 0xF8) {
+            if (const TwoDfxCard* fx = memory_.cards().twodfx()) {
+                return fx->port_read(port & 1);
+            }
+        }
         if (sid_ && port >= SidCard::kFirstPort) {
             return sid_->read(port & 31, ticks_, audio_);
         }

@@ -11,6 +11,7 @@
 #include "core/audio/synth.hpp"
 #include "core/bus/memory_map.hpp"
 #include "core/cards/sid_card.hpp"
+#include "core/cards/twodfx_card.hpp"
 #include "core/input/keyboard.hpp"
 #include "core/machine/config.hpp"
 #include "core/machine/debug_hooks.hpp"

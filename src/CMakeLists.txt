@@ -35,6 +35,7 @@ add_library(freetvc_core STATIC
     core/cards/nanosd.cpp
     core/cards/saa1099.cpp
     core/cards/serial_card.cpp
+    core/cards/twodfx_card.cpp
     core/cards/sid_card.cpp
     core/cards/sn76489.cpp
     core/cards/ym3812.cpp
@@ -52,7 +53,7 @@ target_include_directories(freetvc_core PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}/generated)
 target_link_libraries(freetvc_core PRIVATE freetvc_z80h)
 target_link_libraries(freetvc_core PUBLIC freetvc_fatfs freetvc_littlefs)
-target_link_libraries(freetvc_core PRIVATE freetvc_ymfm freetvc_resid)
+target_link_libraries(freetvc_core PRIVATE freetvc_ymfm freetvc_resid freetvc_twodfx)
 freetvc_warnings(freetvc_core)
 
 # Debug API shared by every front end; like the core, no OS, threads, clocks or I/O

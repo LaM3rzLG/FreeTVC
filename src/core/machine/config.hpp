@@ -43,6 +43,7 @@ enum class CardKind : std::uint8_t {
     Multichip, // Vass Sándor's Multichip Soundcard: SN76489, SAA1099, YM3812, 32 KiB EEPROM in 8 KiB banks
     NanoSd,    // Vass Sándor's NanoSD IO Card: an Arduino Nano serving an SD card, 64 KiB EEPROM in 8 KiB banks
     Serial,    // Videoton's serial line interface (HBS): an 8251A clocked by TXRXCLK, no ROM
+    TwoDfx,    // Vaczkó Károly's 2dfx: a graphics coprocessor on ports F8h/F9h with 8 MiB resource RAM, no ROM
 };
 
 struct CardConfig {

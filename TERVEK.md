@@ -37,6 +37,25 @@ Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC gépp
   - 8 MiB erőforrás-RAM: a visszatekerés (rewind) snapshotjaiba csak a változott részt szabad tenni, különben túl nagy.
   - Nyitott: Graphics 4 módban teljes vagy fél felbontás? (Ep128web: fél; a mi HBA-2 olvasatunk: teljes.)
 
+### 2dfx — félkész, `2dfx` ág (2026-11-06, Windows; folytatás a Macen)
+- A felhasználó döntése: a szerző MIT-es könyvtára átvéve (`third_party/twodfx/`, THIRD_PARTY.md), a C9h és a D3h–D5h
+  demó nélkül (Wriggler/Elite adatok). A TVC256k++ és a 2dfx kizárja egymást (Ep128web: mindkettő EC0-3, /EXTC);
+  a SID kártya és a 2dfx is (F8h/F9h).
+- Kész: `CardKind::TwoDfx` (`src/core/cards/twodfx_card.*`), bármely slot; F8h/F9h a `Machine::io_read/io_write`-ban;
+  overlay a papíron (raw X 126, Y 49 = a BASIC papír bal felső sarka), 4 színben minden 2., 16 színben minden 4.
+  2dfx-pixel ⚑; /INT a raszter-latch-ekből; reset = bekapcsolás (Ep128web README ⚑); headless `--2dfx [SLOT]`
+  (alap 2; SID-del és `--card256`-tal hiba); pillanatkép elfogadja a kártyát, de a 2dfx állapotát NEM menti.
+- Másolatok (rewind) egy közös 2dfx-eszközön osztoznak (8 MiB RAM nem másolódik) → a rewind a 2dfx-et nem állítja vissza.
+- Kipróbálva (headless, 64k+-2.2): Cube (tvc.homeserver.hu `Cube_2dfx.zip`) — forgó kocka hat színnel, egyezik a
+  honlap képével.
+- **Hiba**: Wolf 3D (`Wolf3d_2dfx.zip`, `Wolf2dfx.cas` + .bin-ek) NanoSD-vel (`--nanosd 3 --nanosd-sd MAPPA`) is
+  elakad: `WMIDI.BIN` megnyitása után a CPU 9300h–9400h körül pörög (pc 9411 / 934F), kép: piros keret, fekete papír,
+  felül csonka sor. Következő lépés: `--save-snapshot` a 3000. képkockánál, `--snapshot ... --monitor`, `d 9340 9420`;
+  a játék a `JOY+SN` (GameCard) kártyát is keresi → `--gamecard`-dal is kipróbálni.
+- Hiányzik: GUI (Kártyák menü, Beállítások, ini `twodfx`), MCP `media` 2dfx, mentés (`twodfx_emu_save_snapshot`),
+  `data/lang/hu.po` szövegek, docs (cards.md „2dfx” fejezet, status.md), ellenőrzés a GUI-ban.
+- A Windows-gépen az Intelligens alkalmazásvezérlés (Smart App Control) letiltja a friss, aláíratlan fordítást.
+
 ## Elkészült
 
 ### Kártyahely választása a felületen (2026-11-01, kérésre)
