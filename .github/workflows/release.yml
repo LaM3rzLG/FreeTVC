@@ -20,15 +20,24 @@ jobs:
       - name: Build tools and SDL's development packages (docs/developer-guide.md)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build curl python3 pkg-config unzip zip mingw-w64 \
+          sudo apt-get install -y build-essential cmake ninja-build curl python3 pkg-config unzip zip mingw-w64 nasm \
             libx11-dev libxext-dev libxcursor-dev libxi-dev libxfixes-dev libxrandr-dev libxss-dev libxtst-dev \
             libgl-dev libegl-dev libwayland-dev libxkbcommon-dev wayland-protocols libdecor-0-dev \
             libasound2-dev libpulse-dev libpipewire-0.3-dev libudev-dev libdbus-1-dev libibus-1.0-dev
+
+      - name: ffmpeg for video recording (Linux, Windows)
+        run: |
+          sh tools/release/build_ffmpeg.sh native build/ffmpeg-out-linux
+          sh tools/release/build_ffmpeg.sh mingw build/ffmpeg-out-windows
+          mkdir -p out
+          cp build/ffmpeg-src/* out/
 
       - name: Packages
         env:
           SKIP_TESTS: '1'
           JOBS: '4'
+          FFMPEG_LINUX: build/ffmpeg-out-linux
+          FFMPEG_WINDOWS: build/ffmpeg-out-windows
         run: sh tools/release/make_release.sh out
 
       - uses: actions/upload-artifact@v4

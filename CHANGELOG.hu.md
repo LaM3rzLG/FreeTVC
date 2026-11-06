@@ -2,6 +2,12 @@
 
 A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 
+## Készülőben
+
+### Új
+
+- Videófelvétel ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): a TV-kép (duplázott képpontokkal) és a hang MP4-be (H.264, AAC), ffmpeg-gel; `freetvc-headless --video FÁJL`. A csomagokban egy kis, GPL-es ffmpeg van az `ffmpeg/` almappában (`tools/release/build_ffmpeg.sh`), így semmit nem kell telepíteni.
+
 ## 1.1.0 — 2026-11-06
 
 ### Új

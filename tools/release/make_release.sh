@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Builds the release packages freeTVC-<version>-linux-x86_64.tar.gz and freeTVC-<version>-windows-x64.zip,
 # RELEASE-NOTES.md and SHA256SUMS. usage: tools/release/make_release.sh <out dir>   (from the project root)
-# Env: JOBS = parallel build jobs (default: CMake's), SKIP_TESTS=1 skips the Linux test run.
+# Env: JOBS = parallel build jobs (default: CMake's), SKIP_TESTS=1 skips the Linux test run, FFMPEG_LINUX and
+# FFMPEG_WINDOWS = folders from tools/release/build_ffmpeg.sh, put into the packages as ffmpeg/ (video recording).
 set -eu
 root=$(pwd)
 [ -f "$root/CMakeLists.txt" ] && [ -f "$root/data/roms.txt" ] || { echo "run from the project root" >&2; exit 1; }
@@ -52,11 +53,14 @@ package() {  # <build dir> <folder name> <program suffix>
     cp -R "$stage/roms" "$dir/roms"
     cp -R docs "$dir/docs"
     cp README.md LICENSE THIRD_PARTY.md CHANGELOG.md CHANGELOG.hu.md "$dir/"
+    if [ -n "$4" ]; then
+        cp -R "$4" "$dir/ffmpeg"
+    fi
 }
 linux=freeTVC-$version-linux-x86_64
 windows=freeTVC-$version-windows-x64
-package build/release-linux "$linux" ""
-package build/release-windows "$windows" ".exe"
+package build/release-linux "$linux" "" "${FFMPEG_LINUX:-}"
+package build/release-windows "$windows" ".exe" "${FFMPEG_WINDOWS:-}"
 strip "$stage/$linux/freetvc" "$stage/$linux/freetvc-headless"
 x86_64-w64-mingw32-strip "$stage/$windows/freetvc.exe" "$stage/$windows/freetvc-headless.exe"
 

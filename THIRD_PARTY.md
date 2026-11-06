@@ -43,6 +43,12 @@ freeTVC is GPL-3.0-or-later ([LICENSE](LICENSE)). This file lists every piece of
 | TI SN76489A references | `src/core/cards/sn76489.{hpp,cpp}` | TI's SN76489AN manual (in dikdom's GameCard repository); MAME `sn76496.cpp` (BSD-3-Clause, read only) | github.com/dikdom/TVC-GameCard commit `56e9c2b` (the manual); MAME master `src/devices/sound/sn76496.cpp` | our own code from TI's manual (periods, attenuation, noise rates) and MAME's notes on the chip variants (the SN76489A's 15-bit noise register and taps, period 0 as 400h, the output's polarity); the clock is a parameter (3.125 MHz on the GameCard, 3.579545 MHz on the Multichip card); nothing copied |
 | WinTVC 1.4.1's SID device (Grósz Attila) | `src/core/cards/sid_card.{hpp,cpp}`, `Machine::io_read`/`io_write` | freeware, no source; studied under the clean-room rule (only its behaviour is described; no code) | WinTVC 1.4.1 (https://tvc.homeserver.hu/bin/emu/WinTVC1.4.1.zip), studied by static analysis and runs under Wine (behaviour only, no code taken); winresid's `winresid.cpp` (GPL-2.0, read only) | the port layout (E0h–F8h, register = port − E0h), the clock (985 248 Hz), the default model (6581) and the reset; no code |
 
+## Built for the release packages only (not committed, not linked)
+
+| Component | Licence | Version | How |
+|---|---|---|---|
+| FFmpeg with x264 | GPL-2.0-or-later (built with `--enable-gpl --enable-libx264`) | FFmpeg 7.1.1 (`ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz`), x264 branch `stable` commit `b35605ace3ddf7c1a5d67a2eb553f034aef41d55` | `tools/release/build_ffmpeg.sh` builds a separate `ffmpeg` program with only raw video, float PCM, libx264, AAC and MP4; the packages carry it in `ffmpeg/` with its licences and a README naming the sources, and the release carries both source archives. freeTVC runs it as a child process for video recording |
+
 ## Not code, not distributed
 
 Test data (SingleStepTests/z80, CP/M ZEXDOC/ZEXALL, golden frames, disk and card images) and all ROMs stay in the git-ignored `testdata/` folder and are found through the CMake cache variable `FREETVC_TEST_DATA` and the variables derived from it in `tests/CMakeLists.txt`; tests whose data is missing are skipped. See [developer-guide.md](docs/developer-guide.md) and [build.md](docs/design/build.md).

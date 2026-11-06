@@ -141,6 +141,9 @@ void Video::new_line() {
     if (frame_pending_ ? beam_y_ + 1 >= kMinFrameLines : beam_y_ + 1 >= kMaxFrameLines) {
         front_.pixels = work_.pixels;
         ++frame_count_;
+        if (sink_.p) {
+            sink_.p->frame_done(front_);
+        }
         beam_y_ = 0;
     } else {
         ++beam_y_;

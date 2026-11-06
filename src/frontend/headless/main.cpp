@@ -30,6 +30,7 @@
 #include "frontend/common/presets.hpp"
 #include "frontend/common/rom_fetch.hpp"
 #include "frontend/common/settings.hpp"
+#include "frontend/common/video_recorder.hpp"
 #include "frontend/common/wav.hpp"
 #include "remote/mcp.hpp"
 #include "remote/dzrp.hpp"
@@ -146,6 +147,8 @@ void print_usage(std::FILE* out) {
                  "                      by CRC-32), the tape and cassette come back by path; budgets count from there\n"
                  "  --save-snapshot FILE  write a TVCS snapshot at the end of the run\n"
                  "  --wav FILE          write the whole run's sound as a 48 kHz 16-bit mono WAV\n"
+                 "  --video FILE        record the TV picture and sound as an MP4 (after an autostart: from the program's\n"
+                 "                      start) through ffmpeg: ffmpeg/ next to the program, else on PATH\n"
                  "  --monitor           text monitor on stdin/stdout, starting in the monitor (help lists the commands)\n"
                  "  --remote-monitor    text monitor on 127.0.0.1:6580 (--monitor-port N for another port, 0 = any)\n"
                  "  --moncommands FILE  run monitor commands from FILE first; then the machine runs unless the script ran it\n"
@@ -400,6 +403,7 @@ int main(int argc, char** argv) {
     std::string snapshot_path;
     std::string save_snapshot_path;
     std::string wav_path;
+    std::string video_path;
     std::string cas_path;
     std::string cas_dir;
     std::string autostart_path;
@@ -678,6 +682,8 @@ int main(int argc, char** argv) {
             snapshot_path = argv[++i];
         } else if (arg == "--save-snapshot" && has_value) {
             save_snapshot_path = argv[++i];
+        } else if (arg == "--video" && has_value) {
+            video_path = argv[++i];
         } else if (arg == "--wav" && has_value) {
             wav_path = argv[++i];
         } else if (arg == "--monitor") {
@@ -1155,14 +1161,42 @@ int main(int argc, char** argv) {
     log_media();
     std::size_t next_event = 0;
     std::vector<float> audio;
+    freetvc::VideoRecorder recorder;
+    if (!video_path.empty()) {
+        const auto ffmpeg = freetvc::find_ffmpeg(freetvc::program_directory(argv[0]));
+        if (!ffmpeg) {
+            std::fprintf(stderr, "freetvc-headless: --video: no ffmpeg next to the program or on PATH\n");
+            return kExitError;
+        }
+        std::vector<float> before(machine.audio_available());
+        machine.read_audio(before);  // the sound before the recording starts is not in it
+        if (!recorder.start(video_path, *ffmpeg, freetvc::kTvArea, machine.audio_rate(), error)) {
+            std::fprintf(stderr, "freetvc-headless: --video: %s\n", error.c_str());
+            return kExitError;
+        }
+        machine.set_frame_sink(&recorder);
+    }
     const auto collect_audio = [&] {
-        if (!wav_path.empty()) {
+        if (!wav_path.empty() || recorder.recording()) {
             const std::size_t old_size = audio.size();
             audio.resize(old_size + machine.audio_available());
             machine.read_audio(std::span<float>(audio).subspan(old_size));
+            recorder.audio(std::span<const float>(audio).subspan(old_size));
+            if (wav_path.empty()) {
+                audio.clear();
+            }
         }
     };
     const auto write_outputs = [&]() -> bool {
+        if (recorder.recording()) {
+            machine.set_frame_sink(nullptr);
+            collect_audio();
+            if (!recorder.stop(error)) {
+                std::fprintf(stderr, "freetvc-headless: --video: %s\n", error.c_str());
+                return false;
+            }
+            std::fprintf(stderr, "freetvc-headless: video %s (%.1f s)\n", video_path.c_str(), recorder.seconds());
+        }
         if (!screenshot_path.empty() && !write_ppm(screenshot_path, machine.framebuffer())) {
             std::fprintf(stderr, "freetvc-headless: cannot write '%s'\n", screenshot_path.c_str());
             return false;

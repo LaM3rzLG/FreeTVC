@@ -280,6 +280,12 @@ Loading follows the snapshot's board and ROM set: the ROMs are found by CRC-32 i
 
 The machine's state is kept once a second of machine time for the last 60 s. Holding F10 steps back one kept second every 200 ms; Bench's run bar has **Back 5 s**; the monitor has `rewind [seconds]` and MCP `snapshot` `rewind`. Asking again goes further back. `freetvc-headless` keeps these points only while a monitor or a remote client is running.
 
+### 4.8 Video recording
+
+The TV picture (the 650 × 287 TV area, each pixel doubled to 1300 × 574, at the TVC's 49.76 frames per second) and the sound go into an MP4 file (H.264 and AAC) that plays in browsers, QuickTime, VLC and on video sites. Only the running machine is recorded: no Bench panels, menus or picture effects. freeTVC hands the frames to an `ffmpeg` program: the release packages carry a small one in `ffmpeg/` next to freeTVC (GPL, with its sources named in `ffmpeg/README.txt`); without that folder freeTVC looks for an installed ffmpeg (on macOS also in Homebrew's folders), then on `PATH`. While recording, the frames go to `FILE.video.mp4` and the sound to `FILE.audio.raw` beside the output; at the end ffmpeg joins them into `FILE` and both are removed. If ffmpeg fails, its last messages are reported and its log stays in `FILE.ffmpeg.log`.
+
+`freetvc-headless --video FILE` records the whole run; after `--autostart` it starts when the program runs.
+
 ## 5. Expansion cards
 
 The TVC has four card slots (0–3), each with 16 I/O ports at 10h + 10h·n and an 8 KiB memory window at C000h–DFFFh. Putting a card in or taking it out powers the machine on. Two cards cannot share a slot. The GUI starts with the cards that were in when it closed, in the same slots (the `freetvc.ini` keys below). In the Cards menu, **Put in slot** (or **Move to slot** while the card is in) under a card chooses its slot; a slot holding another card is greyed out with that card's name. Settings → Machine has the same choice as slot buttons 0–3 beside each card. Details of each card are in [cards.md](design/cards.md).
@@ -618,6 +624,7 @@ Exit codes: 0 success; 1 an error (a missing file, a failed autostart, an output
 | `--snapshot FILE` | start from a TVCS snapshot; its board and ROM set win over `--preset`; budgets count from there |
 | `--save-snapshot FILE` | write a TVCS snapshot at the end |
 | `--wav FILE` | write the whole run's sound as a 48 kHz 16-bit mono WAV |
+| `--video FILE` | record the TV picture and the sound as an MP4 through ffmpeg ([4.8](#48-video-recording)) |
 | `--monitor` | text monitor on stdin/stdout, starting in the monitor |
 | `--remote-monitor`, `--monitor-port N`, `--moncommands FILE` | the text monitor ([8.1](#81-text-monitor)) |
 | `--mcp-stdio`, `--mcp-http`, `--mcp-port N`, `--mcp-token TOKEN`, `--mcp-allow-monitor` | MCP ([8.2](#82-mcp-server)) |

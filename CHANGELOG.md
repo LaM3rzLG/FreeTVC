@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### New
+
+- Video recording ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): the TV picture, pixels doubled, and the sound into an MP4 (H.264, AAC) through ffmpeg; `freetvc-headless --video FILE`. The packages carry a small GPL ffmpeg in `ffmpeg/` (`tools/release/build_ffmpeg.sh`), so nothing has to be installed.
+
 ## 1.1.0 — 2026-11-06
 
 ### New

@@ -4,9 +4,10 @@ Közös (Windows + Mac), nem platformfüggő fejlesztések. A Mac-es fordítás/
 
 ## Issue #1 „Missing features need to be implemented” (belaszalontai) — állapot 2026-11-02
 - 1. kártyahely a felületen: KÉSZ (ed4863b) · 5. MCP `card256`: KÉSZ (a3647ee)
-- 2. videófelvétel: **KÉSŐBBRE** (2026-11-02). Irány: FFmpeg (a freeTVC a képkockákat és a hangot a külön telepített
-  `ffmpeg`-nek adja át -> MP4). Minta: az ep128emu beépített AVI-írója (`~/Documents/TVC-emu/ep128emu/src/videorec.cpp`,
-  RLE8/YV12, GPL-2+ -> átvehető). Tesztelni csak Windows-on és Mac ARM-on tudunk.
+- 2. videófelvétel: **FOLYAMATBAN** (2026-11-06). Kész: `FrameSink` a Video-ban, `VideoRecorder` (`frontend/common`,
+  ffmpeg gyerekfolyamat: RGB cső → x264 MP4, hang f32 fájlba, a végén AAC-vel összefűzve), `--video FILE` (headless),
+  saját kis ffmpeg (`tools/release/build_ffmpeg.sh`, 3,5–4,3 MB) a csomagok `ffmpeg/` mappájában. Hátra: GUI (alsó sor,
+  külön menü kamera ikonnal — a felhasználóval megbeszélni), monitor, MCP. Csak az élő kép (a felhasználó kérése).
 - 3. billentyűzetkiosztás: **KÉSŐBBRE** (2026-11-02). A rajz már megvan (`keyboard_editor.cpp`, a TVC-gombok alatt a
   gép-gombok); hiányzik: csak megnézős mód menüből/gyorsbillentyűvel (~1-2 óra), Mac-es alapkiosztás `mac.keys`
   (a MacBookon nincs jobb Ctrl = FIRE és számbillentyűzet = 2. joystick; ~1 óra), esetleg gamepad (~1 óra).

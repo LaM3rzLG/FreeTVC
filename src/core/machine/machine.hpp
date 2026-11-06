@@ -146,6 +146,7 @@ public:
     const Video& video() const { return video_; }
     const Framebuffer& framebuffer() const { return video_.frame(); }
     std::uint64_t frame_count() const { return video_.frame_count(); }
+    void set_frame_sink(FrameSink* sink) { video_.set_frame_sink(sink); }
     bool irq_pending() const { return irq_flipflop_; }
     const Sound& sound() const { return sound_; }
     // The printer port's flip-flops (design/machine.md "Printer port"): /STROBE high, ACK set = ready

@@ -23,6 +23,13 @@ public:
     virtual void video_character(bool display, bool vsync, std::uint8_t mode, std::uint8_t* px) = 0;
 };
 
+// Told of every completed frame (the video recorder)
+class FrameSink {
+public:
+    virtual ~FrameSink() = default;
+    virtual void frame_done(const Framebuffer& frame) = 0;
+};
+
 class Video {
 public:
     // Snapshot fields, framebuffers included (core/snapshot/machine_state.cpp)
@@ -45,6 +52,8 @@ public:
     // The last complete frame and the number of frames completed since power-on.
     const Framebuffer& frame() const { return front_; }
     std::uint64_t frame_count() const { return frame_count_; }
+    // Copies of a Video (rewind, saved states) do not keep the sink, and assigning one keeps the target's
+    void set_frame_sink(FrameSink* sink) { sink_.p = sink; }
 
     // Beam position: framebuffer row (from the first line after VSYNC) and character column (from HSYNC).
     unsigned beam_line() const { return beam_y_; }
@@ -84,6 +93,13 @@ private:
     Framebuffer work_;
     Framebuffer front_;
     std::uint64_t frame_count_ = 0;
+    struct SinkRef {
+        FrameSink* p = nullptr;
+        SinkRef() = default;
+        SinkRef(const SinkRef&) {}
+        SinkRef& operator=(const SinkRef&) { return *this; }
+    };
+    SinkRef sink_;
 };
 
 // The VRAM bytes the 6845 shows with these registers: R6 rows of R1 characters from R12/R13, R9 + 1 lines each (RA b1-0).
