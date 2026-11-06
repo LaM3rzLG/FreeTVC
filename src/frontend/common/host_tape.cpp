@@ -9,6 +9,7 @@
 #include "core/cards/card256.hpp"
 #include "core/cards/gamecard.hpp"
 #include "core/cards/multichip.hpp"
+#include "core/cards/twodfx_card.hpp"
 #include "core/cards/nanosd.hpp"
 #include "core/cards/serial_card.hpp"
 #include "core/media/tape_signal.hpp"
@@ -996,6 +997,20 @@ bool HostTape::twodfx(bool on, unsigned slot, std::string& error) {
 }
 
 int HostTape::twodfx_slot() const { return card_slot(CardKind::TwoDfx); }
+
+std::string HostTape::twodfx_describe() const {
+    const int slot = twodfx_slot();
+    if (slot < 0) {
+        return "no 2dfx graphics card";
+    }
+    std::string text = "2dfx graphics card in slot " + std::to_string(slot) + " (ports F8h-F9h)";
+    if (const auto* card = dynamic_cast<const TwoDfxCard*>(machine_.cards().card(static_cast<unsigned>(slot)))) {
+        char st[64];
+        std::snprintf(st, sizeof st, ", status %02Xh, /INT %s", card->status(), card->irq() ? "low" : "high");
+        text += st;
+    }
+    return text;
+}
 
 std::string HostTape::multichip_describe() const {
     const int slot = multichip_slot();

@@ -101,6 +101,13 @@ public:
     virtual int multichip_slot() const = 0;
     virtual std::string multichip_describe() const = 0;
 
+    // The 2dfx graphics card: into `slot` (kCardSlots: slot 2, else the first free one) or out, and the machine
+    // powers on. Not beside the TVC256k++. False with `error` set.
+    virtual bool twodfx(bool on, unsigned slot, std::string& error) = 0;
+    // Its slot, or -1 when it is out.
+    virtual int twodfx_slot() const = 0;
+    virtual std::string twodfx_describe() const = 0;
+
     // The SID card: "6581" or "8580" puts that chip in at ports E0h-FFh (outside the slots), "off" takes it
     // out; the machine powers on. False with `error` set.
     virtual bool sid_card(const std::string& model, std::string& error) = 0;

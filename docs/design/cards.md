@@ -740,7 +740,8 @@ Vaczkó Károly's graphics coprocessor card (2026, for the TVC and the Enterpris
 |---|---|
 | headless | `--2dfx [SLOT]` (default 2) |
 | GUI | `--2dfx [SLOT]`; **2dfx graphics card** in the Cards menu with its slot choice (powers on); a row in the settings window's cards; `twodfx = yes\|no\|0-3` in `freetvc.ini` |
-| monitor, MCP | not yet |
+| monitor | `2dfx [on [slot] \| off]`; no argument: its slot, status byte and /INT |
+| MCP | `media` actions `twodfx_on` (slot, default 2 or the first free) and `twodfx_off`; `status` reports `twodfx` |
 
 ### Tests and checks
 
@@ -748,11 +749,12 @@ Vaczkó Károly's graphics coprocessor card (2026, for the TVC and the Enterpris
   - `Cube_2dfx.cas`: a rotating six-colour cube, as the site's picture.
   - `Wolf2dfx.cas` from `Wolf3d_2dfx.zip` (about 50 raw `.bin` data files beside it): the title (16-colour mode, a 512 × 240 bitmap uploaded in 512-byte chunks), SPACE starts level 1 (HUD, gun, face). Both by autostart through the host cassette and from the NanoSD (`LOAD"WOLF2DFX"`); also beside the SID, Multichip and serial cards.
   - `AnyShow2.cas` from `AnyShow2dfx.zip`: 15 dithered 512 × 240 pictures.
+  - Monitor (`2dfx`, `on`, `on 1`, `off`, `card256 on` refused, `help 2dfx`) and MCP over stdio (`twodfx_on`, `status`, `card256_on` refused, `twodfx_off`).
 
 ### Known limits
 
 - Open ⚑: where the frame sits on a moved paper; 4-colour mode at full or half resolution; reset.
-- Not built: the card's state in snapshots and rewind, MCP and monitor commands, the built-in demos from a menu.
+- Not built: the card's state in snapshots and rewind, the built-in demos from a menu.
 
 ## SID card
 

@@ -153,8 +153,9 @@ public:
     bool multichip(bool on, unsigned slot, std::string& error) override;
     // The 2dfx graphics card (no ROM) into `slot` (kCardSlots: slot 2, else the first free) or out; powers on.
     // Not with the TVC256k++ (both drive EC0-3 and /EXTC); beside it the SID card keeps E0h-F7h (Machine::io_write).
-    bool twodfx(bool on, unsigned slot, std::string& error);
-    int twodfx_slot() const;
+    bool twodfx(bool on, unsigned slot, std::string& error) override;
+    int twodfx_slot() const override;
+    std::string twodfx_describe() const override;
     bool sid_card(const std::string& model, std::string& error) override;
     // --sid-clock: the clock a SID card gets when it goes in (default a PAL C64's)
     void set_sid_clock(std::uint32_t hz) { sid_clock_hz_ = hz; }

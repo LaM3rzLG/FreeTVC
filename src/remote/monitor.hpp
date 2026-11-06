@@ -144,6 +144,7 @@ private:
     std::string cmd_disk(Args& a);
     std::string cmd_gamecard(Args& a);
     std::string cmd_multichip(Args& a);
+    std::string cmd_twodfx(Args& a);
     std::string cmd_sid(Args& a);
     std::string cmd_nanosd(Args& a);
     std::string cmd_printer(Args& a);

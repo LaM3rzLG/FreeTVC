@@ -293,6 +293,10 @@ const std::vector<Monitor::Command>& Monitor::commands() {
         {"multichip", "multichip [on [slot] | off]",
          "the Multichip sound card (SN76489, SAA1099, YM3812) in a slot (default 2) or out; powers on; no argument: show it",
          &Monitor::cmd_multichip},
+        {"2dfx", "2dfx [on [slot] | off]",
+         "the 2dfx graphics card (ports F8h/F9h, not beside the TVC256k++) in a slot (default 2, else the first free) or out; "
+         "powers on; no argument: show it and its status",
+         &Monitor::cmd_twodfx},
         {"sid", "sid [6581 | 8580 | off]",
          "the SID card at ports E0h-FFh, outside the slots, with a MOS 6581 or 8580, or out; powers on; no argument: "
          "show it", &Monitor::cmd_sid},
@@ -1655,6 +1659,10 @@ std::string Monitor::cmd_cart(Args& a) {
 
 std::string Monitor::cmd_gamecard(Args& a) {
     return switch_card(a, "gamecard on [slot] | off", kGameCardSlot, &MediaControl::gamecard, &MediaControl::gamecard_describe);
+}
+
+std::string Monitor::cmd_twodfx(Args& a) {
+    return switch_card(a, "2dfx on [slot] | off", kCardSlots, &MediaControl::twodfx, &MediaControl::twodfx_describe);
 }
 
 std::string Monitor::cmd_multichip(Args& a) {
