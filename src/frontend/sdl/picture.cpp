@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "frontend/sdl/picture.hpp"
 
-#include <charconv>
+#include "frontend/sdl/parse_float.hpp"
+
 #include <cstdio>
 #include <fstream>
 #include <map>
@@ -87,8 +88,7 @@ std::string apply_line(std::string_view key, std::string_view value, Picture& pi
             continue;
         }
         float v = 0.0f;
-        const auto [end, ec] = std::from_chars(value.data(), value.data() + value.size(), v);
-        if (ec != std::errc{} || end != value.data() + value.size() || v < n.min || v > n.max) {
+        if (!parse_float(value, v) || v < n.min || v > n.max) {
             return msg("%s is a number from %g to %g", std::string(key).c_str(), static_cast<double>(n.min), static_cast<double>(n.max));
         }
         picture.*n.field = v;

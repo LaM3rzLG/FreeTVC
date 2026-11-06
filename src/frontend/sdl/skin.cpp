@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "frontend/sdl/skin.hpp"
 
+#include "frontend/sdl/parse_float.hpp"
+
 #include <algorithm>
 #include <charconv>
 #include <fstream>
@@ -112,8 +114,7 @@ std::optional<RoleColour> parse_role(std::string_view s) {
 
 std::optional<float> parse_number(std::string_view s) {
     float value = 0.0f;
-    const auto [end, ec] = std::from_chars(s.data(), s.data() + s.size(), value);
-    if (ec != std::errc{} || end != s.data() + s.size() || value < 0.0f || value > 1000.0f) {
+    if (!parse_float(s, value) || value < 0.0f || value > 1000.0f) {
         return std::nullopt;
     }
     return value;
