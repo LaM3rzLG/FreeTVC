@@ -32,7 +32,7 @@ Served bytes: the file from offset 80h. Unbuffered: CHIN reads the 16 header byt
 
 Sources (both are supported):
 - **attached file** (`--cas`, monitor `attach`): `OPEN` with an empty name, or its own name, reads it. When a name is found nowhere else it answers that too (a one-program cassette).
-- **folder**: `LOAD "NAME"` opens `NAME.CAS` (ASCII case ignored; a name with a dot is taken whole). `--cas-dir DIR` makes it read/write; without it the attached file's own directory is read only, so multi-part programs find their next file.
+- **folder**: `LOAD "NAME"` opens `NAME.CAS` (ASCII case ignored; a name with a dot is taken whole). A file that is not `.CAS` (such as the raw `.bin` data of the 2dfx Wolf3D) is read byte for byte from its start as a buffered file, as the [NanoSD](cards.md#nanosd) serves it; before 2026-11-06 it was parsed as CAS and lost 144 bytes. `--cas-dir DIR` makes it read/write; without it the attached file's own directory is read only, so multi-part programs find their next file.
 - `SAVE` and `OPEN OUTPUT` write `NAME.CAS` with an exact header (`build_cas`: type, records = floor(size / 128), byte 04h = size mod 128). With no writable folder, CRTE returns E6h (protection) and the strip / stderr says why. An unbuffered header shorter than 16 bytes is padded with zeros (CAS cannot express it).
 
 Choices where the ROM has no counterpart (❓ against a real tape):

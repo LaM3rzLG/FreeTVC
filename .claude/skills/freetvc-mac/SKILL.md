@@ -40,6 +40,14 @@ about/` beside them (move the whole folder, never the binary alone). The CMake p
   `freetvc-headless --preset 64k+-2.2 --autostart FILE --frames N --screenshot out.ppm` (PPM; `sips -s format png`).
   Copy a `.dsk` to the scratchpad first (disk images are written in place).
 
+## 2dfx card (branch `2dfx`)
+- `--2dfx [SLOT]` (GUI and headless, default slot 2), Cards menu, ini `twodfx`; not with the TVC256k++.
+- Test programs in the ignored `2DFXCAS/` (cube, wolf, anyshow; from tvc.homeserver.hu `dl.php?file=Cube_2dfx.zip`,
+  `Wolf3d_2dfx.zip`, `AnyShow2dfx.zip`). Headless: `--preset 64k+-2.2 --2dfx --autostart COPY/Wolf2dfx.cas --frames 3000`
+  (copy the folder to the scratchpad first). Raw `.bin` data files load through the host cassette and the NanoSD.
+- NanoSD in the GUI: SD folder = the program's folder, ESC to BASIC, `LOAD"WOLF2DFX"`, `RUN`. Headless typing: start
+  with `\n\n` (the first keys are lost), e.g. `--key ESC@400 --type '\n\nLOAD"WOLF2DFX"\n@650' --type 'RUN\n@1700'`.
+
 ## MCP (drive the user's running GUI)
 - Start: `build/mac-release/src/freetvc --mcp-http --mcp-token claudeteszt` (port 6584, 127.0.0.1 only).
 - `tools/mac/mcp.sh TOOL 'JSON' [image.png]` (env `FREETVC_MCP_TOKEN`, `FREETVC_MCP_PORT`).

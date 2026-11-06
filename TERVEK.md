@@ -57,7 +57,8 @@ Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC gépp
   a felhasználó döntése: minden más kártya mehet mellé, a SID kártya ekkor E0h–F7h-t kapja (kipróbálva SID + Multichip +
   soros kártyával). hu.po kész.
   Kipróbálva még: AnyShow2dfx (tvc.homeserver.hu 2026/Kis_Róbert(AnyStone), 15 kép) — jó.
-- Hiányzik: MCP `media` 2dfx, mentés (`twodfx_emu_save_snapshot`), docs (cards.md „2dfx” fejezet, status.md).
+- Dokumentálva (2026-11-06): cards.md „2dfx graphics card”, tvc-hardware.md §9, media.md, status.md, MAC_ALLAPOT.md, skill.
+- Hiányzik: MCP `media` 2dfx, monitor, mentés (`twodfx_emu_save_snapshot`), unit teszt.
 - A Windows-gépen az Intelligens alkalmazásvezérlés (Smart App Control) letiltja a friss, aláíratlan fordítást.
 
 ## Elkészült

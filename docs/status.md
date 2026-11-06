@@ -16,7 +16,7 @@ What freeTVC emulates today, how its accuracy was checked, and what is still mis
 | Tape deck | the real tape signal through the ROM's tape routines: CAS as tape, TTP, WAV in and out | [media.md](design/media.md#tape-deck) |
 | Cartridges | plain (with bank switches), KiloCart, MegaCart, MultiCart v2, SD Dual | [media.md](design/media.md#cartridges), [cards.md](design/cards.md) |
 | Snapshots and rewind | freeTVC's own TVCS (byte-exact), WinTVC `.tvs` import, 60 s rewind | [media.md](design/media.md#snapshots), [file-formats.md](hardware/file-formats.md#wintvc-tvs) |
-| Expansion cards | HBF disk card (WD1793, four drives, VT-DOS 1.1 / 1.2), GameCard, TVC256k++ (memory, overlay, storage, mouse, vSID), Multichip sound card, NanoSD, SID card, serial card | [cards.md](design/cards.md) |
+| Expansion cards | HBF disk card (WD1793, four drives, VT-DOS 1.1 / 1.2), GameCard, TVC256k++ (memory, overlay, storage, mouse, vSID), Multichip sound card, NanoSD, SID card, serial card, 2dfx graphics card (the creator's library) | [cards.md](design/cards.md) |
 | Debugger | checkpoints with conditions and banks, stepping, trace, history, saved states, expressions, symbols, disassembler, source-level debugging, profiler | [debug-and-remote.md](design/debug-and-remote.md) |
 | Remote interfaces | VICE-style text monitor, MCP server for AI agents, DZRP for DeZog, GDB stub | [debug-and-remote.md](design/debug-and-remote.md) |
 | GUI | Play mode, the Bench debugger with its panels, skins, a settings window, OpenGL picture model (PAL signal and tube) with an SDL fallback, keyboard editor, English and Hungarian | [ui.md](design/ui.md) |
@@ -37,7 +37,7 @@ What freeTVC emulates today, how its accuracy was checked, and what is still mis
 | Linux x86-64, GCC 13 and Clang 18 | built and tested |
 | Windows x86-64 | cross-built with MinGW-w64 from Linux; tests and the GUI run under Wine |
 | Windows, native build (MSYS2 GCC or MSVC) | described in [windows.md](windows.md), not built or tested |
-| macOS | not supported or tested |
+| macOS (Apple Silicon) | built with `tools/mac/build_mac.sh` and used daily (GUI, headless, MCP); no tests run ([MAC_ALLAPOT.md](../MAC_ALLAPOT.md)) |
 
 ## Known gaps
 

@@ -19,6 +19,12 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 - **ROM-letöltés:** a "ROM-ok letöltése" a beállított `rom_dir` mappába tölt (ha van), különben a felhasználói
   adatmappába. `.gitignore`: `/roms/`, `/ROMS/`, `.DS_Store`. A felhasználó kipróbálta: a ROM-ok jó helyre mennek.
 
+## 2dfx grafikus kártya (`2dfx` ág, 2026-11-06)
+- Kártyák menü / Beállítások / ini `twodfx` / `--2dfx [SLOT]`; bármelyik slot, minden kártya mellé, kivéve TVC256k++.
+- Tesztprogramok (tvc.homeserver.hu 2026/Kis_Róbert(AnyStone)): Cube, Wolf3D, AnyShow — mind jók, headless és GUI.
+  Helyben: `2DFXCAS/` (git-ignore, `.git/info/exclude`), NanoSD-hez másolat: `~/Documents/TVC Projects/Wolf3D_2dfx`,
+  `.../AnyShow_2dfx`. Részletek: `docs/design/cards.md` „2dfx graphics card”, tervek: `TERVEK.md`.
+
 ## Tudás a repóban
 - Tervek, GitHub-hibajegyek (nem Mac-es): `TERVEK.md`.
 - `CLAUDE.md` (munkaszabályok), `.claude/skills/freetvc-mac/` (fordítás, futtatás, MCP, időzítésmérés).

@@ -14,6 +14,7 @@ Evidence markers: ✓ verified, ❓ unknown or assumed, ⚑ needs a dynamic chec
 | [Multichip sound card](#multichip-sound-card) | slot card | slot 2 (30h–3Fh) | 11 | `multichip.*`, `sn76489.*`, `saa1099.*`, `ym3812.*`, `chip_clock.hpp` | `multichip.rom` |
 | [NanoSD](#nanosd) | slot card | slot 3 (40h–4Fh) | 11 | `nanosd.*` | `nanosd.rom` |
 | [Serial card](#serial-card) | slot card | slot 1, else the first free slot | 00 | `i8251.*`, `serial_card.*` | none (the driver is in EXT) |
+| [2dfx graphics card](#2dfx-graphics-card) | slot card (ports F8h–F9h) | slot 2, else the first free slot | – | `twodfx_card.*` on `third_party/twodfx/` | none |
 | [SID card](#sid-card) | ports E0h–FFh, outside the slots | – | – | `sid_card.*` on `third_party/resid/` | none |
 | [MultiCart v2](#multicart-v2) | cartridge | cartridge port | – | `src/core/bus/multicart.*`, `jedec_flash.*` | `multicart-en.rom`, `multicart-hu.rom`, `multicart-es.rom` |
 | [SD Dual](#sd-dual) | cartridge | cartridge port | – | `src/core/bus/sddual.*`, `sd_card.*`, `jedec_flash.*` | `sddual.rom`, `sddual-gm.rom` |
@@ -719,6 +720,40 @@ Cartridges are not saved in `freetvc.ini`, so neither is the SD Dual nor its car
 - Not checked: real hardware; SDXC sizes above 32 GiB; MMC cards (CMD1 path; freeTVC's card answers as an SD card); dropping an `.img` on the GUI window.
 - Open ❓: the CPLD's unread status bits and +2/+3 reads; the flash part, its sectors and times; the HCS rule (a real SDHC card's behaviour); a real SPI clock (transfers are instant). FAT32 free space shows 0K, as the firmware computes it (⚠ above).
 
+## 2dfx graphics card
+
+Vaczkó Károly's graphics coprocessor card (2026, for the TVC and the Enterprise): sprites, 2D draw lists, text, bitmaps, tilemaps and 3D meshes in its own 704 × 256 frame, put over the TVC picture through EC0–EC3 and /EXTC. The hardware facts and the command summary are in [tvc-hardware.md](../hardware/tvc-hardware.md) §9 ("2dfx"); the command interface is `third_party/twodfx/docs/COMMAND_REFERENCE.md`.
+
+- **Model**: the creator's own portable emulator, **2dfx v1.1.0** (MIT, from github.com/kks2003/Ep128web `web/src/twodfx/`), vendored in `third_party/twodfx/` without the Elite and Wriggler demo data, which carry no licence, so the C9h and D3h–D5h demos are left out (`THIRD_PARTY.md`). The creator compared it with the card. freeTVC's side is `src/core/cards/twodfx_card.{hpp,cpp}`, `CardKind::TwoDfx`, created as `TWODFX_EMU_TVC`.
+- **Slot**: any slot, default **slot 2**, else the first free one. No ROM, no `MOPS` header, no ID; it uses no slot port.
+- **Ports**: F8h (command / status) and F9h (data), decoded outside the slots by `Machine::io_read`/`io_write`. Beside the [SID card](#sid-card) they go to the 2dfx and the SID card keeps E0h–F7h (the user's choice, 2026-11-06).
+- **Not with the TVC256k++**: both drive EC0–EC3 and /EXTC (Ep128web refuses the pair too). Every other card and cartridge may sit beside it; the TVC256k++ is refused both ways (GUI, settings, headless).
+- **Video**: `Video::step_character` passes each character to the card (`VideoOverlay`). The card counts lines from the end of VSYNC, calls `twodfx_emu_vsync` and `twodfx_emu_hsync(raw line)`, and at each paper start fetches the line with `twodfx_emu_overlay_raw_line`. The first paper line of the previous frame is raw line 49 and the first paper pixel raw X 126 (the BASIC paper; Ep128web's `zzzz-2dfx.patch`), so a program that moves the paper moves the 2dfx frame with it ⚑. Colour index bits I R G B (b0–b3) become freeTVC's I-G-R-B nibble. Only the paper shows the overlay.
+- **Resolution**: every 2dfx pixel in 2-colour mode, every 2nd pixel doubled in 4- and 16-colour mode, as Ep128web ⚑. Every 4th in 16-colour mode (the first reading of the pixel clock) broke the dither of the Wolf3D title into black lines.
+- **Interrupt**: the raster latches (54h–57h) hold the slot's /INT low until `58h`.
+- **Reset**: the reset button is a power cycle for the card (back to the `50h` wake gate), as Ep128web's README says ⚑.
+- **State**: a TVCS snapshot keeps the card in its slot but not the card's state (`twodfx_emu_save_snapshot` is not wired yet); machine copies (rewind, the prompt state) share one device, so rewinding does not rewind the 2dfx.
+
+### Front ends
+
+| Front end | 2dfx |
+|---|---|
+| headless | `--2dfx [SLOT]` (default 2) |
+| GUI | `--2dfx [SLOT]`; **2dfx graphics card** in the Cards menu with its slot choice (powers on); a row in the settings window's cards; `twodfx = yes\|no\|0-3` in `freetvc.ini` |
+| monitor, MCP | not yet |
+
+### Tests and checks
+
+- No unit test yet. Checked by hand, headless and in the GUI on 64k+-2.2 (Mac, 2026-11-06), with programs from tvc.homeserver.hu (2026/Kis_Róbert(AnyStone)):
+  - `Cube_2dfx.cas`: a rotating six-colour cube, as the site's picture.
+  - `Wolf2dfx.cas` from `Wolf3d_2dfx.zip` (about 50 raw `.bin` data files beside it): the title (16-colour mode, a 512 × 240 bitmap uploaded in 512-byte chunks), SPACE starts level 1 (HUD, gun, face). Both by autostart through the host cassette and from the NanoSD (`LOAD"WOLF2DFX"`); also beside the SID, Multichip and serial cards.
+  - `AnyShow2.cas` from `AnyShow2dfx.zip`: 15 dithered 512 × 240 pictures.
+
+### Known limits
+
+- Open ⚑: where the frame sits on a moved paper; 4-colour mode at full or half resolution; reset.
+- Not built: the card's state in snapshots and rewind, MCP and monitor commands, the built-in demos from a menu.
+
 ## SID card
 
 No real card's documentation is known: the English Wikipedia says a SID card "was created" for the TVC, with no source, schematic, ports or software, and no known program writes the ports below. WinTVC 1.4.1's SID device is the only definition, so freeTVC follows its layout, with a real chip's reads. `src/core/cards/sid_card.{hpp,cpp}` on the vendored reSID; a `Machine` member, not a slot card.
@@ -726,7 +761,7 @@ No real card's documentation is known: the English Wikipedia says a SID card "wa
 **WinTVC 1.4.1 (observed under Wine):** ports E0h–F8h are SID registers, register = port − E0h; the chip is a MOS 6581 at 985 248 Hz (a PAL C64's clock), through `winresid.dll`; reads of E0h–FFh return FFh (its OSC3 and ENV3 reads gave FFh in a probe run); the SID is reset with the machine ⚑ (not checked in a run). winresid (https://github.com/calmopyrin/winresid, GPL-2.0, read only; the same reSID code one commit older than freeTVC's) clocks the chip only when the audio buffer is filled, per 48 kHz sample, and applies writes at once, so in WinTVC a write lands at the start of the buffer being computed ⚑ (static reading of winresid's source). No WinTVC code was used.
 
 - **Ports**: E0h–FFh, decoded outside the slots (A7–A5 high; A4–A0 reach the chip). Writes to E0h–F8h are registers 00h–18h, as in WinTVC. F9h–FCh read POTX, POTY (no paddles: FFh), OSC3 and ENV3; every other read gives the chip's data bus, the last value written or read, which fades to 0 after 1D00h clocks on a 6581 and A2000h on an 8580 (reSID's bus TTL). ⚠ WinTVC reads FFh at all of them; a chip on a real bus would drive them ❓. Without the card E0h–FFh read FFh and writes go nowhere.
-- No slot, ID, ROM or interrupt, so the strip's slot ribs do not show it; it combines with every card and cartridge.
+- No slot, ID, ROM or interrupt, so the strip's slot ribs do not show it; it combines with every card and cartridge. Beside the [2dfx card](#2dfx-graphics-card) F8h/F9h are the 2dfx's, so the SID keeps E0h–F7h.
 - **Chip**: reSID (Dag Lem, https://github.com/daglem/reSID commit `ef7873f`, GPL-2.0-or-later, `third_party/resid/`, patched as below), a MOS 6581 (default, WinTVC's model) or 8580; clock 985 248 Hz unless `--sid-clock` gives another ❓. reSID's external filter (the C64's output stage: 16 Hz high-pass, 16 kHz low-pass) stays in ❓. Filter bias 0 mV (`adjust_filter_bias(0.0)`, VICE's and sidplayfp's default): reSID leaves it uninitialised otherwise, which made machine copies differ in the MinGW build. winresid never calls `adjust_filter_bias()` either, so WinTVC's 6581 filter cut-off depends on uninitialised memory ⚑; in the comparison run below it behaved as 0.
 - **Timing**: an access clocks the chip to its own machine tick (`ChipClock`), so a write lands within one chip clock of its OUT. Between accesses reSID runs in steps of 4 chip clocks and its output is taken after each (about 246 kHz) as a step into the band-limited synthesis. The steps depend only on that grid and the accesses, not on how runs are sliced (tested).
 - **8580 writes**: reSID's non-cycle-exact mode holds an 8580 write for one clock (its "fake pipeline", kept); a second write in the same chip clock, which only the host can make (an OUT takes 11 T), first clocks the chip once so the held one lands.
@@ -807,6 +842,6 @@ There is no printer by default, so an `LPRINT` waits after its first character u
 ## Devices not emulated
 
 - Original Videoton cards beyond the HBF and HBS: HBU parallel (49105), HBI-2 IEC-625 (49106), HBE EPROM programmer, TVC-NET ([tvc-hardware.md](../hardware/tvc-hardware.md) §9). The HBM 32 KiB RAM card (49102) is part of the 32k + HBM preset ([machine.md](machine.md)).
-- SoundQuartett, the Hanák 6-channel SAA1099 modification, UPM on the disk card (not checked), the 2dfx graphics card (ports F8h/F9h; [tvc-hardware.md](../hardware/tvc-hardware.md) §9).
+- SoundQuartett, the Hanák 6-channel SAA1099 modification, UPM on the disk card (not checked).
 - YATE's SDCart (no hardware known, [SD Dual](#sd-dual)), the single-socket SD cartridges and the 2009 slot-card SD interface.
 - The MultiCart's 512 KiB RAM fit-out and other flash chips.
