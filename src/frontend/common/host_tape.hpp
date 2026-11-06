@@ -152,7 +152,7 @@ public:
     std::vector<std::uint8_t> gamecard_rom();
     bool multichip(bool on, unsigned slot, std::string& error) override;
     // The 2dfx graphics card (no ROM) into `slot` (kCardSlots: slot 2, else the first free) or out; powers on.
-    // Not with the SID card (both use F8h/F9h) or the TVC256k++ (both drive EC0-3 and /EXTC).
+    // Not with the TVC256k++ (both drive EC0-3 and /EXTC); beside it the SID card keeps E0h-F7h (Machine::io_write).
     bool twodfx(bool on, unsigned slot, std::string& error);
     int twodfx_slot() const;
     bool sid_card(const std::string& model, std::string& error) override;

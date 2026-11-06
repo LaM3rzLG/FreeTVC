@@ -97,7 +97,7 @@ void print_usage(std::FILE* out) {
                  "                      (default) or 8580 on reSID\n"
                  "  --sid-clock HZ      its clock (default 985248, a PAL C64's)\n"
                  "  --2dfx [SLOT]       the 2dfx graphics card (ports F8h/F9h) in SLOT 0-3 (default 2); not with the\n"
-                 "                      TVC256k++ (both drive /EXTC) or the SID card\n"
+                 "                      TVC256k++ (both drive /EXTC); a SID card keeps E0h-F7h\n"
                  "  --nanosd [SLOT]     the NanoSD IO card (an SD card through an Arduino Nano) in SLOT 0-3 (default 3); its\n"
                  "                      EEPROM nanosd.rom is found like the system ROMs; it takes over LOAD and SAVE\n"
                  "  --nanosd-rom FILE   the NanoSD with this 64 KiB EEPROM image\n"
@@ -953,10 +953,6 @@ int main(int argc, char** argv) {
         if (config.cards[*twodfx_slot].kind != freetvc::CardKind::None) {
             std::fprintf(stderr, "freetvc-headless: --2dfx: slot %u holds the %s\n", *twodfx_slot,
                          freetvc::card_kind_name(config.cards[*twodfx_slot].kind));
-            return kExitUsage;
-        }
-        if (config.sid.model != freetvc::SidModel::None) {
-            std::fprintf(stderr, "freetvc-headless: --2dfx: not with the SID card (both use ports F8h/F9h)\n");
             return kExitUsage;
         }
         if (card256_slot) {

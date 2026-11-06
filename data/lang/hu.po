@@ -3739,21 +3739,16 @@ msgstr "a 2dfx kártya kimaradt: %s"
 
 msgid ""
 "Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper, ports "
-"F8h/F9h; not with the SID card or the TVC256k++; the machine powers on"
+"F8h/F9h (a SID card keeps E0h-F7h); not with the TVC256k++; the machine "
+"powers on"
 msgstr ""
 "Vaczkó Károly kártyája: sprite-ok, 2D és 3D grafika a papír fölött, F8h/F9h "
-"port; a SID-kártyával és a TVC256k++-szal nem megy együtt; hidegindítás"
-
-msgid ""
-"the SID card cannot go in beside the 2dfx card (both use ports F8h/F9h)"
-msgstr "a SID-kártya nem tehető be a 2dfx kártya mellé (mindkettő az F8h/F9h portot használja)"
+"port (a SID-kártyának E0h–F7h marad); a TVC256k++-szal nem megy együtt; "
+"hidegindítás"
 
 msgid ""
 "the TVC256k++ cannot go in beside the 2dfx card (both drive EC0-3 and /EXTC)"
 msgstr "a TVC256k++ nem tehető be a 2dfx kártya mellé (mindkettő az EC0-3 és /EXTC vonalat hajtja)"
-
-msgid "not with the SID card (both use ports F8h/F9h)"
-msgstr "a SID-kártyával nem megy együtt (mindkettő az F8h/F9h portot használja)"
 
 msgid "not with the TVC256k++ (both drive EC0-3 and /EXTC)"
 msgstr "a TVC256k++-szal nem megy együtt (mindkettő az EC0-3 és /EXTC vonalat hajtja)"

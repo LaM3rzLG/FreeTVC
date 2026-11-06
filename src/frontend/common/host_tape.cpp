@@ -976,10 +976,6 @@ int HostTape::multichip_slot() const { return card_slot(CardKind::Multichip); }
 bool HostTape::multichip(bool on, unsigned slot, std::string& error) { return place_card(CardKind::Multichip, &HostTape::multichip_rom, on, slot, error); }
 
 bool HostTape::twodfx(bool on, unsigned slot, std::string& error) {
-    if (on && machine_.config().sid.model != SidModel::None) {
-        error = msg("not with the SID card (both use ports F8h/F9h)");
-        return false;
-    }
     if (on && card_slot(CardKind::Card256) >= 0) {
         error = msg("not with the TVC256k++ (both drive EC0-3 and /EXTC)");
         return false;
@@ -1020,10 +1016,6 @@ std::string HostTape::multichip_describe() const {
 
 bool HostTape::sid_card(const std::string& model, std::string& error) {
     MachineConfig config = machine_.config();
-    if (model != "off" && card_slot(CardKind::TwoDfx) >= 0) {
-        error = msg("the SID card cannot go in beside the 2dfx card (both use ports F8h/F9h)");
-        return false;
-    }
     if (model == "off") {
         config.sid.model = SidModel::None;
     } else if (model == "6581") {

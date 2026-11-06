@@ -226,8 +226,8 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
     }
     actions.toggle_twodfx |= ImGui::MenuItem(item, nullptr, status.twodfx_slot >= 0);
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper, ports F8h/F9h; not with the SID "
-                                   "card or the TVC256k++; the machine powers on"));
+        ImGui::SetTooltip("%s", tr("Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper, ports F8h/F9h (a SID card keeps "
+                                   "E0h-F7h); not with the TVC256k++; the machine powers on"));
     }
     slot_choice(status, CardKind::TwoDfx, status.twodfx_slot, "twodfx", actions);
     if (status.nanosd_slot >= 0) {
