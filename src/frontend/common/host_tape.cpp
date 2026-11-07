@@ -1499,10 +1499,20 @@ bool HostTape::disk_eject(unsigned drive, std::string& error) {
 }
 
 bool HostTape::disk_autostart(const std::string& path, std::string& error) {
-    if (!disk_insert(0, path, error)) {
+    // The first empty drive while the card is in (A: when all are full); the program starts from there
+    unsigned drive = 0;
+    if (disk_card_on()) {
+        for (unsigned d = 0; d < FloppyDrives::kDrives; ++d) {
+            if (!drives_.disk(d)) {
+                drive = d;
+                break;
+            }
+        }
+    }
+    if (!disk_insert(drive, path, error)) {
         return false;
     }
-    const std::vector<std::string> files = drives_.disk(0)->root_files();
+    const std::vector<std::string> files = drives_.disk(drive)->root_files();
     const auto cas = std::find_if(files.begin(), files.end(), [](const std::string& f) {
         return f.size() > 4 && same_ascii(std::string_view(f).substr(f.size() - 4), ".CAS");
     });
@@ -1513,7 +1523,8 @@ bool HostTape::disk_autostart(const std::string& path, std::string& error) {
     keep_prompt_state();
     fetch_prompt_state();
     nanosd_media_.skip_menu = nanosd_slot() >= 0;
-    media_.autostart_disk(machine_, cas->substr(0, cas->size() - 4));
+    const std::string prefix = drive == 0 ? std::string() : std::string(1, static_cast<char>('A' + drive)) + ":";
+    media_.autostart_disk(machine_, prefix + cas->substr(0, cas->size() - 4));
     return true;
 }
 

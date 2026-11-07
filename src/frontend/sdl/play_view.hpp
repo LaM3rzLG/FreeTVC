@@ -113,7 +113,8 @@ struct PlayActions {
     bool toggle_mute = false;
     bool reload_skin = false;
     bool quit = false;
-    bool load_program = false;  // file dialog, then autostart
+    bool load_program = false;    // file dialog, then autostart
+    bool disk_autostart = false;  // file dialog for a disk image, then its first program starts from A:
     bool run_again = false;     // autostart the attached cassette
     bool eject = false;
     bool toggle_bench = false;

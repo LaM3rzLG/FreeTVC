@@ -2053,7 +2053,11 @@ int main(int argc, char** argv) {
                 if (file_choice.purpose == FileChoice::Purpose::Symbols) {
                     run_command("ll \"" + path + "\"");
                 } else if (file_choice.purpose == FileChoice::Purpose::Program) {
-                    open_program(path, false);
+                    if (freetvc::HostTape::is_cart_file(path)) {
+                        notice.set(freetvc::sdl::tr("A cartridge goes in from the Cart key"), true);
+                    } else {
+                        open_program(path, false);
+                    }
                 } else if (file_choice.purpose == FileChoice::Purpose::Cart) {
                     insert_cart(path);
                 } else if (file_choice.purpose == FileChoice::Purpose::MultiCartFiles) {
@@ -2805,8 +2809,10 @@ int main(int argc, char** argv) {
             input.machine_replaced();
             notice.show_text(false, "power cycled");
         }
-        if (actions.load_program || actions.tape_insert || actions.tape_insert_play || actions.tape_record || actions.cart_insert) {
-            static const SDL_DialogFileFilter kPrograms[] = {{N_("TVC programs (*.cas, *.wav, *.ttp, *.crt, *.rom, *.dsk, *.img)"), "cas;CAS;wav;WAV;ttp;TTP;crt;CRT;rom;ROM;dsk;DSK;img;IMG"}, {N_("All files"), "*"}};
+        if (actions.load_program || actions.disk_autostart || actions.tape_insert || actions.tape_insert_play || actions.tape_record ||
+            actions.cart_insert) {
+            static const SDL_DialogFileFilter kDiskPrograms[] = {{N_("Disk images (*.dsk, *.img)"), "dsk;DSK;img;IMG"}, {N_("All files"), "*"}};
+            static const SDL_DialogFileFilter kPrograms[] = {{N_("TVC programs (*.cas, *.wav, *.ttp, *.dsk, *.img)"), "cas;CAS;wav;WAV;ttp;TTP;dsk;DSK;img;IMG"}, {N_("All files"), "*"}};
             static const SDL_DialogFileFilter kTapes[] = {{N_("Tapes (*.wav, *.ttp, *.cas)"), "wav;WAV;ttp;TTP;cas;CAS"}, {N_("All files"), "*"}};
             static const SDL_DialogFileFilter kCarts[] = {{N_("Cartridges (*.crt, *.rom, *.bin)"), "crt;CRT;rom;ROM;bin;BIN"}, {N_("All files"), "*"}};
             static const SDL_DialogFileFilter kWav[] = {{N_("WAV files (*.wav)"), "wav;WAV"}};
@@ -2814,7 +2820,7 @@ int main(int argc, char** argv) {
                 const std::lock_guard lock(file_choice.mutex);
                 file_choice.showing = true;
                 file_choice.play = actions.tape_insert_play;
-                file_choice.purpose = actions.load_program                                ? FileChoice::Purpose::Program
+                file_choice.purpose = actions.load_program || actions.disk_autostart      ? FileChoice::Purpose::Program
                                       : actions.tape_insert || actions.tape_insert_play ? FileChoice::Purpose::Tape
                                       : actions.cart_insert                             ? FileChoice::Purpose::Cart
                                                                                         : FileChoice::Purpose::Record;
@@ -2822,7 +2828,10 @@ int main(int argc, char** argv) {
             if (actions.tape_record) {
                 SDL_ShowSaveFileDialog(&FileChoice::done, &file_choice, window, file_choice.translated(kWav, 1), 1, nullptr);
             } else {
-                const SDL_DialogFileFilter* filters = actions.load_program ? kPrograms : actions.cart_insert ? kCarts : kTapes;
+                const SDL_DialogFileFilter* filters = actions.load_program     ? kPrograms
+                                                      : actions.disk_autostart ? kDiskPrograms
+                                                      : actions.cart_insert    ? kCarts
+                                                                               : kTapes;
                 SDL_ShowOpenFileDialog(&FileChoice::done, &file_choice, window, file_choice.translated(filters, 2), 2, nullptr, false);
             }
         }

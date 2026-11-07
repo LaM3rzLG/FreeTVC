@@ -704,6 +704,15 @@ msgstr "Gép"
 msgid "Recent programs"
 msgstr "Legutóbbi programok"
 
+msgid "Load a program directly..."
+msgstr "Program közvetlen betöltése"
+
+msgid "The disk goes into A: (the disk card goes in if needed) and its first program starts"
+msgstr "A lemez az A: meghajtóba kerül (ha kell, a lemezes kártya is bekerül), és elindul rajta az első program"
+
+msgid "A cartridge goes in from the Cart key"
+msgstr "Cartridge-et a Cart gombbal lehet betenni"
+
 msgid "Version"
 msgstr "Verzió"
 
@@ -1720,8 +1729,8 @@ msgid "power cycled"
 msgstr "ki- és bekapcsolva"
 
 #: src/frontend/sdl/main.cpp:2526
-msgid "TVC programs (*.cas, *.wav, *.ttp, *.crt, *.rom, *.dsk, *.img)"
-msgstr "TVC-programok (*.cas, *.wav, *.ttp, *.crt, *.rom, *.dsk, *.img)"
+msgid "TVC programs (*.cas, *.wav, *.ttp, *.dsk, *.img)"
+msgstr "TVC-programok (*.cas, *.wav, *.ttp, *.dsk, *.img)"
 
 #: src/frontend/sdl/main.cpp:2527
 msgid "Tapes (*.wav, *.ttp, *.cas)"

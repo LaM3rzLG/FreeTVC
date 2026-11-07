@@ -98,6 +98,15 @@ a felhasználó a GUI-ban végignézte és jóváhagyta az alábbiakat; release 
   Névjegy · Kilépés. Billentyűzet, képernyőkép, teljes raszter, kazetta kivétele kikerült. Nyomtató: saját ikon a REC
   előtt (halvány/világos/sárga nyomtatáskor). Magnó: kazetta (forgáskor analóg hullám a valódi jelből, 1,5 ms) ·
   ▶ + számláló · ■ · ◀◀; menü csak a kazettán; a magnó és a lemez menüje fejléc nélkül.
+- **Lemez és cartridge (2026-11-07)**: floppy menü első pontja „Program közvetlen betöltése” (csak .dsk/.img,
+  `disk_autostart` akció → `open_program`); a „Program betöltése” nem fogad CRT-t (szűrő + üzenet: Cart gomb); a Cartridge
+  menü fejléc nélkül; a HBF kártya almenüjében csak a „Lemezes rendszer”, a lemezek a floppy ikonon. A gyors lemez marad
+  (a felhasználó kérte vissza). `HostTape::disk_autostart` most az első üres meghajtóba teszi a lemezt és `LOAD "B:NÉV"`
+  -et gépel — **NYITOTT**: így a SIDSoftEMU B:-ről elakad (a fájljait az A:-n keresi); javasolt: az új lemez mindig A:,
+  a régi A: az első üres meghajtóba — a felhasználó még nem döntött.
+- **SIDSoftEMU + HBF**: a felhasználónál „nem jó” (2026-11-07), nálam A:-ról (64K/1.2, HBF) a fájlkezelő és a SONG1.STC
+  lejátszás megy (IT 5008 Hz, valós sebesség). A felhasználótól még kell: mi a hiba pontosan, melyik gép/slot.
+- Elvetve: program-autodetect / programlista (a felhasználó: „aki nem tudja, mi kell hozzá, így járt”).
 - Hátra a GUI-ból: Nyomtató végleges helye; Ctrl/Cmd+R gyorsbillentyű
   (a CTRL a TVC-nek is kell — megbeszélni); cartridge-mappa (javaslat: `cartridges/` a felhasználói adatmappában, a
   „Cartridge betétele” ott nyílik — a felhasználó még nem döntött); docs (ui.md: strip, menük; user-guide 4.8 GUI rész);

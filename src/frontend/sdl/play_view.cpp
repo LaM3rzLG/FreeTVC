@@ -154,15 +154,12 @@ void draw_machine_menu(const PlayStatus& status, PlayActions& actions) {
     actions.power_cycle |= ImGui::MenuItem(tr("Power cycle"));
 }
 
-void draw_disk_menu(const PlayStatus& status, PlayActions& actions);
-
 // A card's own media and cable, under its slot; none of this powers the machine on
 void draw_card_extras(CardKind kind, const PlayStatus& status, PlayActions& actions) {
     char item[160];
     switch (kind) {
     case CardKind::Hbf: {
-        draw_disk_menu(status, actions);
-        // The card's EPROM: the disk system it boots
+        // The card's EPROM: the disk system it boots; the disks are on the floppy key
         ImGui::SeparatorText(tr("Disk system"));
         for (const auto& [choice, label] : {std::pair{"1.1", "VT-DOS 1.1"}, std::pair{"1.2", "VT-DOS 1.2"}}) {
             if (ImGui::MenuItem(label, nullptr, status.disk_rom == choice) && status.disk_rom != choice) {
@@ -242,6 +239,10 @@ void draw_card_extras(CardKind kind, const PlayStatus& status, PlayActions& acti
     }
     default:
         break;
+    }
+    actions.toggle_fast_disk |= ImGui::MenuItem(tr("Fast disk"), nullptr, status.fast_disk);
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("Run at full speed while a drive works; the machine's own timing stays real"));
     }
 }
 
@@ -357,7 +358,6 @@ void draw_ports_menu(const PlayStatus& status, PlayActions& actions) {
 void draw_cart_menu(const PlayStatus& status, PlayActions& actions) {
     char item[160];
     // design/media.md "Cartridges": inserting or removing one powers the machine on
-    ImGui::SeparatorText(tr("Cartridge"));
     actions.cart_insert |= ImGui::MenuItem(tr("Insert cartridge..."), nullptr, false, status.can_browse);
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("%s", tr("A .crt, .rom or .bin image; the machine powers on"));
@@ -421,6 +421,11 @@ void draw_tape_menu(const PlayStatus& status, PlayActions& actions) {
 }
 
 void draw_disk_menu(const PlayStatus& status, PlayActions& actions) {
+    actions.disk_autostart |= ImGui::MenuItem(tr("Load a program directly..."), nullptr, false, status.can_browse);
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("The disk goes into A: (the disk card goes in if needed) and its first program starts"));
+    }
+    ImGui::Separator();
     // design/cards.md: drives A-D of the HBF card
     char item[160];
     for (int d = 0; d < static_cast<int>(status.disks.size()); ++d) {
@@ -438,10 +443,6 @@ void draw_disk_menu(const PlayStatus& status, PlayActions& actions) {
             }
         }
         ImGui::PopID();
-    }
-    actions.toggle_fast_disk |= ImGui::MenuItem(tr("Fast disk"), nullptr, status.fast_disk);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", tr("Run at full speed while a drive works; the machine's own timing stays real"));
     }
 }
 
