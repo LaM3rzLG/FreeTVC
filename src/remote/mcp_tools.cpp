@@ -874,6 +874,72 @@ json press_keys(Ctx& c, const json& args) {
                                int_arg(args, "timeout_ms", kDefaultTimeoutMs, 1, kMaxTimeoutMs)));
 }
 
+json game_saves(Ctx& c, const json& args) {
+    MediaControl* media = c.monitor.media();
+    if (!media) {
+        fail("this front end has no program media");
+    }
+    const std::string action = string_arg(args, "action", "list");
+    std::string error;
+    if (action == "list") {
+        const std::string game = string_arg(args, "game", "");
+        if (game.empty()) {
+            return structured({{"root", media->game_root()}, {"game", media->game_name()}, {"games", media->game_list()}});
+        }
+        json saves = json::array();
+        for (const GameSaveEntry& save : media->game_saves(game)) {
+            saves.push_back({{"name", save.name}, {"file", save.file}, {"picture", save.picture}});
+        }
+        return structured({{"game", game}, {"saves", std::move(saves)}});
+    }
+    if (action == "save") {
+        hold(c);
+        c.dbg.cancel_step();
+        std::string file;
+        if (!media->game_save(string_arg(args, "game", ""), file, error)) {
+            fail(error);
+        }
+        return structured({{"action", action}, {"file", file}, {"game", media->game_name()}});
+    }
+    if (action == "check") {
+        const auto paths = media->snapshot_check(string_arg(args, "path"), error);
+        if (!paths) {
+            fail(error);
+        }
+        json list = json::array();
+        bool all = true;
+        for (const SnapshotPath& p : *paths) {
+            list.push_back({{"kind", p.kind}, {"path", p.path}, {"directory", p.directory}, {"found", p.found}});
+            all &= p.found;
+        }
+        return structured({{"paths", std::move(list)}, {"all_found", all}});
+    }
+    if (action == "load") {
+        SnapshotPathMap moved;
+        if (const auto it = args.find("moved"); it != args.end() && it->is_object()) {
+            for (const auto& [from, to] : it->items()) {
+                if (to.is_string()) {
+                    moved[from] = to.get<std::string>();
+                }
+            }
+        }
+        hold(c);
+        c.dbg.cancel_step();
+        if (!media->snapshot_load_moved(string_arg(args, "path"), moved, error)) {
+            fail(error);
+        }
+        c.monitor.machine_changed();
+        return structured({{"action", action}, {"game", media->game_name()}, {"pc", hex4(c.machine.pc())}});
+    }
+    if (action == "delete") {
+        if (!media->game_save_delete(string_arg(args, "path"), error)) {
+            fail(error);
+        }
+        return structured({{"action", action}});
+    }
+    fail("action is list, save, check, load or delete");
+}
+
 json snapshot(Ctx& c, const json& args) {
     const std::string action = string_arg(args, "action", "list");
     if (action == "list") {
@@ -1546,6 +1612,10 @@ std::vector<Tool> make_tools(Monitor& monitor, const McpOptions& options) {
                      schema({{"keys", {{"type", "array"}, {"items", {{"type", "string"}}}}}, {"hold_frames", {{"type", "integer"}, {"minimum", 1}}},
                              {"wait", {{"type", "boolean"}}}, {"settle_frames", {{"type", "integer"}, {"minimum", 0}}}, {"timeout_ms", timeout}}, {"keys"}),
                      annotations(false, false, false), bind(press_keys)});
+    tools.push_back({"game_saves", "Game saves", "Snapshots kept per program in <root>/<game>/<date time>.tvcs with a PNG of the screen beside each. list: the root, the current game and every game with saves; list with game: its saves, newest first. save (game, default the program started last): a new save, the machine keeps running state as it was. check (path): the files and folders the save names (tape, cassette, cartridge, disks, SD images, the NanoSD's folder, the TVC256k++'s pendrive) and whether each is there now; nothing changes. load (path; moved: {old path: new path} for ones that moved): the board, cards and ROM set of the save, the media by path, then the memory; missing media are left out with a message; leaves the machine paused. delete (path): a save and its picture.",
+                     schema({{"action", {{"type", "string"}, {"enum", {"list", "save", "check", "load", "delete"}}}},
+                             {"game", {{"type", "string"}}}, {"path", {{"type", "string"}}}, {"moved", {{"type", "object"}}}}),
+                     annotations(false, true, false), bind(game_saves)});
     tools.push_back({"snapshot", "Machine states", "save / load / delete a named in-memory copy of the whole machine, or list them; load returns to exactly that moment. save_file / load_file (path) write and read a TVCS snapshot file, with the tape and cassette by path; load_file follows the file's board and ROM set (found by CRC-32) and leaves the machine paused. rewind (seconds, default 1) goes back in machine time to a point kept once a second for the last 60 s; asking again goes further back.",
                      schema({{"action", {{"type", "string"}, {"enum", {"save", "load", "delete", "list", "save_file", "load_file", "rewind"}}}},
                              {"name", {{"type", "string"}}}, {"path", {{"type", "string"}}},

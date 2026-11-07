@@ -31,6 +31,7 @@
 #include "core/machine/machine.hpp"
 #include "core/version.hpp"
 #include "debug/debugger.hpp"
+#include "frontend/common/game_saves.hpp"
 #include "frontend/common/host_tape.hpp"
 #include "frontend/common/presets.hpp"
 #include "frontend/common/rom_fetch.hpp"
@@ -1036,6 +1037,7 @@ int main(int argc, char** argv) {
     freetvc::HostTape tape(machine);
     tape.set_rom_places(rom_search);
     tape.set_prompt_dir(user_dir / "prompt");
+    tape.set_save_root(settings.values.save_dir ? fs::path(*settings.values.save_dir) : freetvc::default_save_root(user_dir));
     // --disk-rom, else disk_rom in freetvc.ini; 1.1 is the search's hbf.rom, which the card finds itself
     const bool disk_rom_given = !disk_rom_path.empty();
     if (!disk_rom_given) {

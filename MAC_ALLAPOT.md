@@ -25,6 +25,11 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
   Helyben: `2DFXCAS/` (git-ignore, `.git/info/exclude`), NanoSD-hez másolat: `~/Documents/TVC Projects/Wolf3D_2dfx`,
   `.../AnyShow_2dfx`. Részletek: `docs/design/cards.md` „2dfx graphics card”, tervek: `TERVEK.md`.
 
+## Játékmentések (2026-11-07, félkész)
+- A belső rész kész, és MCP-n tesztelve (headless, `--mcp-http --mcp-port 6590`): `game_saves` list/save/check/load/delete.
+  Wolf256 pendrive-ról és NanoSD-mappával, áthelyezett mappával és kártya nélküli gépre töltve is jó. Egy régi `quick.tvcs` is betölt.
+- A GUI még nincs kész. A terv és az állapot: `TERVEK.md` „Játékmentések”.
+
 ## Kiadás (1.1.0-tól; az 1.1.0 kiadva 2026-11-06, az 1.2.0 2026-11-07, a felhasználó fiókjáról)
 - Linux + Windows: GitHub Actions (`.github/workflows/release.yml`, kézi indítás vagy `v*` tag) → artifact.
 - macOS: `sh tools/mac/make_mac_release.sh OUT` → arm64 és x86_64 zip (macOS 13+, ad-hoc aláírás, nincs notarizálás).

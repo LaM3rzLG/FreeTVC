@@ -17,6 +17,7 @@ struct Settings {
     std::optional<std::string> rom_dir;  // made absolute against the file's folder
     std::optional<std::string> video_dir;       // where video recordings go (made absolute); default the Videos folder
     std::optional<std::string> screenshot_dir;
+    std::optional<std::string> save_dir;  // the game saves' folder (made absolute); default SaveState in the user data folder
     std::optional<std::string> recent;          // the last programs loaded, newest first, '|' between the paths  // where screenshots go (made absolute); default the desktop
     std::optional<std::string> preset;
     std::optional<std::string> skin;     // a skin name or a path

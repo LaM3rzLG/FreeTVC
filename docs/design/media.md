@@ -213,13 +213,31 @@ A TVCS file (`src/core/snapshot/`): `TVCS`, a 16-bit format version (1), then ch
 | `RAM `, `VRAM` | 64 KiB each |
 | `VID ` | the 6845's registers and counters, border, palette, mode, the beam, both framebuffers |
 | `SND ` | the tone generator, the band-limited synthesis state, the TXRXCLK edge count |
-| `MEDI` | (front end) the tape's path, state, motor and position; the cassette's and folder's paths; the cartridge's file name; the four disk images' paths; the two SD images' paths |
+| `MEDI` | (front end) the tape's path, state, motor and position; the cassette's and folder's paths; the cartridge's file name; the four disk images' paths; the two SD images' paths; the NanoSD's SD folder (while the card is in); the TVC256k++'s USB port and pendrive folder (while the card is in) |
+| `GAME` | (front end) the program the snapshot belongs to, for game saves |
 
 - **Byte-exact**: a snapshot taken mid-frame, written, read back and loaded into a freshly powered machine runs on to the same ticks, registers, RAM, VRAM, framebuffer and audio samples; saving right after a load gives the same bytes (`snapshot.rom.<preset>`, all five presets). About 26 KB at a BASIC prompt, 48 KB in the middle of a game.
 - Loading follows the file's board, ROM set, cartridge and cards: the machine's own ROMs if their CRCs match, else every preset of that board from the ROM search folders ([ui.md](ui.md), "Settings file and ROM search"), by CRC-32. The tape comes back by path at its position (a tape being recorded comes back stopped); disks and SD images come back by path; files that are gone are left out with a message. The host cassette's open file is not kept: take snapshots outside a LOAD or SAVE through it.
 - Media outside the machine state (disks, SD images, the MultiCart flash, the TVC256k++'s pendrive and flash drive, the NanoSD's SD folder) are not in the snapshot, so loading one does not undo their writes.
 - Front ends: the GUI's Snapshot section (quick save **F9**, quick load **Shift+F9** in Play, both into `quick.tvcs` in the user data folder; save and load dialogs), drag and drop of `.tvcs` and `.tvs`, `--snapshot FILE` (GUI and headless; budgets count from there), `--save-snapshot FILE` (headless, at the end), monitor `dump "file"` / `undump "file"` (VICE's names), MCP `snapshot` `save_file`/`load_file`, DZRP READ_STATE/WRITE_STATE (the TVCS bytes; DeZog gzips and stores them).
 - The autostart prompt state on disk is a TVCS file too (see "Autostart").
+
+### Game saves
+
+`frontend/common/game_saves.*` and `HostTape`: snapshots kept per program, so a game can be continued later.
+
+- **Where**: `<root>/<game>/<YYYY-MM-DD HH-MM-SS>.tvcs` (local time, ` (2)` and on for the same second), each with a PNG of the TV area beside it. The root is `SaveState` in the user data folder, or the `save_dir` setting. The game folder name replaces `/\:*?"<>|` and control characters with `_`, drops leading and trailing dots and spaces, and appends `_` to Windows' reserved names (`CON`, `COM1`, …), so the same folder works on Linux, Windows and macOS.
+- **The game**: the file name (without extension) of the program last started (autostart of a CAS, tape or disk) or the cartridge last plugged in; after a load, the one the snapshot's `GAME` chunk names; else the NanoSD's or the pendrive's folder name. A save can name another.
+- **What is saved**: the whole snapshot (memory, board, ROM set by CRC, the cards in their slots with their EPROMs and state) with the media by path. Disk, SD, flash and folder contents are not copied: a game loaded into memory needs only the memory, and a game that reads its media later needs the same files.
+- **Checking before a load**: `MediaControl::snapshot_check` lists every file and folder a snapshot names and whether it is there, without touching the machine. A load with moved paths (`snapshot_load_moved`) takes old path → new path pairs; a moved folder carries every file under it (the cassette and the pendrive of one game folder follow one new folder). What is still missing is left out with a message: an empty NanoSD socket, an unplugged pendrive, an ejected disk.
+- **Loading** follows the save's board, ROM set and cards as any snapshot load does.
+- Front ends: MCP `game_saves` (`list`, `save`, `check`, `load` with `moved`, `delete`, which only deletes `.tvcs` files under the root). The GUI's menu, dialogs and Dashboard button are not built yet.
+
+**Checks** (headless with MCP, 2026-11-07):
+- Wolf256 from a pendrive folder on the TVC256k++, saved at the title screen. The folder was renamed, `check` reported the cassette and the pendrive missing, and `load` with the folder moved restored them from the new place: the same picture, PC and memory.
+- The same save loaded into a 32k 1.2 machine without cards, with only the folder given as moved: the machine switched to the 64k+ with the TVC256k++, the pendrive and the cassette came from the new folder, and the picture was the same.
+- NanoSD: with its folder renamed, a plain load left the socket empty with a message, and a load with the folder moved put the new folder in.
+- A `quick.tvcs` saved before `GAME` and the new `MEDI` fields loads and runs on.
 
 ### WinTVC `.tvs` import
 

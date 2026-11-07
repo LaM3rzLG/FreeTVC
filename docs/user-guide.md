@@ -558,6 +558,7 @@ Example client configuration (the `mcpServers` shape most clients use; paths are
 | `type_text` | type text (`\n` = RETURN), wait, return the screen text |
 | `press_keys` | hold keys by name or `ROW:COLUMN`, joysticks included |
 | `snapshot` | in-memory states, `save_file` / `load_file` TVCS files, `rewind` |
+| `game_saves` | game saves per program: `list`, `save`, `check`, `load` (with moved folders), `delete` |
 | `symbols` | lookup, list, add, load label and debug files |
 | `trace` | the instruction history with registers, the latest checkpoint hits |
 | `io_state` | video, CRTC, sound, IRQ, paging |

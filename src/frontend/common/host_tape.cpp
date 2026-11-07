@@ -2,6 +2,7 @@
 #include "frontend/common/host_tape.hpp"
 
 #include <algorithm>
+#include <ctime>
 #include <cstdio>
 #include <fstream>
 #include <system_error>
@@ -16,6 +17,8 @@
 #include "core/message.hpp"
 #include "core/snapshot/machine_state.hpp"
 #include "core/snapshot/tvs_import.hpp"
+#include "frontend/common/game_saves.hpp"
+#include "remote/png.hpp"
 
 #include "frontend/common/multicart_image.hpp"
 #include "frontend/common/presets.hpp"
@@ -252,6 +255,7 @@ bool HostTape::autostart(const std::string& path, std::string& error) {
     if (!attach(path, error)) {
         return false;
     }
+    program_name_ = fs::path(path).stem().string();
     keep_prompt_state();
     fetch_prompt_state();
     nanosd_media_.skip_menu = nanosd_slot() >= 0;
@@ -287,6 +291,7 @@ bool HostTape::tape_autostart(const std::string& path, std::string& error) {
     if (!tape_insert(path, error)) {
         return false;
     }
+    program_name_ = fs::path(path).stem().string();
     keep_prompt_state();
     fetch_prompt_state();
     nanosd_media_.skip_menu = nanosd_slot() >= 0;
@@ -451,6 +456,7 @@ bool HostTape::cart_insert(const std::string& path, const std::string& type, uns
     media_.cancel();
     machine_.configure(config);
     cart_path_ = path;
+    program_name_ = fs::path(path).stem().string();
     if (config.roms.cart_type == CartType::MultiCart) {
         set_multicart(path, std::move(flash));
     }
@@ -637,7 +643,166 @@ std::vector<std::uint8_t> HostTape::snapshot_bytes() {
     for (const SdImageFile& sd : sd_files_) {
         w.text(sd.is_open() ? sd.path().string() : std::string());
     }
+    // The cards' own media only while the card is in
+    const bool card256_in = card256_slot() >= 0;
+    w.text(nanosd_slot() >= 0 ? nanosd_sd_dir().string() : std::string());
+    w.u8(static_cast<std::uint8_t>(card256_in ? card256_host_.usb() : Card256Usb::None));
+    w.text(card256_in ? card256_host_.pendrive_dir().string() : std::string());
+    snapshot.add("GAME").text(game_name());
     return snapshot.encode();
+}
+
+namespace {
+
+// The MEDI chunk; fields an older snapshot does not have are marked as missing
+struct MediaRecord {
+    std::string tape;
+    TapeState state = TapeState::Stopped;
+    bool motor = false;
+    std::uint64_t position = 0;
+    std::uint64_t last_tick = 0;
+    std::string cassette;
+    std::string folder;
+    std::string cart;
+    bool has_disks = false;
+    std::array<std::string, FloppyDrives::kDrives> disks;
+    bool has_sds = false;
+    std::array<std::string, 2> sds;
+    bool has_cards = false;
+    std::string nanosd;
+    Card256Usb usb = Card256Usb::None;
+    std::string pendrive;
+};
+
+MediaRecord read_media(const SnapshotChunk& medi) {
+    ChunkReader r(medi.body.data);
+    MediaRecord m;
+    m.tape = r.text();
+    m.state = static_cast<TapeState>(std::min<unsigned>(r.u8(), 3));
+    m.motor = r.boolean();
+    m.position = r.u64();
+    m.last_tick = r.u64();
+    m.cassette = r.text();
+    m.folder = r.text();
+    m.cart = r.text();
+    for (std::string& disk : m.disks) {
+        disk = r.text();
+    }
+    m.has_disks = !r.failed();
+    for (std::string& sd : m.sds) {
+        sd = r.text();
+    }
+    m.has_sds = !r.failed();
+    m.nanosd = r.text();
+    m.usb = static_cast<Card256Usb>(std::min<unsigned>(r.u8(), 2));
+    m.pendrive = r.text();
+    m.has_cards = !r.failed();
+    return m;
+}
+
+}  // namespace
+
+std::optional<std::vector<SnapshotPath>> HostTape::snapshot_paths(std::span<const std::uint8_t> bytes, std::string& error) {
+    auto snapshot = Snapshot::decode(bytes, error);
+    if (!snapshot) {
+        return std::nullopt;
+    }
+    std::vector<SnapshotPath> paths;
+    const SnapshotChunk* medi = snapshot->find("MEDI");
+    if (!medi) {
+        return paths;
+    }
+    const MediaRecord m = read_media(*medi);
+    const auto add = [&](std::string kind, const std::string& path, bool directory) {
+        if (path.empty()) {
+            return;
+        }
+        std::error_code ec;
+        const bool found = directory ? fs::is_directory(path, ec) : fs::is_regular_file(path, ec);
+        paths.push_back({std::move(kind), path, directory, found});
+    };
+    add("tape", m.tape, false);
+    add("cassette", m.cassette, false);
+    add("folder", m.folder, true);
+    add("cartridge", m.cart, false);
+    for (unsigned d = 0; m.has_disks && d < m.disks.size(); ++d) {
+        add(std::string("disk ") + static_cast<char>('A' + d) + ":", m.disks[d], false);
+    }
+    for (unsigned i = 0; m.has_sds && i < m.sds.size(); ++i) {
+        add("SD " + std::to_string(i + 1), m.sds[i], false);
+    }
+    if (m.has_cards) {
+        add("NanoSD", m.nanosd, true);
+        add("pendrive", m.usb == Card256Usb::Pendrive ? m.pendrive : std::string(), true);
+    }
+    return paths;
+}
+
+bool HostTape::snapshot_load_moved(const std::string& path, const SnapshotPathMap& moved, std::string& error) {
+    const auto bytes = read_file(path, kMaxSnapshotSize, error);
+    return bytes && snapshot_load_bytes(*bytes, fs::path(path).filename().string(), error, &moved);
+}
+
+std::optional<std::vector<SnapshotPath>> HostTape::snapshot_check(const std::string& path, std::string& error) {
+    const auto bytes = read_file(path, kMaxSnapshotSize, error);
+    if (!bytes) {
+        return std::nullopt;
+    }
+    auto paths = snapshot_paths(*bytes, error);
+    if (!paths) {
+        error = msg("%s: %s", fs::path(path).filename().string().c_str(), error.c_str());
+    }
+    return paths;
+}
+
+std::string HostTape::game_root() const { return save_root_.string(); }
+
+std::vector<std::string> HostTape::game_list() const { return save_root_.empty() ? std::vector<std::string>{} : list_games(save_root_); }
+
+std::vector<GameSaveEntry> HostTape::game_saves(const std::string& game) const {
+    std::vector<GameSaveEntry> entries;
+    if (!save_root_.empty()) {
+        for (const GameSave& save : list_saves(save_root_, game)) {
+            entries.push_back({save.file.string(), save.picture.string(), save.name});
+        }
+    }
+    return entries;
+}
+
+bool HostTape::game_save(const std::string& game, std::string& file, std::string& error) {
+    if (save_root_.empty()) {
+        error = msg("game saves are off in this front end");
+        return false;
+    }
+    const std::string name = game.empty() ? game_name() : game;
+    const fs::path target = new_save_file(save_root_, name.empty() ? std::string("TVC") : name, std::time(nullptr), error);
+    if (target.empty()) {
+        return false;
+    }
+    const std::string kept = program_name_;
+    program_name_ = name;
+    const bool saved = snapshot_save(target.string(), error);
+    if (!saved) {
+        program_name_ = kept;
+        return false;
+    }
+    std::string ignored;
+    remote::write_png(fs::path(target).replace_extension(".png").string(), machine_.framebuffer(), kTvArea, ignored);
+    file = target.string();
+    return true;
+}
+
+bool HostTape::game_save_delete(const std::string& file, std::string& error) {
+    std::error_code ec;
+    const fs::path target = fs::weakly_canonical(file, ec);
+    const fs::path root = fs::weakly_canonical(save_root_, ec);
+    const auto [end, ignored] = std::mismatch(root.begin(), root.end(), target.begin(), target.end());
+    if (save_root_.empty() || end != root.end() || target.extension() != ".tvcs") {
+        error = msg("%s is not a game save", file.c_str());
+        return false;
+    }
+    const fs::path picture = fs::path(target).replace_extension(".png");
+    return delete_save({target, fs::exists(picture, ec) ? picture : fs::path(), {}}, error);
 }
 
 bool HostTape::snapshot_save(const std::string& path, std::string& error) {
@@ -678,7 +843,8 @@ bool HostTape::snapshot_load(const std::string& path, std::string& error) {
     return snapshot_load_bytes(*bytes, fs::path(path).filename().string(), error);
 }
 
-bool HostTape::snapshot_load_bytes(std::span<const std::uint8_t> bytes, const std::string& from, std::string& error) {
+bool HostTape::snapshot_load_bytes(std::span<const std::uint8_t> bytes, const std::string& from, std::string& error,
+                                   const SnapshotPathMap* moved) {
     auto snapshot = Snapshot::decode(bytes, error);
     const auto needs = snapshot ? snapshot_needs(*snapshot, error) : std::nullopt;
     if (!needs) {
@@ -717,17 +883,50 @@ bool HostTape::snapshot_load_bytes(std::span<const std::uint8_t> bytes, const st
         return false;
     }
 
+    if (const SnapshotChunk* game = snapshot->find("GAME")) {
+        ChunkReader r(game->body.data);
+        if (std::string name = r.text(); !r.failed() && !name.empty()) {
+            program_name_ = std::move(name);
+        }
+    }
     // MEDI: files that are gone are left out with a message
     if (const SnapshotChunk* medi = snapshot->find("MEDI")) {
-        ChunkReader r(medi->body.data);
-        const std::string tape = r.text();
-        const auto state = static_cast<TapeState>(std::min<unsigned>(r.u8(), 3));
-        const bool motor = r.boolean();
-        const std::uint64_t position = r.u64();
-        const std::uint64_t last_tick = r.u64();
-        const std::string cassette = r.text();
-        const std::string folder = r.text();
-        const fs::path cart = r.text();
+        MediaRecord m = read_media(*medi);
+        // A moved folder takes the files under it along
+        const auto where = [&](std::string& path) {
+            if (!moved || path.empty()) {
+                return;
+            }
+            if (const auto it = moved->find(path); it != moved->end()) {
+                path = it->second;
+                return;
+            }
+            for (const auto& [old_path, new_path] : *moved) {
+                fs::path old_dir = fs::path(old_path).lexically_normal();
+                if (old_dir.filename().empty()) {
+                    old_dir = old_dir.parent_path();
+                }
+                const fs::path file = fs::path(path).lexically_normal();
+                const auto [end, ignored] = std::mismatch(old_dir.begin(), old_dir.end(), file.begin(), file.end());
+                if (!old_path.empty() && end == old_dir.end()) {
+                    path = (fs::path(new_path) / file.lexically_relative(old_dir)).lexically_normal().string();
+                    return;
+                }
+            }
+        };
+        for (std::string* path : {&m.tape, &m.cassette, &m.folder, &m.cart, &m.nanosd, &m.pendrive}) {
+            where(*path);
+        }
+        for (std::string& path : m.disks) {
+            where(path);
+        }
+        for (std::string& path : m.sds) {
+            where(path);
+        }
+        const std::string& tape = m.tape;
+        const std::string& cassette = m.cassette;
+        const std::string& folder = m.folder;
+        const fs::path cart = m.cart;
         // A MultiCart's flash by path, like a disk: the same image stays as it is, flash writes included
         if (machine_.config().roms.cart_type == CartType::MultiCart) {
             if (cart != cart_path_ || multicart_flash_.bytes.empty()) {
@@ -745,13 +944,10 @@ bool HostTape::snapshot_load_bytes(std::span<const std::uint8_t> bytes, const st
             drop_multicart();
         }
         cart_path_ = cart;
-        std::array<std::string, FloppyDrives::kDrives> disks;
-        for (std::string& disk : disks) {
-            disk = r.text();
-        }
+        const auto& disks = m.disks;
         std::string why;
         // Disks by path; a snapshot from before the disk card names none, and its drives stay as they are
-        if (!r.failed()) {
+        if (m.has_disks) {
             for (unsigned d = 0; d < FloppyDrives::kDrives; ++d) {
                 if (disks[d].empty()) {
                     if (drives_.disk(d) && !disk_eject(d, why)) {
@@ -765,11 +961,8 @@ bool HostTape::snapshot_load_bytes(std::span<const std::uint8_t> bytes, const st
             }
         }
         // SD card images by path; older snapshots name none, and the sockets stay as they are
-        std::array<std::string, 2> sds;
-        for (std::string& sd : sds) {
-            sd = r.text();
-        }
-        if (!r.failed()) {
+        const auto& sds = m.sds;
+        if (m.has_sds) {
             for (unsigned s = 0; s < sds.size(); ++s) {
                 if (sds[s].empty()) {
                     sd_eject(s);
@@ -788,7 +981,39 @@ bool HostTape::snapshot_load_bytes(std::span<const std::uint8_t> bytes, const st
             }
         }
         if (!tape.empty() && media_.deck().loaded()) {
-            media_.deck().restore(state, motor, position, last_tick);
+            media_.deck().restore(m.state, m.motor, m.position, m.last_tick);
+        }
+        // The NanoSD's folder and the TVC256k++'s USB port by path; older snapshots name none, and they stay as they are
+        if (m.has_cards && nanosd_slot() >= 0) {
+            std::error_code ec;
+            if (m.nanosd.empty() || !fs::is_directory(m.nanosd, ec)) {
+                if (nanosd_folder_) {
+                    nanosd_folder_.reset();
+                    nanosd_media_.sd = nullptr;
+                }
+                if (!m.nanosd.empty()) {
+                    messages_.push_back(msg("snapshot: NanoSD folder left out: %s", m.nanosd.c_str()));
+                }
+            } else if (nanosd_sd_dir() != fs::path(m.nanosd)) {
+                nanosd_media_.sd = nullptr;
+                nanosd_folder_.emplace(fs::absolute(m.nanosd, ec).lexically_normal());
+                nanosd_media_.sd = &*nanosd_folder_;
+            }
+        }
+        if (m.has_cards && card256_slot() >= 0) {
+            std::error_code ec;
+            if (m.usb == Card256Usb::Mouse) {
+                card256_host_.plug_mouse();
+            } else if (m.usb == Card256Usb::Pendrive && !m.pendrive.empty() && fs::is_directory(m.pendrive, ec)) {
+                if (card256_host_.pendrive_dir() != fs::path(m.pendrive) && !card256_host_.plug_pendrive(m.pendrive, why)) {
+                    messages_.push_back(msg("snapshot: pendrive left out: %s", why.c_str()));
+                }
+            } else {
+                card256_host_.unplug();
+                if (m.usb == Card256Usb::Pendrive) {
+                    messages_.push_back(msg("snapshot: pendrive left out: %s", m.pendrive.c_str()));
+                }
+            }
         }
         if (!folder.empty() && (!folder_ || folder_->dir() != fs::path(folder)) && !set_folder(folder, why)) {
             messages_.push_back(msg("snapshot: folder left out: %s", why.c_str()));
@@ -800,6 +1025,18 @@ bool HostTape::snapshot_load_bytes(std::span<const std::uint8_t> bytes, const st
         }
     }
     return true;
+}
+
+std::string HostTape::game_name() const {
+    if (!program_name_.empty()) {
+        return program_name_;
+    }
+    for (const fs::path& dir : {nanosd_sd_dir(), card256_host_.pendrive_dir()}) {
+        if (!dir.empty()) {
+            return dir.filename().empty() ? dir.parent_path().filename().string() : dir.filename().string();
+        }
+    }
+    return {};
 }
 
 void HostTape::set_rewind(bool on) {
@@ -1520,6 +1757,7 @@ bool HostTape::disk_autostart(const std::string& path, std::string& error) {
         error = msg("%s: no CAS file in the root directory to start", fs::path(path).filename().string().c_str());
         return false;
     }
+    program_name_ = fs::path(path).stem().string();
     keep_prompt_state();
     fetch_prompt_state();
     nanosd_media_.skip_menu = nanosd_slot() >= 0;

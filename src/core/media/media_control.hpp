@@ -3,6 +3,8 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -10,6 +12,22 @@
 #include "core/media/media.hpp"
 
 namespace freetvc {
+
+// A file or folder a snapshot names, for checking before a load.
+struct SnapshotPath {
+    std::string kind;  // "tape", "cassette", "folder", "cartridge", "disk A:"..."disk D:", "SD 1", "SD 2", "NanoSD", "pendrive"
+    std::string path;
+    bool directory = false;
+    bool found = false;
+};
+// Old path -> new path, for files that moved since the snapshot was saved.
+using SnapshotPathMap = std::map<std::string, std::string>;
+
+struct GameSaveEntry {
+    std::string file;     // the .tvcs
+    std::string picture;  // the .png beside it, or empty
+    std::string name;     // its date and time
+};
 
 class MediaControl {
 public:
@@ -66,6 +84,23 @@ public:
     // the board and ROM set (found by CRC-32) and powers nothing on; false with `error` set.
     virtual bool snapshot_save(const std::string& path, std::string& error) = 0;
     virtual bool snapshot_load(const std::string& path, std::string& error) = 0;
+    // The files and folders a snapshot names and whether each is there now, without touching the machine.
+    virtual std::optional<std::vector<SnapshotPath>> snapshot_check(const std::string& path, std::string& error) = 0;
+    // snapshot_load() with the paths in `moved` replaced; a path still missing is left out with a message.
+    virtual bool snapshot_load_moved(const std::string& path, const SnapshotPathMap& moved, std::string& error) = 0;
+
+    // Game saves: snapshots per program in <root>/<game>/, each with a picture of the screen.
+    // The program running now, as the saves name it; empty when nothing tells.
+    virtual std::string game_name() const = 0;
+    // The root folder; empty when game saves are off.
+    virtual std::string game_root() const = 0;
+    virtual std::vector<std::string> game_list() const = 0;
+    // Newest first.
+    virtual std::vector<GameSaveEntry> game_saves(const std::string& game) const = 0;
+    // A new save of the machine for `game` (empty: game_name()), named by the date and time; its path in `file`.
+    virtual bool game_save(const std::string& game, std::string& file, std::string& error) = 0;
+    // Deletes a save under the root and its picture.
+    virtual bool game_save_delete(const std::string& file, std::string& error) = 0;
 
     // Rewind by time: back to the newest kept point at least `seconds` of machine time ago; newer points are
     // dropped, so asking again goes further back. False with `error` set when nothing is kept that far.

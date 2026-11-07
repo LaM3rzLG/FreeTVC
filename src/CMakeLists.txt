@@ -108,7 +108,7 @@ add_custom_command(OUTPUT ${rom_list_cpp}
     VERBATIM)
 add_library(freetvc_frontend_common STATIC frontend/common/presets.cpp frontend/common/settings.cpp frontend/common/wav.cpp frontend/common/video_recorder.cpp
     frontend/common/host_tape.cpp frontend/common/card256_host.cpp frontend/common/rom_fetch.cpp frontend/common/unzip.cpp
-    frontend/common/multicart_image.cpp
+    frontend/common/multicart_image.cpp frontend/common/game_saves.cpp
     frontend/common/sd_image.cpp frontend/common/printer_host.cpp frontend/common/serial_host.cpp ${rom_list_cpp})
 target_link_libraries(freetvc_frontend_common PUBLIC freetvc_core PRIVATE freetvc_debug freetvc_remote)
 freetvc_warnings(freetvc_frontend_common)

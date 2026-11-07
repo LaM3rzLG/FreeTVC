@@ -13,6 +13,24 @@ Közös (Windows + Mac), nem platformfüggő fejlesztések. A Mac-es fordítás/
   (a MacBookon nincs jobb Ctrl = FIRE és számbillentyűzet = 2. joystick; ~1 óra), esetleg gamepad (~1 óra).
 - 4. About + „Bronze” sötét betű: **KÉSZ** (a szöveg a kinézet világos színeivel; az #1 issue-ban jelezve 2026-11-07)
 
+## Játékmentések (megbeszélve 2026-11-07, FOLYAMATBAN)
+A megbeszélt működés:
+- **Mentés:** memóriakép és konfiguráció (melyik kártya melyik slotban, EPROM-mal és állapottal), a felcsatolt útvonalakkal
+  (kazetta, lemez, SD-kép, NanoSD-mappa, 256K++ pendrive). A lemez, az SD és a mappák tartalma nem kerül bele.
+- **Hely:** `SaveState/<játék>/<dátum idő>.tvcs` + `.png`. A gyorsmentés is dátummal megy, a beállítások közé `save_dir` kerül.
+- **Visszaállítás:** előbb minden útvonal ellenőrzése. Ha valami hiányzik: *Tallózás… / Betöltés nélküle / Mégse*
+  (Mégse esetén a gép érintetlen). Tallózás után ellenőrizni, hogy a mentéskor nyitott fájl megvan-e az új mappában.
+- **Az átállás csak a játék idejére szól:** reset vagy kilépés után vissza a saját beállításra (a beállításfájl nem változik).
+- **Gyorsmentés:** a gép nem áll meg, csak egy felirat jelenik meg. Menüből mentéskor vagy betöltéskor a gép áll, a kép sötét.
+- Menüpont: „Mentések mappájának megnyitása”, plusz **egy kis gomb a Dashboardra**. Linux, Windows és Mac.
+
+Állapot:
+- KÉSZ (MCP-n tesztelve): MEDI + NanoSD/pendrive, GAME blokk, `game_saves` modul, `MediaControl::snapshot_check`
+  és `snapshot_load_moved` (egy áthelyezett mappa a benne lévő fájlokat is viszi), MCP `game_saves` eszköz.
+  Leírás: `docs/design/media.md` „Game saves”.
+- HÁTRA: HTML-előnézet (menü, mentéslista-ablak, hiányzó-mappa ablak, Dashboard-gomb), utána GUI (F9 → játékmentés
+  dátummal?), visszaállás a saját konfigra resetkor, sötétítés.
+
 ## Ep128web (kks2003.github.io/Ep128web) — mit tud, amit mi nem (felmérés 2026-11-06)
 Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC géppel. A tények angolul:
 `docs/hardware/tvc-hardware.md` §9 (2dfx, UPM). Repó: github.com/kks2003/Ep128web.

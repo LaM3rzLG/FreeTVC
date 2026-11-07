@@ -24,6 +24,7 @@
 #include "core/machine/machine.hpp"
 #include "core/version.hpp"
 #include "debug/debugger.hpp"
+#include "frontend/common/game_saves.hpp"
 #include "frontend/common/host_tape.hpp"
 #include "frontend/common/multicart_image.hpp"
 #include "frontend/common/sd_image.hpp"
@@ -1027,6 +1028,7 @@ int main(int argc, char** argv) {
     freetvc::HostTape tape(machine);
     tape.set_rom_places(rom_search);
     tape.set_prompt_dir(freetvc::user_data_directory() / "prompt");
+    tape.set_save_root(freetvc::default_save_root(freetvc::user_data_directory()));
     if (config.roms.cart_type == freetvc::CartType::MultiCart && !multicart_flash.empty()) {
         tape.set_multicart(cart_path, std::move(multicart_flash));
     }

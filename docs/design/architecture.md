@@ -123,7 +123,7 @@ The third-party targets are defined in `third_party/CMakeLists.txt`: `freetvc_z8
 
 ## Snapshots and state
 
-The TVCS format (`core/snapshot/`): `TVCS`, a format version, then tagged, versioned chunks (`CONF`, `SLOT`, `CARD`, `CPU `, `BUS `, `LPT `, `MCRT`, `SDDC`, `SIDC`, `RAM `, `VRAM`, `VID `, `SND `, plus the front end's `MEDI`). It is byte-exact: a loaded snapshot runs on to the same ticks, registers, memory, picture and samples. It drives rewind, DZRP READ/WRITE_STATE, the MCP and monitor snapshot commands and the autostart prompt state on disk. The layout and the WinTVC `.tvs` import are in [media.md](media.md#snapshots).
+The TVCS format (`core/snapshot/`): `TVCS`, a format version, then tagged, versioned chunks (`CONF`, `SLOT`, `CARD`, `CPU `, `BUS `, `LPT `, `MCRT`, `SDDC`, `SIDC`, `RAM `, `VRAM`, `VID `, `SND `, plus the front end's `MEDI` and `GAME`). It is byte-exact: a loaded snapshot runs on to the same ticks, registers, memory, picture and samples. It drives rewind, DZRP READ/WRITE_STATE, the MCP and monitor snapshot commands and the autostart prompt state on disk. The layout and the WinTVC `.tvs` import are in [media.md](media.md#snapshots).
 
 ## Debug layer
 

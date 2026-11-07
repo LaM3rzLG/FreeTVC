@@ -105,7 +105,23 @@ public:
     bool snapshot_load(const std::string& path, std::string& error) override;
     // The snapshot as bytes, with the MEDI chunk; and back. `from` names the source in messages.
     std::vector<std::uint8_t> snapshot_bytes();
-    bool snapshot_load_bytes(std::span<const std::uint8_t> bytes, const std::string& from, std::string& error);
+    bool snapshot_load_bytes(std::span<const std::uint8_t> bytes, const std::string& from, std::string& error,
+                             const SnapshotPathMap* moved = nullptr);
+    bool snapshot_load_moved(const std::string& path, const SnapshotPathMap& moved, std::string& error) override;
+    std::optional<std::vector<SnapshotPath>> snapshot_check(const std::string& path, std::string& error) override;
+    // The files and folders a TVCS snapshot names, read without touching the machine; nullopt with `error` set.
+    static std::optional<std::vector<SnapshotPath>> snapshot_paths(std::span<const std::uint8_t> bytes, std::string& error);
+    // The program the saves belong to: the last one started or plugged in (its file name without the extension), the one
+    // a loaded snapshot names, else the NanoSD's or the pendrive's folder; empty when nothing tells.
+    std::string game_name() const override;
+    void set_game_name(std::string name) { program_name_ = std::move(name); }
+    // The game saves' folder (default_save_root()); empty turns game saves off.
+    void set_save_root(std::filesystem::path root) { save_root_ = std::move(root); }
+    std::string game_root() const override;
+    std::vector<std::string> game_list() const override;
+    std::vector<GameSaveEntry> game_saves(const std::string& game) const override;
+    bool game_save(const std::string& game, std::string& file, std::string& error) override;
+    bool game_save_delete(const std::string& file, std::string& error) override;
     // Where snapshot_load() looks for a ROM set the machine does not have.
     void set_rom_places(std::vector<RomPlace> places) { rom_places_ = std::move(places); }
     // Autostart's prompt state is kept here as one snapshot per board, ROM set and cartridge; empty = in memory only.
@@ -248,6 +264,8 @@ private:
 
     Machine& machine_;
     Media media_;
+    std::string program_name_;
+    std::filesystem::path save_root_;
     std::filesystem::path tape_path_;    // the file in the deck
     std::filesystem::path record_path_;  // where the recording goes; empty when not recording
     std::optional<CasFolder> folder_;

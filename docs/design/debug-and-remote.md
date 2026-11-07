@@ -314,6 +314,7 @@ Tool calls run on the host thread. In the GUI a long `run` holds the window unti
 | `type_text` | `\n` = RETURN; waits until typed plus `settle_frames` and returns the screen rows |
 | `press_keys` | key names or ROW:COLUMN, held together for `hold_frames`; `JOY3_*`/`JOY4_*` with the GameCard |
 | `snapshot` | save / load / delete / list in-memory states; save_file / load_file for TVCS files; rewind (seconds) |
+| `game_saves` | game saves per program: list, save, check (the media a save names and whether each is there), load (with moved paths), delete ([media.md](media.md#game-saves)) |
 | `symbols` | lookup (by name, or by address with its `source_line`), list, add, load: label files and the debug files of "Source level", through the monitor's loader |
 | `trace` | instruction history with registers, and the latest checkpoint hits |
 | `io_state` | video, CRTC, sound, IRQ, paging |

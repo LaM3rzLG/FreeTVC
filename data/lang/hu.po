@@ -3255,6 +3255,12 @@ msgstr "pillanatkép: a lemez kimaradt: %s"
 msgid "snapshot: SD card left out: %s"
 msgstr "pillanatkép: az SD-kártya kimaradt: %s"
 
+msgid "snapshot: NanoSD folder left out: %s"
+msgstr "pillanatkép: a NanoSD mappája kimaradt: %s"
+
+msgid "snapshot: pendrive left out: %s"
+msgstr "pillanatkép: a pendrive kimaradt: %s"
+
 #: src/frontend/common/host_tape.cpp:786
 #, c-format
 msgid "snapshot: tape left out: %s"
@@ -3899,3 +3905,18 @@ msgid ""
 msgstr ""
 "A Videoton RAM-kártyája a 32K-s géphez: plusz 32 KiB (U2 és U3); "
 "hidegindítás"
+
+msgid "cannot make %s: %s"
+msgstr "nem hozható létre: %s: %s"
+
+msgid "cannot delete %s: %s"
+msgstr "nem törölhető: %s: %s"
+
+msgid "no such save: %s"
+msgstr "nincs ilyen mentés: %s"
+
+msgid "game saves are off in this front end"
+msgstr "ebben a felületben nincs játékmentés"
+
+msgid "%s is not a game save"
+msgstr "%s nem játékmentés"
