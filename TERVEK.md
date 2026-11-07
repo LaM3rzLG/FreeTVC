@@ -66,7 +66,7 @@ Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC gépp
 
 ## FOLYAMATBAN: GUI-átalakítás és UPM — átadás (2026-11-06 este, Mac)
 Ág: `gui-upm` (a `main`-ből; a `main` = v1.1.0 + videófelvétel headless). Minden lefordul (`ninja -C build/mac-release`),
-a felhasználó a GUI-ban végignézte és jóváhagyta az alábbiakat; release NEM volt, és ne is legyen kérés nélkül.
+a felhasználó a GUI-ban végignézte és jóváhagyta az alábbiakat; kiadva az 1.2.0-ban (2026-11-07, a `main`-be olvasztva).
 - **Alsó sáv (strip)** 1,5×: bronze skin `metric.strip.height = 45`, új kulcs `font.strip.size = 22` (`Skin::font_strip_size`,
   0 = `font.ui.size`); a sávból nyíló menük is ekkora betűvel (`PushFont(nullptr, …)` a menük körül, `play_view.cpp`).
   A felhasználó `sajat.skin`-je még a régi bronze másolata (30/—).

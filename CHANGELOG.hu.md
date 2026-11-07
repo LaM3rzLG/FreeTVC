@@ -2,11 +2,36 @@
 
 A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 
-## Készülőben
+## 1.2.0 — 2026-11-07
 
 ### Új
 
-- Videófelvétel ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): a TV-kép a TV 4:3-as arányában (1534 × 1148) és a hang MP4-be (H.264, AAC), ffmpeg-gel; `freetvc-headless --video FÁJL`. A csomagokban egy kis, GPL-es ffmpeg van az `ffmpeg/` almappában (`tools/release/build_ffmpeg.sh`), így semmit nem kell telepíteni.
+- Videófelvétel ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): a TV-kép a TV 4:3-as arányában (1534 × 1148) és a hang MP4-be (H.264, AAC), ffmpeg-gel: az alsó sáv REC gombja (kattintás indít és leállít, jobb klikkel a mappa választható), `freetvc-headless --video FÁJL`. A csomagokban egy kis, GPL-es ffmpeg van az `ffmpeg/` almappában (`tools/release/build_ffmpeg.sh`), így semmit nem kell telepíteni; a forrása a kiadás fájljai között van.
+- Új alsó sáv rajzolt gombokkal: cartridge a nevével, a gép (verziók és bekapcsolás), a billentyűzet (szimbolikus, pozíciós, kiosztás), a hangszóró (némítva áthúzva), az 5,25"-os floppy, a kazetta lejátszással, számlálóval, stoppal és visszatekeréssel, a nyomtató, REC, a fényképező (4:3-as PNG), a sebesség és a freeTVC felirat a főmenüvel. Amíg forog a szalag, a kazetta helyén a fej alatti jel kis hullámként fut.
+- A TVC 64k+ halvány fotója takarja a TV-képet induláskor, bekapcsoláskor és kártyacserénél, amíg a gép nem rajzol.
+- Főmenü: *Legutóbbi programok* (az utolsó tíz, a `freetvc.ini`-ben), a pillanatkép, a kinézet és a nyelv almenüje, *ROM-ok letöltése*.
+- A floppy menü első pontja a *Program közvetlen betöltése*: a lemez az első üres meghajtóba kerül, és elindul rajta az első program.
+- A slot listájában a NanoSD és a TVC256k++ betételkor rögtön kéri az SD-kártya mappáját, a pendrive mappáját vagy a flash képfájlt.
+
+### Változott
+
+- A *Program betöltése* már nem fogad cartridge-et: azt a Cart gombbal lehet betenni.
+- A HBF kártya saját menüjében csak a lemezes rendszer maradt; a lemezek a floppy gombon vannak.
+
+### Javítva
+
+- A TVC256k++ overlay 16 színű módban csak minden második pixelt mutatta, ezért a sakktábla-mintás árnyékolás (dikdom Wolf256 címképe) fekete csíkokra esett szét; most minden pixel látszik, ahogy a 2dfx kártyánál.
+
+### Letöltések
+
+| Fájl | Mire |
+|---|---|
+| `freeTVC-1.2.0-windows-x64.zip` | 64 bites Windows: bárhová kicsomagolható, a `freetvc.exe` indítja. A program nincs aláírva, ezért a SmartScreen első indításkor figyelmeztethet. |
+| `freeTVC-1.2.0-linux-x86_64.tar.gz` | 64 bites Linux, glibc 2.39 vagy újabb (Ubuntu 24.04, Debian 13, Fedora 40 vagy újabb): kicsomagolás után `./freetvc`. |
+| `freeTVC-1.2.0-macos-arm64.zip` | macOS 13 vagy újabb, Apple Silicon (M1 és újabb): kicsomagolás után `freetvc`. |
+| `freeTVC-1.2.0-macos-x86_64.zip` | macOS 13 vagy újabb, Intel Mac. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | a csomagok ellenőrzőösszegei |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | a mellékelt ffmpeg forrása (GPL) |
 
 ## 1.1.0 — 2026-11-06
 

@@ -1,10 +1,35 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 — 2026-11-07
 
 ### New
 
-- Video recording ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): the TV picture at the TV's 4:3 aspect (1534 × 1148) and the sound into an MP4 (H.264, AAC) through ffmpeg; `freetvc-headless --video FILE`. The packages carry a small GPL ffmpeg in `ffmpeg/` (`tools/release/build_ffmpeg.sh`), so nothing has to be installed.
+- Video recording ([#1](https://github.com/LaM3rzLG/FreeTVC/issues/1)): the TV picture at the TV's 4:3 aspect (1534 × 1148) and the sound into an MP4 (H.264, AAC) through ffmpeg: the REC key in the status strip (a click starts and stops, a right click picks the folder), `freetvc-headless --video FILE`. The packages carry a small GPL ffmpeg in `ffmpeg/` (`tools/release/build_ffmpeg.sh`), so nothing has to be installed; its sources are among the release files.
+- A new status strip of drawn keys: the cartridge with its name, the machine (versions and power), the keyboard (symbolic, positional, the key layout), the speaker (crossed out when muted), the 5.25" floppy, the cassette with play, counter, stop and rewind, the printer, REC, the camera (a 4:3 PNG), the speed and the freeTVC nameplate with the main menu. While the tape moves, the cassette shows the signal under the head as a small wave.
+- A faint photo of the TVC 64k+ covers the TV picture at start, at power on and when a card changes, until the machine draws.
+- The main menu: *Recent programs* (the last ten, kept in `freetvc.ini`), the snapshot, skin and language submenus, *Download ROMs*.
+- The floppy menu starts with *Load a program directly*: the disk goes into the first empty drive and its first program starts.
+- In a slot's list the NanoSD and the TVC256k++ take their SD card folder, pendrive folder or flash image as they go in.
+
+### Changed
+
+- *Load program* no longer takes cartridges: they go in from the Cart key.
+- The HBF card's own menu keeps only its disk system; the disks are on the floppy key.
+
+### Fixed
+
+- The TVC256k++ overlay showed only every other pixel in 16-colour mode, which broke checkerboard dithers (dikdom's Wolf256 title) into black lines; every pixel shows now, as on the 2dfx card.
+
+### Downloads
+
+| File | For |
+|---|---|
+| `freeTVC-1.2.0-windows-x64.zip` | 64-bit Windows: unpack anywhere and run `freetvc.exe`. The programs are not signed, so Windows SmartScreen may warn on the first start. |
+| `freeTVC-1.2.0-linux-x86_64.tar.gz` | 64-bit Linux with glibc 2.39 or newer (Ubuntu 24.04, Debian 13, Fedora 40 or newer): unpack and run `./freetvc`. |
+| `freeTVC-1.2.0-macos-arm64.zip` | macOS 13 or newer on Apple Silicon (M1 and later): unpack and run `freetvc`. |
+| `freeTVC-1.2.0-macos-x86_64.zip` | macOS 13 or newer on Intel Macs. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | checksums of the archives |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | the sources of the bundled ffmpeg (GPL) |
 
 ## 1.1.0 — 2026-11-06
 

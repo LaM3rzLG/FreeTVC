@@ -115,7 +115,7 @@ void Card256::overlay_power_on() {
     load_pictures();
 }
 
-void Card256::video_character(bool display, bool vsync, std::uint8_t mode, std::uint8_t* px) {
+void Card256::video_character(bool display, bool vsync, std::uint8_t /*mode*/, std::uint8_t* px) {
     if (last_vsync_ && !vsync) {
         vsync_end();
     }
@@ -129,9 +129,9 @@ void Card256::video_character(bool display, bool vsync, std::uint8_t mode, std::
     }
     if (px) {
         for (unsigned k = 0; k < 4; ++k) {
-            // B9 latches at the mode's pixel clock: in 16-colour mode every other overlay pixel (which one ❓)
-            const unsigned p = paper_px_ + k;
-            const unsigned q = mode >= 2 ? (p & ~1u) : p;
+            // Every overlay pixel in every mode: dropping every other one in 16-colour mode broke the Wolf256 title's
+            // checkerboard dither into black lines, as on the 2dfx card ⚑ (to check on the real card)
+            const unsigned q = paper_px_ + k;
             const std::uint8_t v = q < 256 ? shown_[q] : held_;
             if (v != kClear) {
                 px[2 * k] = px[2 * k + 1] = to_igrb(v);
