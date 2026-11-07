@@ -56,11 +56,27 @@ about/` beside them (move the whole folder, never the binary alone). The CMake p
   Needs `ffmpeg/ffmpeg` next to the program: `sh tools/release/build_ffmpeg.sh native build/ffmpeg-out-macos-arm64` and
   copy it to `build/mac-release/src/ffmpeg/`. Check a video: `ffmpeg -i X` (stream info), `qlmanage -t -s 700 -o DIR X`
   (a frame via macOS), sound: `afconvert -f WAVE -d LEI16 X out.wav`.
-- Release: version in CMakeLists.txt + CHANGELOG.md / CHANGELOG.hu.md section; `gh workflow run release.yml` builds
-  Linux + Windows (with ffmpeg) as an artifact; `sh tools/mac/make_mac_release.sh OUT` builds both macOS zips; tag
-  `vX.Y.Z` (annotated, the user's name) and `gh release create` from the user's account with all packages, both
-  SHA256SUMS and the ffmpeg/x264 source archives; notes = the English section + the Hungarian section. Only on request.
+- Release (only on request; done this way for 1.2.0, 2026-11-07): version in CMakeLists.txt + a `## X.Y.Z — date`
+  section in CHANGELOG.md and CHANGELOG.hu.md (with the Downloads table); commit, fast-forward `main`, push; tag
+  `vX.Y.Z` (annotated, `git -c user.name=LaM3rzLG -c user.email=lorinczg77@gmail.com tag -a`) and push it: the tag
+  starts `release.yml` (Linux + Windows + ffmpeg/x264 sources, ~8 min; `gh run watch ID`, then
+  `gh run download ID -n freeTVC-packages -D build/release-X.Y.Z/actions`). Meanwhile
+  `sh tools/mac/make_mac_release.sh build/release-X.Y.Z` (both macOS zips + SHA256SUMS-macos). Check `shasum -a 256 -c`
+  on both sums and unzip one package (`freetvc-headless --version`). Notes = English section + Quick start, `---`,
+  `### Magyarul` + Hungarian section + Gyors kezdés (see the v1.2.0 release body); `gh release create` from the user's
+  account with the four packages, both SHA256SUMS and the `ffmpeg-*.tar.xz` / `x264-*.tar.bz2` sources.
 - UPM test: see TERVEK.md (UPM.FDR + the EFCA95FC cartridge, `--key RETURN@250`).
+
+## Checking the GUI without clicks
+- osascript cannot click (no Accessibility permission). To see a GUI change working, start it with
+  `--mcp-http --mcp-token claudeteszt` and drive it with `tools/mac/mcp.sh` (screenshot, press_keys, io_state,
+  machine_info frame count for real-time speed); `screencapture -x -R-900,-600,1000,52 out.png` grabs the strip of a
+  1000 × 792 window at {-900, -1340}. Menus cannot be opened this way: say so and let the user look.
+- Visual changes: an HTML preview first (scratchpad, `open` it; render with headless Chrome
+  `--headless=new --screenshot` to check it), build only after the user picks.
+- Card checks headless: `--card256 --card256-usb DIR --autostart Wolf256.cas` (dikdom's Wolf in
+  `~/Documents/TVC-256K++/256k++ programok/Wolf`, copy it first), `--2dfx --autostart Wolf2dfx.cas` for comparison.
+  Test files: `~/Downloads/TVC/TVC_CEmu/cas/*.cas`, `~/Documents/TVC Projects/*/*.dsk`.
 
 ## MCP (drive the user's running GUI)
 - Start: `build/mac-release/src/freetvc --mcp-http --mcp-token claudeteszt` (port 6584, 127.0.0.1 only).
@@ -89,3 +105,5 @@ about/` beside them (move the whole folder, never the binary alone). The CMake p
   text was twice as large.
 - *Download ROMs* writes into `rom_dir` when one is set (`RomDownload::dir`, texts in `play_view.cpp`, `hu.po`,
   `docs/user-guide.md`, `docs/design/ui.md`).
+- The GUI of 1.2.0 (strip, menus, start picture, recent programs, storage cards) is described in
+  `docs/user-guide.md` section 3; hand-off state and open questions in TERVEK.md ("FOLYAMATBAN: GUI-átalakítás").
