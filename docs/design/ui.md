@@ -64,17 +64,14 @@ Play is the default mode at start: the 4:3 screen, centred in the frame colour, 
 
 ### Status strip
 
-One status strip at the bottom (the keyboard deck), separated by the groove line. Left to right:
+One status strip at the bottom (the keyboard deck), separated by the groove line. Its keys are line drawings in the machine key's style (`frontend/sdl/deck.*`); the user guide's section 3 lists them. Left to right:
 
-- four **slot ribs**: a slot with a card is lit in the lettering colour, an empty one stays in the rib colour; the tooltip lists slots 0–3 with their ports and cards; a click opens the **Cards** menu;
-- the nameplate **free**TVC: opens the **main** menu;
-- the preset name (e.g. `64k+-2.2`): opens the **machine and ROM** menu;
-- state (running/paused) and emulation speed in % of real time; a click pauses or resumes;
-- keyboard mapping: a click toggles symbolic/positional ([machine.md](machine.md), section "Host input");
-- audio: a click mutes;
-- the **play/stop key** (a triangle or a square drawn on the deck), then the **tape item**, both always there. The key stops while PLAY or RECORD is down, else plays; with no tape it opens the insert-tape dialog and the chosen tape goes in playing. The item shows **no tape**, or the deck's state and counter (in the notice colour while the tape moves), and opens the **Tape** menu;
-- **disk**, only while the disk card is in: **disk A:** in the notice colour while the drive is active (the drive light; fast disk runs unpaced then), the drives in its tooltip ([cards.md](cards.md), section "Front ends" of the HBF card); it opens the **Disk** menu;
-- right-aligned: the latest notice (screenshot path, skin error, preset error), shown for a few seconds. It never covers the strip's items: a notice too long for the space after them is cut with "..." and shows whole on hover. The start position is computed from the items, not from ImGui's cursor, which wraps to the next line once the row is full.
+- four **slot ribs**: a slot with a card is lit in the lettering colour, an empty one stays in the rib colour; a click opens the **Cards** menu;
+- the cartridge with **Cart**, the **machine** key (a small TVC), the **game save** key (corner marks around a small screen with an arrow going into it: a click saves, a right click opens the game saves menu; beside the machine key because a save holds the whole machine), keyboard, speaker, the 5.25" floppy, the cassette with ▶, counter, ■ and ◀◀;
+- right-aligned: the printer, REC, the camera and the **free**TVC nameplate with the main menu.
+- The speed in percent of a real TVC, or *paused*, is in the window title (`freeTVC · <preset> · <speed>`), so the strip keeps its room for keys; Pause and the machine menu pause.
+- **Notices** are drawn on the TV picture's top border (framebuffer rows 23–47 of the TV area, above the paper), centred in the notice colour, fading out: 6 s, errors 15 s; too wide: cut with "..." and whole on hover. Bench, which has no such border, keeps them right-aligned in the strip.
+- **Size**: the groove above the strip is a handle (a 6-point band, the ↕ pointer): dragging it changes `strip.height` between 75 and 250 % of the skin's (`strip_size`, also a list in Settings → Interface); the keys scale with it and no fonts are rebuilt. The strip reports the width its keys need side by side, and a narrower window grows to it (also its minimum width), so keys never cover each other.
 
 ### Strip menus
 
@@ -83,7 +80,7 @@ Each device has its own menu, opened from its own strip item, so no menu grows t
 | Strip item | Menu | Contents |
 |---|---|---|
 | slot ribs | **Cards** | "Disk card in slot 0" (HBF; the disk-card switch lives here, not in the Disk menu); GameCard; Multichip sound card (under each slot card, indented, **Put in slot** or, while it is in, **Move to slot**: a submenu of slots 0–3 with their ports, the card's own checked, a slot holding another card greyed out with its name; the choice puts the card there or moves it and powers on); the SID card, MOS 6581 or 8580 (one at a time: the checked one takes it out; no slot rib, it sits outside the slots); TVC256k++ and, while it is in, its USB port (pendrive folder, mouse, empty) and flash drive image ([cards.md](cards.md), TVC256k++ "Front ends"); NanoSD and, while it is in, its SD card folder or "Take the SD card out"; the serial card (slot 1, else the first free one) and, while it is in, its cable ("Cable unplugged", "Cable to TCP port 6585" showing "connected" or "waiting"), "Send a file..." and "Capture to a file..."; a **Printer port** section: "Printer to a file..." (a save dialog: `.txt` gets UTF-8 text, anything else the raw bytes) and "No printer" (the default; the port is the main board's own, but a printer is something plugged into the machine); a **Cartridge** section: "Insert cartridge...", "Remove cartridge", "New MultiCart image..." (pick the programs, then the image's name; it goes in), "SD Dual cartridge" with its "microSD card image...", "SD card image..." and "Take ... out", and "New SD card image..." (pick the files, then the image's name; it goes into the microSD socket, with the cartridge). Cartridges are plug-in boards, though not slot cards, so they are here |
-| nameplate **free**TVC | **main** | Program: "Load program..." (every format, so it belongs to no one device), "Run again", "Eject cassette"; Snapshot: quick save, quick load, save and load snapshot; Keyboard: symbolic, positional; Skin: the skins found, "Reload skin"; Language; Screen: full raster, screenshot, full screen; then **Settings...**, **Bench** and **Quit** |
+| nameplate **free**TVC | **main** | Program: "Load program..." (every format, so it belongs to no one device), "Recent programs", "Run again"; Keyboard: symbolic, positional; Skin: the skins found, "Reload skin"; Language; Screen: full raster, screenshot, full screen; then **Settings...**, **Bench** and **Quit** |
 | preset name | **machine and ROM** | the presets, **Download ROMs** (the TVC's ROMs and the card ROMs, with the system's curl, into the `rom_dir` folder if one is set, else the user data folder; [build.md](build.md), section "ROM autofetch"), then Pause, Reset, Power cycle (they act on the machine) |
 | tape item | **Tape** | "Insert tape..." (a `.wav` or `.ttp` file, or a `.cas` played as a tape), "Run the tape", Play, Stop, Rewind, "Record to WAV...", "Eject tape", "Fast tape" ([media.md](media.md), section "Tape deck") |
 | disk item | **Disk** | A:–D: insert and eject, "Fast disk" (full speed while a drive works; the machine's own timing stays real) |
@@ -103,8 +100,8 @@ Never sent to the TVC:
 | F11 | full screen |
 | F12 | Play ↔ Bench |
 | Pause | pause/resume; a pause is a monitor stop, the same state Bench and remote clients see |
-| F9 | quick save (Play only; in Bench F9 sets a checkpoint) |
-| Shift+F9 | quick load |
+| F9 | game save: the machine stops and a prompt asks for the name ([media.md](media.md#game-saves)); in Bench F9 sets a checkpoint |
+| Shift+F9 | loads the running game's newest save |
 | F10 (held) | rewind ([media.md](media.md), sections "Snapshots" and "Rewind") |
 
 F1–F8 stay with the TVC (positional mapping).
@@ -293,11 +290,12 @@ All on the real GUI (`tools/ui/ui_drive.py`: XTEST keys and clicks, window grabs
 **Settings...** in the main menu opens a sheet at the right of the window, from the top (Play) or below the run bar (Bench) down to the strip. Play's screen and Bench's dock space give up its width, so the picture stays visible and a change shows at once. Code: `frontend/sdl/settings_view.*`; it returns the same `PlayActions` as the menus (preset, cards, skin, language, mapping, mute...) plus its own `SettingsActions`.
 
 - Materials: the deck colour with the groove along its left edge, a header band in the rib colour with **Close**; the sections as words down a column as wide as the longest name, the current one marked with a lit slot rib (the strip's motif) and the strong font. Escape closes it while it has the keys; while it has them they stay out of the TVC.
-- **Machine**: the presets; the ROM folder in use, **Choose folder...** (writes `rom_dir`; the machine powers on only when the preset's ROMs differ), **Default places** (removes the key), **Download ROMs**; the disk card in slot 0 and its EPROM: VT-DOS 1.1 (`hbf.rom`), VT-DOS 1.2 (`hbf12.rom`) or an image file (a card that is in takes it at once and powers on); the other cards (the Cards menu's switches, each with slot buttons 0–3 in a column right of the names: the card's slot marked, a slot holding another card greyed out, its tooltip naming the slot's ports and card) and the SID card's chip.
-- **Picture**: see "Picture"; the TVC's rear colour switch; full screen now and at start, full raster; what draws (OpenGL or SDL's renderer) and SDL's renderer from the next start.
+- The sheet's text is as large as the strip's menus (`font.strip.size`, or the user's text size); the section column and the header band follow it.
+- **Machine**: the ROM folder in use, **Choose folder...** (writes `rom_dir`; the machine powers on only when the preset's ROMs differ), **Default places** (removes the key), **Download ROMs**. The presets and the cards live in the strip's machine and Cards menus only.
+- **Picture**: see "Picture"; the shipped pictures by what they show (Black and white TV, CRT TV emulation, RGB monitor emulation, Sharp picture), another file by its name; the TVC's rear colour switch; full screen now and at start, full raster; what draws (OpenGL or SDL's renderer) and SDL's renderer from the next start.
 - **Sound**: mute, volume (the stream's gain, saved as `volume`), sound output from the next start (`audio`).
 - **Keyboard and joysticks**: symbolic or positional, the key layout and **Edit the layout...** (see "Keyboard editor"), the joystick keys.
-- **Interface**: language, skin, the settings file's path and whether it is the portable one.
+- **Interface**: language; **Text**: the menus' text size, a list of 12–36 pt (`ui_font_size`; every font size of the skin scales with it, and the fonts are built again between frames); **Status strip**: its height with its keys, a list of 75–250 % (`strip_size`); skin; the settings file's path and whether it is the portable one. Lists, not sliders: a slider rebuilt the fonts at every step and moved the sheet under the mouse. The sheet stays in front of Bench's panels but not of its own popups, so a list opens over it.
 - **Remote**: the text monitor, MCP over HTTP (with its token and **Copy**, monitor commands allowed or not), DZRP (TVC banks or not), the GDB stub. Each is switched on or off and moved to another port at once (the monitor's listener closes with `MonitorHub::stop_listening()`, the others' hosts are rebuilt); the sheet shows the port each listens on or why it could not start. A server the command line asked for still ends the program when it cannot listen; one from `freetvc.ini` shows its error in the sheet.
 - A value the command line decides shows "Set by --x for this run; a change here is saved" in the notice colour.
 

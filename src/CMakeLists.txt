@@ -149,6 +149,7 @@ if(FREETVC_BUILD_GUI)
         frontend/sdl/host_input.cpp
         frontend/sdl/keyboard_editor.cpp
         frontend/sdl/play_view.cpp
+        frontend/sdl/save_prompt.cpp
         frontend/sdl/settings_view.cpp
         frontend/sdl/skin_style.cpp)
     target_link_libraries(freetvc PRIVATE freetvc_frontend_common freetvc_remote freetvc_skin freetvc_keymap freetvc_imgui SDL3::SDL3)

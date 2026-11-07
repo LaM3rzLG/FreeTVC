@@ -888,7 +888,7 @@ json game_saves(Ctx& c, const json& args) {
         }
         json saves = json::array();
         for (const GameSaveEntry& save : media->game_saves(game)) {
-            saves.push_back({{"name", save.name}, {"file", save.file}, {"picture", save.picture}});
+            saves.push_back({{"name", save.name}, {"when", save.when}, {"file", save.file}, {"picture", save.picture}});
         }
         return structured({{"game", game}, {"saves", std::move(saves)}});
     }
@@ -896,7 +896,7 @@ json game_saves(Ctx& c, const json& args) {
         hold(c);
         c.dbg.cancel_step();
         std::string file;
-        if (!media->game_save(string_arg(args, "game", ""), file, error)) {
+        if (!media->game_save(string_arg(args, "game", ""), string_arg(args, "name", ""), file, error)) {
             fail(error);
         }
         return structured({{"action", action}, {"file", file}, {"game", media->game_name()}});
@@ -1612,9 +1612,9 @@ std::vector<Tool> make_tools(Monitor& monitor, const McpOptions& options) {
                      schema({{"keys", {{"type", "array"}, {"items", {{"type", "string"}}}}}, {"hold_frames", {{"type", "integer"}, {"minimum", 1}}},
                              {"wait", {{"type", "boolean"}}}, {"settle_frames", {{"type", "integer"}, {"minimum", 0}}}, {"timeout_ms", timeout}}, {"keys"}),
                      annotations(false, false, false), bind(press_keys)});
-    tools.push_back({"game_saves", "Game saves", "Snapshots kept per program in <root>/<game>/<date time>.tvcs with a PNG of the screen beside each. list: the root, the current game and every game with saves; list with game: its saves, newest first. save (game, default the program started last): a new save, the machine keeps running state as it was. check (path): the files and folders the save names (tape, cassette, cartridge, disks, SD images, the NanoSD's folder, the TVC256k++'s pendrive) and whether each is there now; nothing changes. load (path; moved: {old path: new path} for ones that moved): the board, cards and ROM set of the save, the media by path, then the memory; missing media are left out with a message; leaves the machine paused. delete (path): a save and its picture.",
+    tools.push_back({"game_saves", "Game saves", "Snapshots kept per program in <root>/<game>/<game> NNN.tvcs with a PNG of the screen beside each. list: the root, the current game and every game with saves; list with game: its saves (name, when: the file's time), newest first. save (game, default the program started last; name: the file's name, replacing a save of that name, default the next \"<game> NNN\"): a save of the machine as it is. check (path): the files and folders the save names (tape, cassette, cartridge, disks, SD images, the NanoSD's folder, the TVC256k++'s pendrive) and whether each is there now; nothing changes. load (path; moved: {old path: new path} for ones that moved): the board, cards and ROM set of the save, the media by path, then the memory; missing media are left out with a message; leaves the machine paused. delete (path): a save and its picture.",
                      schema({{"action", {{"type", "string"}, {"enum", {"list", "save", "check", "load", "delete"}}}},
-                             {"game", {{"type", "string"}}}, {"path", {{"type", "string"}}}, {"moved", {{"type", "object"}}}}),
+                             {"game", {{"type", "string"}}}, {"name", {{"type", "string"}}}, {"path", {{"type", "string"}}}, {"moved", {{"type", "object"}}}}),
                      annotations(false, true, false), bind(game_saves)});
     tools.push_back({"snapshot", "Machine states", "save / load / delete a named in-memory copy of the whole machine, or list them; load returns to exactly that moment. save_file / load_file (path) write and read a TVCS snapshot file, with the tape and cassette by path; load_file follows the file's board and ROM set (found by CRC-32) and leaves the machine paused. rewind (seconds, default 1) goes back in machine time to a point kept once a second for the last 60 s; asking again goes further back.",
                      schema({{"action", {{"type", "string"}, {"enum", {"save", "load", "delete", "list", "save_file", "load_file", "rewind"}}}},

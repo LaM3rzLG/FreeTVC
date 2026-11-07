@@ -13,7 +13,7 @@ Közös (Windows + Mac), nem platformfüggő fejlesztések. A Mac-es fordítás/
   (a MacBookon nincs jobb Ctrl = FIRE és számbillentyűzet = 2. joystick; ~1 óra), esetleg gamepad (~1 óra).
 - 4. About + „Bronze” sötét betű: **KÉSZ** (a szöveg a kinézet világos színeivel; az #1 issue-ban jelezve 2026-11-07)
 
-## Játékmentések (megbeszélve 2026-11-07, FOLYAMATBAN)
+## Játékmentések (megbeszélve 2026-11-07; alap kész az 1.3.0-ban)
 A megbeszélt működés:
 - **Mentés:** memóriakép és konfiguráció (melyik kártya melyik slotban, EPROM-mal és állapottal), a felcsatolt útvonalakkal
   (kazetta, lemez, SD-kép, NanoSD-mappa, 256K++ pendrive). A lemez, az SD és a mappák tartalma nem kerül bele.
@@ -28,8 +28,9 @@ A megbeszélt működés:
 - KÉSZ (MCP-n tesztelve): MEDI + NanoSD/pendrive, GAME blokk, `game_saves` modul, `MediaControl::snapshot_check`
   és `snapshot_load_moved` (egy áthelyezett mappa a benne lévő fájlokat is viszi), MCP `game_saves` eszköz.
   Leírás: `docs/design/media.md` „Game saves”.
-- HÁTRA: HTML-előnézet (menü, mentéslista-ablak, hiányzó-mappa ablak, Dashboard-gomb), utána GUI (F9 → játékmentés
-  dátummal?), visszaállás a saját konfigra resetkor, sötétítés.
+- KÉSZ (1.3.0): GUI — F9 / ikon a TVC gomb mellett, név bekérése sötét képpel, felülírás kérdés, jobb klikkes lista.
+- HÁTRA: betöltés előtti ellenőrzés tallózós ablakkal (hiányzó mappa), visszaállás a saját konfigra resetkor,
+  GameCard menüből választott játék felismerése (EPROM-lap figyelése) — a felhasználóval még nincs eldöntve.
 
 ## Ep128web (kks2003.github.io/Ep128web) — mit tud, amit mi nem (felmérés 2026-11-06)
 Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC géppel. A tények angolul:

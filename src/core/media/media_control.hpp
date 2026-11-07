@@ -26,7 +26,8 @@ using SnapshotPathMap = std::map<std::string, std::string>;
 struct GameSaveEntry {
     std::string file;     // the .tvcs
     std::string picture;  // the .png beside it, or empty
-    std::string name;     // its date and time
+    std::string name;     // the file name without the extension
+    std::string when;     // the file's time, local, "YYYY-MM-DD hh:mm:ss"
 };
 
 class MediaControl {
@@ -95,10 +96,13 @@ public:
     // The root folder; empty when game saves are off.
     virtual std::string game_root() const = 0;
     virtual std::vector<std::string> game_list() const = 0;
-    // Newest first.
+    // Newest file first.
     virtual std::vector<GameSaveEntry> game_saves(const std::string& game) const = 0;
-    // A new save of the machine for `game` (empty: game_name()), named by the date and time; its path in `file`.
-    virtual bool game_save(const std::string& game, std::string& file, std::string& error) = 0;
+    // A save of the machine for `game` (empty: game_name()) as "<game>/<name>.tvcs", replacing one of that name; an empty
+    // name numbers it, "<game> NNN.tvcs". Its path in `file`.
+    virtual bool game_save(const std::string& game, const std::string& name, std::string& file, std::string& error) = 0;
+    // Where game_save() would write `name` for `game` (empty: game_name()).
+    virtual std::string game_save_file(const std::string& game, const std::string& name) const = 0;
     // Deletes a save under the root and its picture.
     virtual bool game_save_delete(const std::string& file, std::string& error) = 0;
 

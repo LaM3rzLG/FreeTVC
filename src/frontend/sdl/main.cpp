@@ -40,6 +40,7 @@
 #include "frontend/sdl/bench_view.hpp"
 #include "frontend/sdl/host_input.hpp"
 #include "frontend/sdl/play_view.hpp"
+#include "frontend/sdl/save_prompt.hpp"
 #include "frontend/sdl/display.hpp"
 #include "frontend/sdl/keyboard_editor.hpp"
 #include "frontend/sdl/keymap.hpp"
@@ -228,7 +229,10 @@ std::string save_screenshot(const freetvc::Framebuffer& frame, freetvc::sdl::Scr
 
 // The skin in use, its file and fonts; reloads when the file changes on disk
 struct SkinState {
-    freetvc::sdl::Skin skin;
+    freetvc::sdl::Skin skin;       // the file's skin with the user's text size
+    freetvc::sdl::Skin file_skin;  // as the file gives it
+    int text_size = 0;             // the menus' text in points; 0 = the skin's
+    float strip_size = 100.0f;     // the strip's height in percent of the skin's
     freetvc::sdl::SkinFonts fonts;
     fs::path path;  // empty = built-in skin
     fs::file_time_type stamp{};
@@ -248,13 +252,29 @@ struct SkinState {
             stamp = path == file ? new_stamp : stamp;  // don't retry a bad file until it changes again
             return error;
         }
-        skin = *loaded;
+        file_skin = *loaded;
         path = file;
         stamp = new_stamp;
         return apply();
     }
 
+    // The strip's height alone: no fonts to build, so it can follow a drag
+    void resize_strip() { skin.strip_height = file_skin.strip_height * strip_size / 100.0f; }
+
+    // The skin's menu size and the size the user chose: every text size follows
+    int menu_size() const {
+        return static_cast<int>(std::lround(file_skin.font_strip_size > 0.0f ? file_skin.font_strip_size : file_skin.font_ui_size));
+    }
+
     std::string apply() {
+        skin = file_skin;
+        if (text_size > 0) {
+            const float factor = static_cast<float>(text_size) / static_cast<float>(menu_size());
+            skin.font_ui_size *= factor;
+            skin.font_data_size *= factor;
+            skin.font_strip_size *= factor;
+        }
+        resize_strip();
         std::string warning;
         fonts = freetvc::sdl::load_fonts(skin, path.empty() ? font_dir : path.parent_path(), font_dir, warning);
         freetvc::sdl::apply_style(skin, scale, ImGui::GetStyle());  // after the fonts: ClearFonts() rewrites the size
@@ -917,9 +937,18 @@ int main(int argc, char** argv) {
     }
     // Bench's Video panel draws a VID bank into this one
     const ImTextureID vram_texture = display->create_texture(freetvc::sdl::BenchView::kVramWidth, freetvc::sdl::BenchView::kVramLines);
+    // The window title: the machine, then the speed in percent of a real TVC or the paused state
+    std::string title_shown;
+    std::string title_state;
     const auto set_title = [&] {
-        const std::string title = "freeTVC \xC2\xB7 " + std::string(freetvc::kPresets[preset_index].name);
-        SDL_SetWindowTitle(window, title.c_str());
+        std::string title = "freeTVC \xC2\xB7 " + std::string(freetvc::kPresets[preset_index].name);
+        if (!title_state.empty()) {
+            title += " \xC2\xB7 " + title_state;
+        }
+        if (title != title_shown) {
+            title_shown = title;
+            SDL_SetWindowTitle(window, title.c_str());
+        }
     };
     set_title();
 
@@ -933,6 +962,8 @@ int main(int argc, char** argv) {
     skins.dirs = {user_dir / "skins", base_dir / "skins"};
     skins.font_dir = base_dir / "fonts";
     skins.scale = ui_scale(window);
+    skins.text_size = settings.values.ui_font_size.value_or(0);
+    skins.strip_size = static_cast<float>(settings.values.strip_size.value_or(100));
     if (const auto path = freetvc::sdl::find_skin(skin_option, skins.dirs)) {
         const std::string message = skins.load(*path);
         notice.set(message, !message.empty());
@@ -1521,6 +1552,12 @@ int main(int argc, char** argv) {
         if (language_chosen) {
             values.emplace_back("language", freetvc::sdl::current_language());
         }
+        if (skins.text_size > 0) {
+            values.emplace_back("ui_font_size", std::to_string(skins.text_size));
+        }
+        if (std::lround(skins.strip_size) != 100 || settings.values.strip_size.has_value()) {
+            values.emplace_back("strip_size", std::to_string(std::lround(skins.strip_size)));
+        }
         if (!keymap_given || input.mapping() != mapping_at_start) {
             values.emplace_back("keymap", input.mapping() == freetvc::sdl::KeyMapping::Symbolic ? "symbolic" : "positional");
         }
@@ -1754,14 +1791,10 @@ int main(int argc, char** argv) {
             notice.show(false, "%s: %s; SD Dual in, powered on", socket == 0 ? "microSD" : "SD", name.c_str());
         }
     };
-    // Snapshots (design/media.md "Snapshots"); the quick slot is one file in the user data folder
-    const fs::path quick_path = user_dir / "quick.tvcs";
-    std::error_code quick_ec;
-    bool quick_exists = fs::exists(quick_path, quick_ec);
+    // Snapshots (design/media.md "Snapshots")
     const auto save_snapshot = [&](const std::string& path) {
         std::string why;
         if (tape.snapshot_save(path, why)) {
-            quick_exists |= fs::path(path) == quick_path;
             notice.show(false, "snapshot saved: %s", fs::path(path).filename().string().c_str());
         } else {
             notice.set(why, true);
@@ -1778,6 +1811,51 @@ int main(int argc, char** argv) {
         input.machine_replaced();
         sync_preset();
         notice.show(false, "snapshot loaded: %s", fs::path(path).filename().string().c_str());
+    };
+    // Quick save and load: game saves of the program running (design/media.md "Game saves"), named by date and time
+    std::uint64_t game_saved_ns = 0;
+    // Every game's saves for the strip's menu: looked up again when the program changes, a save is made, or every 2 s
+    std::string saves_of;
+    std::uint64_t saves_checked_ns = 1;
+    std::uint64_t saves_listed_ns = 0;
+    std::vector<freetvc::sdl::GameSaveList> save_lists;
+    bool has_saves = false;
+    // A save first asks for its name, the machine held and the window dimmed meanwhile
+    freetvc::sdl::SavePrompt save_prompt;
+    bool save_resumes = false;  // the prompt held the machine, so closing it runs it again
+    const auto quick_save = [&] {
+        if (save_prompt.is_open()) {
+            return;
+        }
+        save_resumes = !held();
+        if (save_resumes) {
+            bench_view.console_output(monitor->enter("pause"));
+        }
+        input.release_all();
+        const std::string game = tape.game_name().empty() ? std::string("TVC") : tape.game_name();
+        save_prompt.open(game, freetvc::game_folder_name(game));
+    };
+    const auto save_named = [&](const std::string& name) {
+        std::string file;
+        std::string why;
+        if (tape.game_save("", name, file, why)) {
+            game_saved_ns = SDL_GetTicksNS();
+            notice.show(false, "game saved: %s", fs::path(file).stem().string().c_str());
+        } else {
+            notice.set(why, true);
+        }
+    };
+    const auto quick_load = [&] {
+        if (save_prompt.is_open()) {
+            return;
+        }
+        const std::string game = tape.game_name();
+        const std::vector<freetvc::GameSaveEntry> saves = tape.game_saves(game.empty() ? std::string("TVC") : game);
+        if (saves.empty()) {
+            notice.show(true, "no game save yet for %s (F9 saves one)", game.empty() ? "TVC" : game.c_str());
+            return;
+        }
+        load_snapshot(saves.front().file);
     };
     // The recent programs: newest first, at most ten, kept in the settings file
     std::vector<std::string> recent;
@@ -1898,6 +1976,7 @@ int main(int argc, char** argv) {
     double speed_percent = -1.0;
     std::uint64_t skin_poll_ns = last_ns;
     fs::path pending_skin;
+    bool pending_fonts = false;  // the text size changed: the fonts are built again between frames
     long frames = 0;
     std::vector<float> tape_wave;
     std::size_t wave_run = 0;       // the run that holds the wave's start, and where it starts
@@ -1915,6 +1994,13 @@ int main(int argc, char** argv) {
                 notice.set(message, true);
             }
             pending_skin.clear();
+        }
+        if (pending_fonts) {
+            pending_fonts = false;
+            const std::string warning = skins.apply();
+            if (!warning.empty()) {
+                notice.set(warning, true);
+            }
         }
 
         SDL_Event event;
@@ -1981,13 +2067,9 @@ int main(int argc, char** argv) {
                 if (!bench && sc == SDL_SCANCODE_F9) {
                     if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat) {
                         if (event.key.mod & SDL_KMOD_SHIFT) {
-                            if (quick_exists) {
-                                load_snapshot(quick_path.string());
-                            } else {
-                                notice.show_text(true, "no quick snapshot yet (F9 saves one)");
-                            }
+                            quick_load();
                         } else {
-                            save_snapshot(quick_path.string());
+                            quick_save();
                         }
                     }
                     continue;
@@ -2315,6 +2397,18 @@ int main(int argc, char** argv) {
         status.preset = preset_index;
         status.paused = stopped;
         status.speed_percent = speed_percent;
+        {
+            char state[32];
+            if (stopped) {
+                std::snprintf(state, sizeof state, "%s", freetvc::sdl::tr("paused"));
+            } else if (speed_percent < 0.0) {
+                std::snprintf(state, sizeof state, "%s", freetvc::sdl::tr("running"));
+            } else {
+                std::snprintf(state, sizeof state, "%.0f %%", speed_percent);
+            }
+            title_state = state;
+            set_title();
+        }
         status.mapping = input.mapping();
         status.layouts = keymaps;
         status.recent = recent;
@@ -2446,7 +2540,31 @@ int main(int argc, char** argv) {
         }
         const std::string cart_name = tape.cart_name();
         status.cartridge = cart_name;
-        status.quick_snapshot = quick_exists;
+        {
+            const std::string named = tape.game_name();
+            const std::string game = named.empty() ? std::string("TVC") : freetvc::game_folder_name(named);
+            const std::uint64_t now = SDL_GetTicksNS();
+            if (game != saves_of || saves_checked_ns != game_saved_ns || now - saves_listed_ns >= 2'000'000'000ULL) {
+                saves_of = game;
+                saves_checked_ns = game_saved_ns;
+                saves_listed_ns = now;
+                save_lists.clear();
+                for (const std::string& one : tape.game_list()) {
+                    freetvc::sdl::GameSaveList list{one, {}};
+                    for (const freetvc::GameSaveEntry& save : tape.game_saves(one)) {
+                        list.saves.push_back({save.name, save.when, save.file});
+                    }
+                    if (!list.saves.empty()) {
+                        save_lists.insert(one == game ? save_lists.begin() : save_lists.end(), std::move(list));
+                    }
+                }
+                has_saves = !save_lists.empty() && save_lists.front().game == game;
+            }
+            status.game = saves_of;
+            status.game_saves = save_lists;
+            status.quick_snapshot = has_saves;
+            status.game_saved = game_saved_ns != 0 && SDL_GetTicksNS() - game_saved_ns < 600'000'000ULL;
+        }
         std::array<std::string, freetvc::FloppyDrives::kDrives> disk_names;
         status.disk_card = tape.disk_card_on();
         status.disk_busy = -1;
@@ -2504,6 +2622,8 @@ int main(int argc, char** argv) {
         sheet.mcp_token = mcp_token_now;
         sheet.mcp_allow_monitor = mcp_allow_monitor;
         sheet.dzrp_banks = dzrp_memory == freetvc::remote::DzrpMemory::TvcBanks;
+        sheet.text_size = skins.text_size > 0 ? skins.text_size : skins.menu_size();
+        sheet.strip_size = static_cast<int>(std::lround(skins.strip_size));
         const float sheet_top =
             ImGui::GetMainViewport()->Pos.y + (bench ? (skins.skin.strip_height + skins.skin.groove_width) * skins.scale : 0.0f);
         const freetvc::sdl::KeyboardEditorActions editor_actions =
@@ -2515,6 +2635,16 @@ int main(int argc, char** argv) {
         sheet.layout_given = keys_given;
         const freetvc::sdl::SettingsActions sheet_actions = settings_view.draw(status, sheet, skins.skin, skins.fonts, sheet_top, actions);
         actions.menu_open |= about_view.draw(*display, base_dir / "about" / "lamerz-logo.png", display->name(), skins.skin, skins.fonts, skins.scale);
+        const bool prompting = save_prompt.is_open();
+        std::string save_name;
+        const bool save_chosen = save_prompt.draw(
+            skins.skin, skins.fonts, skins.scale,
+            [&](const std::string& name) {
+                std::error_code ec;
+                return fs::exists(tape.game_save_file("", name), ec);
+            },
+            save_name);
+        actions.menu_open |= prompting;
         ImGui::Render();
 
         display->prepare_picture(texture, machine.config().colour, machine.frame_count());
@@ -2522,6 +2652,28 @@ int main(int argc, char** argv) {
 
         if (actions.menu_open && !menu_open) {
             input.release_all();
+        }
+        if (actions.strip_drag != 0.0f) {
+            const float base = skins.file_skin.strip_height * skins.scale;
+            skins.strip_size = std::clamp(skins.strip_size - actions.strip_drag / base * 100.0f, 75.0f, 250.0f);
+            skins.resize_strip();
+        }
+        // A larger strip needs a wider window: it grows rather than the keys covering each other
+        if (actions.strip_width > 0.0f && (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED)) == 0) {
+            int width = 0;
+            int height = 0;
+            SDL_GetWindowSize(window, &width, &height);
+            const int needed = static_cast<int>(std::ceil(actions.strip_width));
+            SDL_SetWindowMinimumSize(window, needed, 0);
+            if (width < needed) {
+                SDL_SetWindowSize(window, needed, height);
+            }
+        }
+        if (save_chosen) {
+            save_named(save_name);
+        }
+        if (prompting && !save_prompt.is_open() && save_resumes && held()) {
+            run_command("x");
         }
         menu_open = actions.menu_open;
         if (actions.toggle_settings) {
@@ -2548,6 +2700,14 @@ int main(int argc, char** argv) {
         }
         if (!sheet_actions.disk_rom.empty()) {
             use_disk_rom(sheet_actions.disk_rom);
+        }
+        if (sheet_actions.strip_size > 0) {
+            skins.strip_size = static_cast<float>(sheet_actions.strip_size);
+            skins.resize_strip();
+        }
+        if (sheet_actions.text_size > 0) {
+            skins.text_size = sheet_actions.text_size;
+            pending_fonts = true;
         }
         if (sheet_actions.volume >= 0) {
             volume = sheet_actions.volume;
@@ -2762,6 +2922,7 @@ int main(int argc, char** argv) {
                     mcp->set_machine_name(std::string(wanted.name));
                 }
                 preset_index = static_cast<std::size_t>(actions.preset);
+                tape.set_game_name({});
                 set_title();
                 const std::string name(wanted.name);
                 if (card256_dropped) {
@@ -2806,6 +2967,7 @@ int main(int argc, char** argv) {
         }
         if (actions.power_cycle) {
             tape.media().cancel();
+            tape.set_game_name({});
             machine.power_on();
             show_machine();
             input.machine_replaced();
@@ -2851,10 +3013,10 @@ int main(int argc, char** argv) {
             }
         }
         if (actions.quick_save) {
-            save_snapshot(quick_path.string());
+            quick_save();
         }
         if (actions.quick_load) {
-            load_snapshot(quick_path.string());
+            quick_load();
         }
         if (actions.toggle_card256) {
             const bool on = tape.card256_slot() < 0;
@@ -3331,6 +3493,14 @@ int main(int argc, char** argv) {
         }
         if (actions.open_screenshot_dir) {
             open_folder(screenshot_dir());
+        }
+        if (!actions.load_save.empty()) {
+            load_snapshot(actions.load_save);
+        }
+        if (actions.open_save_dir) {
+            std::error_code ec;
+            fs::create_directories(tape.game_root(), ec);
+            open_folder(tape.game_root());
         }
         running &= !actions.quit;
 

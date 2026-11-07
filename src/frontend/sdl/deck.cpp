@@ -2,6 +2,7 @@
 #include "frontend/sdl/deck.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cfloat>
 #include <cmath>
 #include <cstdio>
@@ -212,6 +213,29 @@ bool DeckRow::camera(const char* id, ImFont* font, float size, Colour colour) {
     draw->AddRect({mid.x - w / 2.0f, mid.y - h / 2.0f}, {mid.x + w / 2.0f, mid.y + h / 2.0f}, c, thick, thick);
     draw->AddRectFilled({mid.x - w * 0.18f, mid.y - h / 2.0f - h * 0.28f}, {mid.x + w * 0.18f, mid.y - h / 2.0f}, c, thick * 0.5f);
     draw->AddCircle(mid, h * 0.3f, c, 0, thick);
+    return clicked;
+}
+
+bool DeckRow::game_save(const char* id, ImFont* font, float size, Colour colour) {
+    ImGui::SameLine(0.0f, 0.0f);
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const float width = rec_width(font, size, height_);
+    const bool clicked = ImGui::InvisibleButton(id, {width, height_});
+    draw_hover(pos, {width, height_});
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    const ImU32 c = to_imgui(colour);
+    const float thick = std::max(1.0f, height_ * 0.06f);
+    const float inset = height_ * 0.2f;
+    corners(draw, {pos.x + inset, pos.y + inset}, {pos.x + width - inset, pos.y + height_ - inset}, height_ * 0.16f, thick, c);
+    // On a 20 x 17 grid: the screen, its stand, and the arrow inside it
+    const float g = height_ * 0.024f;
+    const ImVec2 o{pos.x + width / 2.0f - 10.0f * g, pos.y + height_ / 2.0f - 8.5f * g};
+    const auto p = [&](float x, float y) { return ImVec2{o.x + x * g, o.y + y * g}; };
+    draw->AddRect(p(0.0f, 0.0f), p(20.0f, 13.0f), c, 0.0f, thick);
+    draw->AddLine(p(10.0f, 13.0f), p(10.0f, 17.0f), c, thick);
+    draw->AddLine(p(5.0f, 17.0f), p(15.0f, 17.0f), c, thick);
+    draw->AddLine(p(10.0f, 2.5f), p(10.0f, 9.5f), c, thick);
+    draw->AddPolyline(std::array{p(7.2f, 6.8f), p(10.0f, 9.6f), p(12.8f, 6.8f)}.data(), 3, c, thick);
     return clicked;
 }
 

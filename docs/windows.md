@@ -184,7 +184,7 @@ Test data cache variables are set on the first configure of a build folder; afte
 
 - **`freetvc.exe` is a GUI-subsystem program** (`add_executable(freetvc WIN32 ...)`): started from a console it returns at once and its stderr, where it prints the ROMs found, the renderer and every status-strip notice, is not shown. To keep it, start it from `cmd` with a redirection: `build\msvc-debug\src\freetvc.exe 2> freetvc-stderr.txt` ❓. In PowerShell use `Start-Process -Wait -RedirectStandardError freetvc-stderr.txt build\msvc-debug\src\freetvc.exe`.
 - **`freetvc-headless.exe` is a console program**: output, exit codes and `--help` work as on Linux.
-- **User data folder:** `%APPDATA%\freeTVC` (`freetvc.ini`, `layout.ini`, `roms\`, the user copies of key layouts and pictures, `quick.tvcs`). A `freetvc.ini` next to `freetvc.exe` makes that copy portable: settings are then read from and written next to the program.
+- **User data folder:** `%APPDATA%\freeTVC` (`freetvc.ini`, `layout.ini`, `roms\`, the user copies of key layouts and pictures, `SaveState\` with the game saves). A `freetvc.ini` next to `freetvc.exe` makes that copy portable: settings are then read from and written next to the program.
 - **Data folders:** the build copies `fonts`, `skins`, `keymaps`, `pictures` and `lang` next to `freetvc.exe`; the GUI needs them there.
 - **Renderer:** OpenGL 3.3 core by default; with an old or missing OpenGL driver (some virtual machines, remote desktops) start with `--renderer sdl`, which uses SDL's own renderer (normally Direct3D on Windows).
 - **Debugger:** in Visual Studio, pick `freetvc.exe` or `freetvc-headless.exe` as the startup item and add arguments in its launch settings (`launch.vs.json`); with MSYS2 use `gdb` from `mingw-w64-ucrt-x86_64-gdb`.

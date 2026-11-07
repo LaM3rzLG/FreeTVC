@@ -23,6 +23,8 @@ struct Settings {
     std::optional<std::string> skin;     // a skin name or a path
     std::optional<std::string> keymap;   // symbolic or positional
     std::optional<std::string> language;  // the UI language: en or a translation's code, such as hu
+    std::optional<int> ui_font_size;      // the menus' text in points, 12-36; the rest of the UI in proportion
+    std::optional<int> strip_size;        // the status strip's height and keys in percent of the skin's, 75-250
     std::optional<bool> audio;
     std::optional<bool> full_raster;
     std::optional<bool> disk_card;  // the HBF card in slot 0

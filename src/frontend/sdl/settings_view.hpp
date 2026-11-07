@@ -61,6 +61,8 @@ struct SettingsStatus {
     std::string_view mcp_token;
     bool mcp_allow_monitor = false;
     bool dzrp_banks = false;
+    int text_size = 22;              // the menus' and this sheet's text, in points
+    int strip_size = 100;            // the status strip's height and keys, in percent
 };
 
 enum Server : std::size_t { kMonitorServer, kMcpServer, kDzrpServer, kGdbServer };
@@ -86,6 +88,8 @@ struct SettingsActions {
     int renderer_sdl = -1;
     std::string layout;                // a layout file's path to switch to
     bool edit_layout = false;          // the keyboard editor opens
+    int text_size = -1;                // a new text size in points
+    int strip_size = -1;               // a new strip size in percent
 };
 
 class SettingsView {

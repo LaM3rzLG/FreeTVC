@@ -57,6 +57,8 @@ public:
     bool tvc(const char* id, Colour colour);
     // The screenshot key: corner marks around a camera, as wide as the REC key
     bool camera(const char* id, ImFont* font, float size, Colour colour);
+    // The game save key: corner marks around a small screen with an arrow going down into it, as wide as the REC key
+    bool game_save(const char* id, ImFont* font, float size, Colour colour);
     // Line icons in the machine key's style, drawn on a 45-high grid
     bool keyboard(const char* id, Colour colour);
     // A speaker with sound waves; `slashed` crosses it out in the `slash` colour

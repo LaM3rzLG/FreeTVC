@@ -74,16 +74,7 @@ const char* section_name(SettingsSection section) {
 }
 
 void draw_machine(const Sheet& s, const PlayStatus& status, const SettingsStatus& st, PlayActions& play, SettingsActions& a) {
-    heading(s, tr("Model and ROMs"));
-    given(s, st.preset_given, "--preset");
-    for (std::size_t i = 0; i < status.presets.size(); ++i) {
-        const std::string name(status.presets[i].name);
-        if (ImGui::RadioButton(name.c_str(), i == status.preset) && i != status.preset) {
-            play.preset = static_cast<int>(i);
-        }
-    }
-    note(s, tr("Switching powers the machine on; the cartridge and the cards stay in."));
-
+    // The model and the cards are in the strip's machine and Cards menus
     heading(s, tr("ROM folder"));
     note(s, tr_format("In use: %s", std::string(st.rom_source).c_str()).c_str());
     if (st.rom_dir.empty()) {
@@ -105,80 +96,6 @@ void draw_machine(const Sheet& s, const PlayStatus& status, const SettingsStatus
     ImGui::BeginDisabled(st.downloading);
     play.fetch_roms |= ImGui::Button(st.downloading ? tr("Downloading...") : tr("Download ROMs"));
     ImGui::EndDisabled();
-
-    heading(s, tr("Disk card"));
-    play.toggle_disk_card |= check(tr("HBF disk card in slot 0"), status.disk_card);
-    given(s, st.disk_rom_given, "--disk-rom");
-    if (ImGui::RadioButton(tr("VT-DOS 1.1 (hbf.rom)"), st.disk_rom == "1.1") && st.disk_rom != "1.1") {
-        a.disk_rom = "1.1";
-    }
-    if (ImGui::RadioButton(tr("VT-DOS 1.2 (hbf12.rom)"), st.disk_rom == "1.2") && st.disk_rom != "1.2") {
-        a.disk_rom = "1.2";
-    }
-    const bool file = st.disk_rom != "1.1" && st.disk_rom != "1.2";
-    const std::string file_label =
-        file ? tr_format("Image: %s", std::filesystem::path(std::string(st.disk_rom)).filename().string().c_str()) : std::string(tr("Image file..."));
-    ImGui::BeginDisabled(!status.can_browse);
-    a.choose_disk_rom |= ImGui::RadioButton(file_label.c_str(), file);
-    ImGui::EndDisabled();
-    note(s, tr("The card's EPROM. A new one powers the machine on while the card is in. VT-DOS also needs its cartridge "
-               "(vtdos11.rom or vtdos12.rom); either works with either EPROM."));
-
-    heading(s, tr("Other cards"));
-    struct SlotCard {
-        const char* name;
-        CardKind kind;
-        int slot;
-        bool& toggle;
-    };
-    const SlotCard cards[] = {{tr("GameCard"), CardKind::GameCard, status.gamecard_slot, play.toggle_gamecard},
-                              {tr("Multichip sound card"), CardKind::Multichip, status.multichip_slot, play.toggle_multichip},
-                              {tr("TVC256k++"), CardKind::Card256, status.card256_slot, play.toggle_card256},
-                              {tr("2dfx graphics card"), CardKind::TwoDfx, status.twodfx_slot, play.toggle_twodfx},
-                              {tr("NanoSD"), CardKind::NanoSd, status.nanosd_slot, play.toggle_nanosd},
-                              {tr("Serial card"), CardKind::Serial, status.serial_slot, play.toggle_serial}};
-    // The slot buttons line up in a column right of the longest name
-    float column = 0.0f;
-    for (const SlotCard& c : cards) {
-        column = std::max(column, ImGui::CalcTextSize(c.name).x);
-    }
-    column += ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x + ImGui::GetStyle().ItemSpacing.x * 3.0f;
-    const float left = ImGui::GetCursorPosX();
-    for (const SlotCard& c : cards) {
-        c.toggle |= check(c.name, c.slot >= 0);
-        ImGui::SameLine(left + column);
-        ImGui::TextUnformatted(tr("slot"));
-        for (int n = 0; n < static_cast<int>(kCardSlots); ++n) {
-            ImGui::SameLine();
-            ImGui::PushID(c.name);
-            ImGui::PushID(n);
-            const bool taken = n != c.slot && !status.slot_cards[n].empty();
-            ImGui::BeginDisabled(taken);
-            const char digit[2] = {static_cast<char>('0' + n), 0};
-            if (ImGui::RadioButton(digit, n == c.slot) && n != c.slot) {
-                play.slot_card = c.kind;
-                play.slot_card_to = n;
-            }
-            ImGui::EndDisabled();
-            ImGui::PopID();
-            ImGui::PopID();
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-                const std::string holder(status.slot_cards[n]);
-                ImGui::SetTooltip("%s", holder.empty() || n == c.slot ? tr_format("Slot %d, ports %d0h-%dFh", n, n + 1, n + 1).c_str()
-                                                                       : tr_format("Slot %d, ports %d0h-%dFh: %s", n, n + 1, n + 1, holder.c_str()).c_str());
-            }
-        }
-    }
-    ImGui::TextUnformatted(tr("SID card"));
-    const char* models[] = {tr("none"), "MOS 6581", "MOS 8580"};
-    for (int m = 0; m < 3; ++m) {
-        ImGui::SameLine();
-        if (ImGui::RadioButton(models[m], status.sid_card == m) && status.sid_card != m) {
-            play.sid_card = m;
-        }
-    }
-    note(s, tr("The same switches as the Cards menu; each powers the machine on. A slot button puts the card in that slot or "
-               "moves it there. freeTVC starts with the cards that were in when it closed, in the same slots."));
 }
 
 // A slider for one picture value; true while it changes, `done` when it is let go
@@ -189,12 +106,29 @@ bool picture_slider(const char* label, float& value, float min, float max, const
     return changed;
 }
 
+// The shipped pictures by what they show; another file by its name
+const char* picture_label(const std::string& name) {
+    if (name == "bw-tv") {
+        return tr("Black and white TV");
+    }
+    if (name == "pal-tv") {
+        return tr("CRT TV emulation");
+    }
+    if (name == "rgb-monitor") {
+        return tr("RGB monitor emulation");
+    }
+    if (name == "sharp") {
+        return tr("Sharp picture");
+    }
+    return name.c_str();
+}
+
 void draw_picture(const Sheet& s, const PlayStatus& status, const SettingsStatus& st, PlayActions& play, SettingsActions& a) {
     heading(s, tr("Picture"));
     given(s, st.picture_given, "--picture");
     for (const PictureEntry& entry : st.pictures) {
         const bool current = st.picture && entry.name == st.picture->name;
-        if (ImGui::RadioButton(entry.name.c_str(), current) && !current) {
+        if (ImGui::RadioButton(picture_label(entry.name), current) && !current) {
             a.picture = entry.path.string();
         }
     }
@@ -338,7 +272,38 @@ void draw_keyboard(const Sheet& s, const PlayStatus& status, const SettingsStatu
                "Gamepads 1 to 4 drive joysticks 1 to 4; 3 and 4 are the GameCard's."));
 }
 
-void draw_interface(const Sheet& s, const PlayStatus& status, const SettingsStatus& st, PlayActions& play) {
+void draw_interface(const Sheet& s, const PlayStatus& status, const SettingsStatus& st, PlayActions& play, SettingsActions& a) {
+    heading(s, tr("Text"));
+    // A list, not a slider: every new size builds the fonts again and moves the sheet under the mouse
+    static constexpr int kSizes[] = {12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36};
+    ImGui::SetNextItemWidth(ImGui::CalcTextSize("00 pt").x + ImGui::GetFrameHeight() * 2.0f);
+    const std::string size_text = std::to_string(st.text_size) + " pt";
+    if (ImGui::BeginCombo("##text_size", size_text.c_str(), ImGuiComboFlags_HeightLargest)) {
+        for (const int size : kSizes) {
+            const std::string text = std::to_string(size) + " pt";
+            if (ImGui::Selectable(text.c_str(), size == st.text_size) && size != st.text_size) {
+                a.text_size = size;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    note(s, tr("Text size in points, for the menus, this window and the strip."));
+
+    heading(s, tr("Status strip"));
+    static constexpr int kStripSizes[] = {75, 100, 125, 150, 175, 200, 250};
+    ImGui::SetNextItemWidth(ImGui::CalcTextSize("000 %").x + ImGui::GetFrameHeight() * 2.0f);
+    const std::string strip_text = std::to_string(st.strip_size) + " %";
+    if (ImGui::BeginCombo("##strip_size", strip_text.c_str(), ImGuiComboFlags_HeightLargest)) {
+        for (const int size : kStripSizes) {
+            const std::string text = std::to_string(size) + " %";
+            if (ImGui::Selectable(text.c_str(), size == st.strip_size) && size != st.strip_size) {
+                a.strip_size = size;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    note(s, tr("The height of the strip at the bottom and of its keys."));
+
     heading(s, tr("Language"));
     given(s, st.language_given, "--language");
     if (ImGui::RadioButton("English", status.language == "en") && status.language != "en") {
@@ -434,10 +399,13 @@ void draw_remote(const Sheet& s, const SettingsStatus& st, std::array<int, 4>& p
 namespace {
 
 // The section column: the widest name (in the UI language) after its rib
+// The sheet's text: as large as the strip's menus
+float text_size(const Skin& skin) { return skin.font_strip_size > 0.0f ? skin.font_strip_size : skin.font_ui_size; }
+
 float sections_width(const Skin& skin, const SkinFonts& fonts, float scale) {
     float widest = 0.0f;
     for (const SettingsSection section : kSections) {
-        widest = std::max(widest, fonts.strong->CalcTextSizeA(skin.font_ui_size * scale, FLT_MAX, 0.0f, section_name(section)).x);
+        widest = std::max(widest, fonts.strong->CalcTextSizeA(text_size(skin) * scale, FLT_MAX, 0.0f, section_name(section)).x);
     }
     return widest + 44.0f * scale;
 }
@@ -445,7 +413,8 @@ float sections_width(const Skin& skin, const SkinFonts& fonts, float scale) {
 }  // namespace
 
 float SettingsView::width(const Skin& skin, const SkinFonts& fonts, float scale, float window_width) const {
-    return open_ ? std::min(sections_width(skin, fonts, scale) + kContentWidth * scale, window_width * 0.65f) : 0.0f;
+    const float content = kContentWidth * scale * text_size(skin) / skin.font_ui_size;
+    return open_ ? std::min(sections_width(skin, fonts, scale) + content, window_width * 0.65f) : 0.0f;
 }
 
 SettingsActions SettingsView::draw(const PlayStatus& status, const SettingsStatus& settings, const Skin& skin, const SkinFonts& fonts,
@@ -471,7 +440,10 @@ SettingsActions SettingsView::draw(const PlayStatus& status, const SettingsStatu
     ImGui::Begin("##settings", nullptr, kFlags);
     ImGui::PopStyleColor();
     ImGui::PopStyleVar(2);
-    ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());  // above Bench's panels
+    // Above Bench's panels, but under its own popups (the text size list)
+    if (!ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId)) {
+        ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+    }
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
         play.menu_open = true;  // keys stay out of the TVC while the sheet has them
         if (ImGui::IsKeyPressed(ImGuiKey_Escape, false) && !ImGui::IsAnyItemActive()) {
@@ -483,7 +455,7 @@ SettingsActions SettingsView::draw(const PlayStatus& status, const SettingsStatu
 
     // Header band: the name and a key to close it
     const float band = skin.strip_height * status.scale;
-    const float ui_px = skin.font_ui_size * status.scale;
+    const float ui_px = text_size(skin) * status.scale;
     draw->AddRectFilled({pos.x + groove, pos.y}, {pos.x + w, pos.y + band}, to_imgui(skin.rib));
     draw->AddText(fonts.strong, ui_px, {pos.x + groove + 12.0f * status.scale, pos.y + (band - ui_px) / 2.0f}, to_imgui(skin.label),
                   tr("Settings"));
@@ -539,6 +511,7 @@ SettingsActions SettingsView::draw(const PlayStatus& status, const SettingsStatu
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {pad, pad});
     ImGui::PushStyleColor(ImGuiCol_ChildBg, to_imgui(skin.deck));
     ImGui::BeginChild("##settings_body", {w - sections_w - groove, bottom - body_top}, ImGuiChildFlags_AlwaysUseWindowPadding);
+    ImGui::PushFont(nullptr, text_size(skin));
     ImGui::PushTextWrapPos(0.0f);
     switch (section_) {
     case SettingsSection::Machine:
@@ -554,13 +527,14 @@ SettingsActions SettingsView::draw(const PlayStatus& status, const SettingsStatu
         draw_keyboard(s, status, settings, play, actions);
         break;
     case SettingsSection::Interface:
-        draw_interface(s, status, settings, play);
+        draw_interface(s, status, settings, play, actions);
         break;
     case SettingsSection::Remote:
         draw_remote(s, settings, port_edit_, port_editing_, actions);
         break;
     }
     ImGui::PopTextWrapPos();
+    ImGui::PopFont();
     ImGui::EndChild();
     ImGui::PopStyleColor();
     ImGui::PopStyleVar();

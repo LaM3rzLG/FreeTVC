@@ -2,7 +2,6 @@
 #include "frontend/common/host_tape.hpp"
 
 #include <algorithm>
-#include <ctime>
 #include <cstdio>
 #include <fstream>
 #include <system_error>
@@ -537,6 +536,9 @@ void HostTape::cart_remove() {
     config.roms.cart_bank = 0;
     media_.cancel();
     machine_.configure(config);
+    if (program_name_ == cart_path_.stem().string()) {
+        program_name_.clear();
+    }
     cart_path_.clear();
 }
 
@@ -763,19 +765,38 @@ std::vector<GameSaveEntry> HostTape::game_saves(const std::string& game) const {
     std::vector<GameSaveEntry> entries;
     if (!save_root_.empty()) {
         for (const GameSave& save : list_saves(save_root_, game)) {
-            entries.push_back({save.file.string(), save.picture.string(), save.name});
+            entries.push_back({save.file.string(), save.picture.string(), save.name, save.when});
         }
     }
     return entries;
 }
 
-bool HostTape::game_save(const std::string& game, std::string& file, std::string& error) {
+std::string HostTape::game_save_file(const std::string& game, const std::string& name) const {
+    const std::string folder = game.empty() ? game_name() : game;
+    return named_save_file(save_root_, folder.empty() ? std::string("TVC") : folder, name).string();
+}
+
+bool HostTape::game_save(const std::string& game, const std::string& save_name, std::string& file, std::string& error) {
     if (save_root_.empty()) {
         error = msg("game saves are off in this front end");
         return false;
     }
-    const std::string name = game.empty() ? game_name() : game;
-    const fs::path target = new_save_file(save_root_, name.empty() ? std::string("TVC") : name, std::time(nullptr), error);
+    std::string name = game.empty() ? game_name() : game;
+    if (name.empty()) {
+        name = "TVC";
+    }
+    fs::path target;
+    if (save_name.empty()) {
+        target = new_save_file(save_root_, name, error);
+    } else {
+        target = named_save_file(save_root_, name, save_name);
+        std::error_code ec;
+        fs::create_directories(target.parent_path(), ec);
+        if (ec) {
+            error = msg("cannot make %s: %s", target.parent_path().string().c_str(), ec.message().c_str());
+            target.clear();
+        }
+    }
     if (target.empty()) {
         return false;
     }
@@ -802,7 +823,7 @@ bool HostTape::game_save_delete(const std::string& file, std::string& error) {
         return false;
     }
     const fs::path picture = fs::path(target).replace_extension(".png");
-    return delete_save({target, fs::exists(picture, ec) ? picture : fs::path(), {}}, error);
+    return delete_save({target, fs::exists(picture, ec) ? picture : fs::path(), {}, {}}, error);
 }
 
 bool HostTape::snapshot_save(const std::string& path, std::string& error) {
@@ -1031,10 +1052,17 @@ std::string HostTape::game_name() const {
     if (!program_name_.empty()) {
         return program_name_;
     }
-    for (const fs::path& dir : {nanosd_sd_dir(), card256_host_.pendrive_dir()}) {
+    // A card's folder only while the card is in: the front end keeps it attached across the card's absence
+    const fs::path nanosd_dir = nanosd_slot() >= 0 ? nanosd_sd_dir() : fs::path();
+    const fs::path pendrive_dir = card256_slot() >= 0 ? card256_host_.pendrive_dir() : fs::path();
+    for (const fs::path& dir : {nanosd_dir, pendrive_dir}) {
         if (!dir.empty()) {
             return dir.filename().empty() ? dir.parent_path().filename().string() : dir.filename().string();
         }
+    }
+    // The GameCard's own boot menu of games
+    if (card_slot(CardKind::GameCard) >= 0) {
+        return "GameCard";
     }
     return {};
 }
@@ -1167,6 +1195,7 @@ int HostTape::gamecard_slot() const { return card_slot(CardKind::GameCard); }
 bool HostTape::gamecard(bool on, unsigned slot, std::string& error) { return place_card(CardKind::GameCard, &HostTape::gamecard_rom, on, slot, error); }
 
 bool HostTape::place_card(CardKind kind, std::vector<std::uint8_t> (HostTape::*rom)(), bool on, unsigned slot, std::string& error) {
+    program_name_.clear();  // another machine: the last program's name no longer fits
     MachineConfig config = machine_.config();
     const int now = card_slot(kind);
     if (!on) {
@@ -1267,6 +1296,7 @@ std::string HostTape::multichip_describe() const {
 }
 
 bool HostTape::sid_card(const std::string& model, std::string& error) {
+    program_name_.clear();  // another machine: the last program's name no longer fits
     MachineConfig config = machine_.config();
     if (model == "off") {
         config.sid.model = SidModel::None;
@@ -1524,6 +1554,7 @@ int HostTape::card256_slot() const {
 }
 
 bool HostTape::card256(bool on, unsigned slot, std::string& error) {
+    program_name_.clear();  // another machine: the last program's name no longer fits
     MachineConfig config = machine_.config();
     const int now = card256_slot();
     if (!on) {
@@ -1630,6 +1661,7 @@ bool HostTape::disk_card(bool on, std::string& error) {
     if (on == disk_card_on()) {
         return true;
     }
+    program_name_.clear();  // another machine: the last program's name no longer fits
     MachineConfig config = machine_.config();
     if (on && config.cards[kDiskCardSlot].kind != CardKind::None) {
         error = msg("slot %u, the disk card's, holds the %s", static_cast<unsigned>(kDiskCardSlot), card_kind_name(config.cards[kDiskCardSlot].kind));
@@ -1681,7 +1713,11 @@ bool HostTape::disk_insert(unsigned drive, const std::string& path, std::string&
     if (!disk_card_on() && !disk_card(true, error)) {
         return false;
     }
-    return insert_disk_file(drive, path, error);
+    if (!insert_disk_file(drive, path, error)) {
+        return false;
+    }
+    program_name_ = fs::path(path).stem().string();
+    return true;
 }
 
 bool HostTape::save_disk(unsigned drive, std::string& error) {
@@ -1803,6 +1839,7 @@ std::string HostTape::disk_describe() const {
 
 
 bool HostTape::sddual(bool on, bool gamer, std::string& error) {
+    program_name_.clear();  // another machine: the last program's name no longer fits
     MachineConfig config = machine_.config();
     save_multicart();
     if (!on) {

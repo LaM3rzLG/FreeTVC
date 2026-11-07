@@ -112,7 +112,8 @@ public:
     // The files and folders a TVCS snapshot names, read without touching the machine; nullopt with `error` set.
     static std::optional<std::vector<SnapshotPath>> snapshot_paths(std::span<const std::uint8_t> bytes, std::string& error);
     // The program the saves belong to: the last one started or plugged in (its file name without the extension), the one
-    // a loaded snapshot names, else the NanoSD's or the pendrive's folder; empty when nothing tells.
+    // a loaded snapshot names, else the NanoSD's or the pendrive's folder, else "GameCard" with that card in; empty when
+    // nothing tells. A card going in or out, a power cycle or another preset forgets the program.
     std::string game_name() const override;
     void set_game_name(std::string name) { program_name_ = std::move(name); }
     // The game saves' folder (default_save_root()); empty turns game saves off.
@@ -120,7 +121,8 @@ public:
     std::string game_root() const override;
     std::vector<std::string> game_list() const override;
     std::vector<GameSaveEntry> game_saves(const std::string& game) const override;
-    bool game_save(const std::string& game, std::string& file, std::string& error) override;
+    bool game_save(const std::string& game, const std::string& name, std::string& file, std::string& error) override;
+    std::string game_save_file(const std::string& game, const std::string& name) const override;
     bool game_save_delete(const std::string& file, std::string& error) override;
     // Where snapshot_load() looks for a ROM set the machine does not have.
     void set_rom_places(std::vector<RomPlace> places) { rom_places_ = std::move(places); }

@@ -24,6 +24,16 @@ using freetvc::kFullRaster;
 using freetvc::kTvArea;
 using freetvc::ScreenArea;
 
+struct GameSaveItem {
+    std::string name;  // the file name without the extension
+    std::string when;  // the file's time
+    std::string file;
+};
+struct GameSaveList {
+    std::string game;
+    std::vector<GameSaveItem> saves;  // newest first
+};
+
 struct PlayStatus {
     ImTextureID screen = ImTextureID_Invalid;  // the framebuffer texture, 800 x 314
     // At start: a faint photo of the machine over a dark screen until the machine is ready; 0 = gone
@@ -37,6 +47,8 @@ struct PlayStatus {
     KeyMapping mapping = KeyMapping::Symbolic;
     std::span<const KeymapEntry> layouts;  // host key layouts
     std::span<const std::string> recent;   // the last programs loaded, newest first
+    std::string_view game;                    // the program the game saves go to
+    std::span<const GameSaveList> game_saves;  // every game with saves, `game` first when it has any
     std::string_view layout;
     bool audio = false;  // an audio device is open
     bool muted = false;
@@ -62,7 +74,8 @@ struct PlayStatus {
     bool tape_recording = false;
     bool fast_tape = true;
     std::string_view cartridge;  // file name of the cartridge; empty = none
-    bool quick_snapshot = false;  // the quick slot holds a snapshot
+    bool quick_snapshot = false;  // the program running has a game save
+    bool game_saved = false;      // a game save was just made: its key is lit
     // The disk card and drives A-D: file names, empty = no disk
     bool disk_card = false;
     std::array<std::string_view, 4> disks{};
@@ -101,8 +114,11 @@ struct PlayStatus {
 
 struct PlayActions {
     bool menu_open = false;
+    float strip_width = 0.0f;  // the width the strip's keys need side by side (window points)
+    float strip_drag = 0.0f;   // the strip's top edge dragged by this many points (up is negative)
     std::string layout;        // a host key layout file to use
     std::string open_recent;   // a program from the recent list to load
+    std::string load_save;     // a game save to load
     bool edit_layout = false;  // the keyboard editor opens  // keys must not reach the TVC while it is
     bool toggle_pause = false;
     bool reset = false;
@@ -136,6 +152,7 @@ struct PlayActions {
     bool snapshot_load = false;  // file dialog, then the machine becomes the snapshot
     bool quick_save = false;
     bool quick_load = false;
+    bool open_save_dir = false;
     bool toggle_disk_card = false;  // the card goes in or out and the machine powers on
     bool toggle_fast_disk = false;
     bool toggle_gamecard = false;  // the GameCard goes in (slot 1) or out and the machine powers on
@@ -182,7 +199,8 @@ struct PlayActions {
 PlayActions draw_play(const PlayStatus& status, const Skin& skin, const SkinFonts& fonts);
 
 // The status strip along the bottom of the window, with its menus; Play and Bench both show it.
-void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fonts, PlayActions& actions);
+// `notice`: the latest notice goes into the strip (Bench); Play shows it on the picture's top border instead
+void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fonts, PlayActions& actions, bool notice = true);
 // Height the strip and its groove take at the bottom of the window.
 float strip_space(const Skin& skin, float scale);
 

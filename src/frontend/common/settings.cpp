@@ -19,7 +19,7 @@ constexpr std::string_view kHeader =
     "; not saved. Keys: rom_dir, preset, skin, keymap, language, audio, volume, fullscreen, full_raster, disk_card, disk_rom,\n"
     "; gamecard, multichip, sid_card, card256, card256_usb, card256_flash, twodfx, nanosd, nanosd_sd, nanosd_menu, nanosd_sort,\n"
     "; printer, serial_card, serial_line, serial_flow, video_dir, screenshot_dir, save_dir, monitor, mcp, mcp_allow_monitor, dzrp, dzrp_banks, gdb, renderer,\n"
-    "; picture, colour_switch, keys, recent.\n";
+    "; picture, colour_switch, keys, recent, ui_font_size, strip_size.\n";
 
 std::string_view trim(std::string_view s) {
     const auto first = s.find_first_not_of(" \t\r");
@@ -161,6 +161,20 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
             s.preset = value;
         } else if (key == "skin") {
             s.skin = value;
+        } else if (key == "strip_size") {
+            const int size = std::all_of(value.begin(), value.end(), [](char c) { return c >= '0' && c <= '9'; }) && value.size() <= 3 ? std::stoi(value) : -1;
+            if (size >= 75 && size <= 250) {
+                s.strip_size = size;
+            } else {
+                fail(msg("strip_size is 75 to 250"));
+            }
+        } else if (key == "ui_font_size") {
+            const int size = std::all_of(value.begin(), value.end(), [](char c) { return c >= '0' && c <= '9'; }) && value.size() <= 2 ? std::stoi(value) : -1;
+            if (size >= 12 && size <= 36) {
+                s.ui_font_size = size;
+            } else {
+                fail(msg("ui_font_size is 12 to 36"));
+            }
         } else if (key == "language") {
             if (std::all_of(value.begin(), value.end(), [](char c) { return c >= 'a' && c <= 'z'; })) {
                 s.language = value;

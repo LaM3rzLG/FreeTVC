@@ -1571,9 +1571,6 @@ msgid "mouse captured by the TVC256k++; Ctrl+Alt lets it go"
 msgstr "az egeret a TVC256k++ fogja; a Ctrl+Alt elengedi"
 
 #: src/frontend/sdl/main.cpp:1796
-msgid "no quick snapshot yet (F9 saves one)"
-msgstr "még nincs gyorsmentés (az F9 készít egyet)"
-
 #: src/frontend/sdl/main.cpp:1852
 #, c-format
 msgid "monitor: stopped at %s"
@@ -1983,26 +1980,6 @@ msgstr "%s kivétele"
 #: src/frontend/sdl/play_view.cpp:54
 msgid "Eject cassette"
 msgstr "Kazetta kivétele"
-
-#: src/frontend/sdl/play_view.cpp:57
-msgid "Snapshot"
-msgstr "Pillanatkép"
-
-#: src/frontend/sdl/play_view.cpp:58
-msgid "Quick save"
-msgstr "Gyorsmentés"
-
-#: src/frontend/sdl/play_view.cpp:59
-msgid "Quick load"
-msgstr "Gyorsbetöltés"
-
-#: src/frontend/sdl/play_view.cpp:60
-msgid "Save snapshot..."
-msgstr "Pillanatkép mentése..."
-
-#: src/frontend/sdl/play_view.cpp:61
-msgid "Load snapshot..."
-msgstr "Pillanatkép betöltése..."
 
 #: src/frontend/sdl/play_view.cpp:64 src/frontend/sdl/settings_view.cpp:277
 msgid "Symbolic"
@@ -2523,16 +2500,6 @@ msgstr "Gép és ROM-ok"
 msgid "paused"
 msgstr "szünet"
 
-#: src/frontend/sdl/play_view.cpp:435
-msgid "Paused: click or Pause to resume"
-msgstr "Szünet: kattintás vagy Pause a folytatáshoz"
-
-#: src/frontend/sdl/play_view.cpp:436
-msgid "Speed in percent of a real TVC: click or Pause to pause"
-msgstr ""
-"Sebesség egy valódi TVC-hez képest, százalékban: kattintás vagy Pause a "
-"szüneteltetéshez"
-
 #: src/frontend/sdl/play_view.cpp:441
 msgid "symbolic keys"
 msgstr "szimbolikus kiosztás"
@@ -2610,14 +2577,6 @@ msgstr "Felület"
 msgid "Remote"
 msgstr "Távoli elérés"
 
-#: src/frontend/sdl/settings_view.cpp:77
-msgid "Model and ROMs"
-msgstr "Modell és ROM-ok"
-
-#: src/frontend/sdl/settings_view.cpp:85
-msgid "Switching powers the machine on; the cartridge and the cards stay in."
-msgstr "Váltáskor hidegindítás jön; a cartridge és a kártyák bent maradnak."
-
 #: src/frontend/sdl/settings_view.cpp:87
 msgid "ROM folder"
 msgstr "ROM-mappa"
@@ -2646,64 +2605,6 @@ msgstr "Alapértelmezett helyek"
 #: src/frontend/sdl/settings_view.cpp:106
 msgid "Downloading..."
 msgstr "Letöltés..."
-
-#: src/frontend/sdl/settings_view.cpp:109
-msgid "Disk card"
-msgstr "Lemezkártya"
-
-#: src/frontend/sdl/settings_view.cpp:110
-msgid "HBF disk card in slot 0"
-msgstr "HBF lemezkártya a 0. kártyahelyen"
-
-#: src/frontend/sdl/settings_view.cpp:112
-msgid "VT-DOS 1.1 (hbf.rom)"
-msgstr "VT-DOS 1.1 (hbf.rom)"
-
-#: src/frontend/sdl/settings_view.cpp:115
-msgid "VT-DOS 1.2 (hbf12.rom)"
-msgstr "VT-DOS 1.2 (hbf12.rom)"
-
-#: src/frontend/sdl/settings_view.cpp:120
-#, c-format
-msgid "Image: %s"
-msgstr "Kép: %s"
-
-#: src/frontend/sdl/settings_view.cpp:120
-msgid "Image file..."
-msgstr "Képfájl..."
-
-#: src/frontend/sdl/settings_view.cpp:124
-msgid ""
-"The card's EPROM. A new one powers the machine on while the card is in. VT-"
-"DOS also needs its cartridge (vtdos11.rom or vtdos12.rom); either works with "
-"either EPROM."
-msgstr ""
-"A kártya EPROM-ja. Ha a kártya bent van, csere után hidegindítás jön. A VT-"
-"DOS-hoz a cartridge-e is kell (vtdos11.rom vagy vtdos12.rom); bármelyik "
-"működik bármelyik EPROM-mal."
-
-#: src/frontend/sdl/settings_view.cpp:127
-msgid "Other cards"
-msgstr "Többi kártya"
-
-#: src/frontend/sdl/settings_view.cpp:133
-msgid "SID card"
-msgstr "SID-kártya"
-
-#: src/frontend/sdl/settings_view.cpp:134
-msgid "none"
-msgstr "nincs"
-
-#: src/frontend/sdl/settings_view.cpp:141
-msgid ""
-"The same switches as the Cards menu; each powers the machine on. A slot "
-"button puts the card in that slot or moves it there. freeTVC starts with the "
-"cards that were in when it closed, in the same slots."
-msgstr ""
-"Ugyanazok a kapcsolók, mint a Kártyák menüben; mindegyik hidegindítással "
-"jár. A kártyahely-gomb abba a kártyahelybe teszi vagy oda rakja át a "
-"kártyát. A freeTVC azokkal a kártyákkal indul, amelyek kilépéskor bent "
-"voltak, ugyanazokon a kártyahelyeken."
 
 #: src/frontend/sdl/settings_view.cpp:168
 msgid "Only sharp pixels here: the picture model needs OpenGL 3.3."
@@ -3920,3 +3821,72 @@ msgstr "ebben a felületben nincs játékmentés"
 
 msgid "%s is not a game save"
 msgstr "%s nem játékmentés"
+
+msgid "game saved: %s"
+msgstr "Mentve: %s"
+
+msgid "no game save yet for %s (F9 saves one)"
+msgstr "Még nincs mentés ehhez: %s (F9: mentés)"
+
+msgid "Game save: click or F9 saves; right click opens the menu"
+msgstr "Játékmentés: kattintás vagy F9 = mentés; jobb gomb = menü"
+
+msgid "Game saves"
+msgstr "Játék mentések"
+
+msgid "Last save"
+msgstr "Utolsó mentés"
+
+msgid "All games"
+msgstr "Játék mentések"
+
+msgid "Saves folder"
+msgstr "Mentések mappa"
+
+msgid "Game save"
+msgstr "Játék mentése"
+
+msgid "Name of the save:"
+msgstr "A mentés neve:"
+
+msgid "Save"
+msgstr "Mentés"
+
+msgid "Cancel"
+msgstr "Mégse"
+
+msgid "A save named %s is already there. Replace it?"
+msgstr "Már van %s nevű mentés. Felülírod?"
+
+msgid "Replace"
+msgstr "Felülírás"
+
+msgid "Black and white TV"
+msgstr "Fekete-fehér TV"
+
+msgid "CRT TV emulation"
+msgstr "CRT TV emuláció"
+
+msgid "RGB monitor emulation"
+msgstr "RGB monitor emuláció"
+
+msgid "Sharp picture"
+msgstr "Éles kép"
+
+msgid "Text"
+msgstr "Betűk"
+
+msgid "ui_font_size is 12 to 36"
+msgstr "az ui_font_size 12 és 36 között lehet"
+
+msgid "Text size in points, for the menus, this window and the strip."
+msgstr "A betűk mérete pontban: a menükben, ebben az ablakban és az alsó sávban."
+
+msgid "Status strip"
+msgstr "Alsó sáv"
+
+msgid "The height of the strip at the bottom and of its keys."
+msgstr "Az alsó sáv és a gombjai magassága."
+
+msgid "strip_size is 75 to 250"
+msgstr "a strip_size 75 és 250 között lehet"

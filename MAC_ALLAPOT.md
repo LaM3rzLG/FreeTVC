@@ -25,10 +25,12 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
   Helyben: `2DFXCAS/` (git-ignore, `.git/info/exclude`), NanoSD-hez másolat: `~/Documents/TVC Projects/Wolf3D_2dfx`,
   `.../AnyShow_2dfx`. Részletek: `docs/design/cards.md` „2dfx graphics card”, tervek: `TERVEK.md`.
 
-## Játékmentések (2026-11-07, félkész)
-- A belső rész kész, és MCP-n tesztelve (headless, `--mcp-http --mcp-port 6590`): `game_saves` list/save/check/load/delete.
-  Wolf256 pendrive-ról és NanoSD-mappával, áthelyezett mappával és kártya nélküli gépre töltve is jó. Egy régi `quick.tvcs` is betölt.
-- A GUI még nincs kész. A terv és az állapot: `TERVEK.md` „Játékmentések”.
+## Játékmentések és felület (1.3.0, 2026-11-07)
+- Játékmentés: F9 vagy a TVC gomb melletti ikon → a gép megáll, sötét, név bekérése; `SaveState/<játék>/<név>.tvcs` + png.
+  Shift+F9 = legutóbbi; jobb klikk = mentések listája. MCP `game_saves`. A felhasználó a GUI-ban kipróbálta.
+- Üzenetek a kép felső keretén; sebesség az ablak címében; alsó sáv húzható (75–250 %, `strip_size`); betűméret
+  lenyíló listából (`ui_font_size`). Betűtípus-választás kivéve (a vak listából díszbetű lett kiválasztva).
+- Ellenőrzés kattintás nélkül: `screencapture` csak akkor jó, ha az ablak elöl van (`set frontmost`), különben mást fotóz.
 
 ## Kiadás (1.1.0-tól; az 1.1.0 kiadva 2026-11-06, az 1.2.0 2026-11-07, a felhasználó fiókjáról)
 - Linux + Windows: GitHub Actions (`.github/workflows/release.yml`, kézi indítás vagy `v*` tag) → artifact.

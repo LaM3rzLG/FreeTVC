@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.3.0 — 2026-11-07
+
+### New
+
+- **Game saves**: F9, or the new game save key beside the TVC key, stops the machine, dims the picture and asks for the save's name; the save goes to `SaveState/<game>/<name>.tvcs` in the user data folder with a picture of the screen, and a name already there is replaced only after a question. The game is the program started last (or the disk, the cartridge, the NanoSD's or the pendrive's folder, the GameCard). Shift+F9 loads the game's newest save; a right click on the key lists the game's saves with their times, every game's saves, and opens the folder. A save holds the whole machine: the board, the ROMs, the cards in their slots and the media by path, the NanoSD's folder and the TVC256k++'s pendrive included, so it comes back on a machine set up differently. MCP `game_saves`: list, save, check (which files a save needs and whether they are there), load (with moved folders), delete.
+- The status strip's size: drag the groove above it, or Settings → Interface → Status strip (75–250 %); the keys grow with it, and the window widens when they would not fit.
+- The text size of the menus, the settings window and the strip: Settings → Interface → Text (12–36 pt).
+
+### Changed
+
+- Notices appear in yellow on the TV picture's top border instead of the strip.
+- The speed (or *paused*) is in the window title: `freeTVC · <machine> · 100 %`.
+- The main menu's Snapshot submenu and the single `quick.tvcs` quick save are gone: F9 and Shift+F9 are game saves. A dropped `.tvcs` file still loads.
+- Settings → Machine keeps only the ROM folder; the machine and the cards are chosen in the strip's menus. Settings → Picture names the pictures by what they show (Black and white TV, CRT TV emulation, RGB monitor emulation, Sharp picture). The settings window's text is as large as the menus'.
+
+### Downloads
+
+| File | For |
+|---|---|
+| `freeTVC-1.3.0-windows-x64.zip` | 64-bit Windows: unpack anywhere and run `freetvc.exe`. The programs are not signed, so Windows SmartScreen may warn on the first start. |
+| `freeTVC-1.3.0-linux-x86_64.tar.gz` | 64-bit Linux with glibc 2.39 or newer (Ubuntu 24.04, Debian 13, Fedora 40 or newer): unpack and run `./freetvc`. |
+| `freeTVC-1.3.0-macos-arm64.zip` | macOS 13 or newer on Apple Silicon (M1 and later): unpack and run `freetvc`. |
+| `freeTVC-1.3.0-macos-x86_64.zip` | macOS 13 or newer on Intel Macs. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | checksums of the archives |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | the sources of the bundled ffmpeg (GPL) |
+
 ## 1.2.0 — 2026-11-07
 
 ### New

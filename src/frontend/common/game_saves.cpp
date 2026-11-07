@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
+#include <ctime>
 #include <cstdio>
 #include <system_error>
 
@@ -62,7 +64,11 @@ std::vector<std::string> list_games(const fs::path& root) {
 }
 
 std::vector<GameSave> list_saves(const fs::path& root, std::string_view game) {
-    std::vector<GameSave> saves;
+    struct Found {
+        GameSave save;
+        fs::file_time_type time;
+    };
+    std::vector<Found> found;
     std::error_code ec;
     for (fs::directory_iterator it(root / from_utf8(game_folder_name(game)), ec), end; !ec && it != end; it.increment(ec)) {
         const fs::path& file = it->path();
@@ -71,34 +77,56 @@ std::vector<GameSave> list_saves(const fs::path& root, std::string_view game) {
         }
         fs::path picture = fs::path(file).replace_extension(".png");
         std::error_code pec;
-        saves.push_back({file, fs::is_regular_file(picture, pec) ? picture : fs::path(), utf8(file.stem())});
+        const fs::file_time_type time = fs::last_write_time(file, pec);
+        // file_clock to system_clock through the two clocks' present
+        const auto system = std::chrono::system_clock::now() +
+                            std::chrono::duration_cast<std::chrono::system_clock::duration>(time - fs::file_time_type::clock::now());
+        const std::time_t seconds = std::chrono::system_clock::to_time_t(system);
+        std::tm local{};
+#ifdef _WIN32
+        localtime_s(&local, &seconds);
+#else
+        localtime_r(&seconds, &local);
+#endif
+        char when[32];
+        std::strftime(when, sizeof when, "%Y-%m-%d %H:%M:%S", &local);
+        found.push_back({{file, fs::is_regular_file(picture, pec) ? picture : fs::path(), utf8(file.stem()), when}, time});
     }
-    // The names start with the date and time, so the newest sorts last
-    std::sort(saves.begin(), saves.end(), [](const GameSave& a, const GameSave& b) { return a.name > b.name; });
+    std::sort(found.begin(), found.end(), [](const Found& a, const Found& b) { return a.time > b.time; });
+    std::vector<GameSave> saves;
+    for (Found& f : found) {
+        saves.push_back(std::move(f.save));
+    }
     return saves;
 }
 
-fs::path new_save_file(const fs::path& root, std::string_view game, std::time_t when, std::string& error) {
-    std::tm local{};
-#ifdef _WIN32
-    localtime_s(&local, &when);
-#else
-    localtime_r(&when, &local);
-#endif
-    char stamp[32];
-    std::strftime(stamp, sizeof stamp, "%Y-%m-%d %H-%M-%S", &local);
-    const fs::path dir = root / from_utf8(game_folder_name(game));
+fs::path new_save_file(const fs::path& root, std::string_view game, std::string& error) {
+    const std::string name = game_folder_name(game);
+    const fs::path dir = root / from_utf8(name);
     std::error_code ec;
     fs::create_directories(dir, ec);
     if (ec) {
         error = msg("cannot make %s: %s", utf8(dir).c_str(), ec.message().c_str());
         return {};
     }
-    fs::path file = dir / (std::string(stamp) + ".tvcs");
-    for (int n = 2; fs::exists(file, ec); ++n) {
-        file = dir / (std::string(stamp) + " (" + std::to_string(n) + ").tvcs");
+    // One past the highest "<name> NNN" there, so a deleted save never gives its number to a newer one
+    unsigned highest = 0;
+    for (fs::directory_iterator it(dir, ec), end; !ec && it != end; it.increment(ec)) {
+        const std::string stem = utf8(it->path().stem());
+        if (it->path().extension() == ".tvcs" && stem.size() > name.size() + 1 && stem.starts_with(name + " ")) {
+            const std::string digits = stem.substr(name.size() + 1);
+            if (digits.find_first_not_of("0123456789") == std::string::npos && digits.size() < 9) {
+                highest = std::max(highest, static_cast<unsigned>(std::stoul(digits)));
+            }
+        }
     }
-    return file;
+    char number[16];
+    std::snprintf(number, sizeof number, " %03u.tvcs", highest + 1);
+    return dir / from_utf8(name + number);
+}
+
+fs::path named_save_file(const fs::path& root, std::string_view game, std::string_view name) {
+    return root / from_utf8(game_folder_name(game)) / from_utf8(game_folder_name(name) + ".tvcs");
 }
 
 bool delete_save(const GameSave& save, std::string& error) {

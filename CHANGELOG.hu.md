@@ -2,6 +2,32 @@
 
 A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 
+## 1.3.0 — 2026-11-07
+
+### Új
+
+- **Játékmentések**: az F9 vagy a TVC gomb melletti új mentés gomb megállítja a gépet, elsötétíti a képet, és bekéri a mentés nevét. A mentés a felhasználói adatmappa `SaveState/<játék>/<név>.tvcs` fájljába kerül, a képernyő képével együtt; meglévő nevet csak rákérdezés után ír felül. A játék az utoljára indított program (vagy a lemez, a cartridge, a NanoSD vagy a pendrive mappája, a GameCard). A Shift+F9 a játék legutóbbi mentését tölti vissza; a gomb jobb klikkes menüje mutatja a játék mentéseit idővel, az összes játék mentéseit, és megnyitja a mappát. A mentés a teljes gépet tartalmazza: a gépet, a ROM-okat, a kártyákat a slotjukban, a hordozókat útvonallal, a NanoSD mappáját és a TVC256k++ pendrive-ját is, így másképp beállított gépen is visszajön. MCP `game_saves`: list, save, check (milyen fájlok kellenek a mentéshez, és megvannak-e), load (áthelyezett mappákkal), delete.
+- Az alsó sáv mérete: a fölötte lévő sötét vájat húzható, vagy Beállítások → Felület → Alsó sáv (75–250 %); a gombok vele nőnek, és ha nem férnének ki, az ablak szélesebb lesz.
+- A menük, a beállítások ablak és a sáv betűmérete: Beállítások → Felület → Betűk (12–36 pt).
+
+### Változott
+
+- Az üzenetek a sáv helyett a TV-kép felső keretén jelennek meg, sárgával.
+- A sebesség (vagy a *szünet*) az ablak címében látszik: `freeTVC · <gép> · 100 %`.
+- Kikerült a főmenü Pillanatkép almenüje és az egyetlen `quick.tvcs` gyorsmentés: az F9 és a Shift+F9 játékmentés. A behúzott `.tvcs` fájl továbbra is betöltődik.
+- A Beállítások → Gép részben csak a ROM-mappa maradt; a gépet és a kártyákat a sáv menüiben lehet választani. A Beállítások → Kép a képtípusokat a nevükön mutatja (Fekete-fehér TV, CRT TV emuláció, RGB monitor emuláció, Éles kép). A beállítások ablak betűi akkorák, mint a menüké.
+
+### Letöltések
+
+| Fájl | Mire |
+|---|---|
+| `freeTVC-1.3.0-windows-x64.zip` | 64 bites Windows: bárhová kicsomagolható, a `freetvc.exe` indítja. A program nincs aláírva, ezért a SmartScreen első indításkor figyelmeztethet. |
+| `freeTVC-1.3.0-linux-x86_64.tar.gz` | 64 bites Linux, glibc 2.39 vagy újabb (Ubuntu 24.04, Debian 13, Fedora 40 vagy újabb): kicsomagolás után `./freetvc`. |
+| `freeTVC-1.3.0-macos-arm64.zip` | macOS 13 vagy újabb, Apple Silicon (M1 és újabb): kicsomagolás után `freetvc`. |
+| `freeTVC-1.3.0-macos-x86_64.zip` | macOS 13 vagy újabb, Intel. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | az archívumok ellenőrzőösszegei |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | a mellékelt ffmpeg forrása (GPL) |
+
 ## 1.2.0 — 2026-11-07
 
 ### Új

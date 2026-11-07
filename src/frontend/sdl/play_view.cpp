@@ -27,6 +27,7 @@ constexpr const char* kKeysMenu = "##keys_menu";
 constexpr const char* kPrinterMenu = "##printer_menu";
 constexpr const char* kRecordMenu = "##record_menu";
 constexpr const char* kShotMenu = "##shot_menu";
+constexpr const char* kSaveMenu = "##save_menu";
 
 // Opens `id` above the strip at window x `anchor`; true while it is open (EndPopup is the caller's)
 bool begin_menu(const char* id, float anchor, float strip_top, PlayActions& actions, float pivot_x = 0.0f) {
@@ -67,15 +68,6 @@ void draw_main_menu(const PlayStatus& status, PlayActions& actions) {
     char item[160];
     std::snprintf(item, sizeof item, tr("Run %s again"), cassette.c_str());
     actions.run_again |= ImGui::MenuItem(cassette.empty() ? tr("Run again") : item, nullptr, false, !cassette.empty());
-
-    ImGui::Separator();
-    if (ImGui::BeginMenu(tr("Snapshot"))) {
-        actions.quick_save |= ImGui::MenuItem(tr("Quick save"), "F9");
-        actions.quick_load |= ImGui::MenuItem(tr("Quick load"), "Shift+F9", false, status.quick_snapshot);
-        actions.snapshot_save |= ImGui::MenuItem(tr("Save snapshot..."), nullptr, false, status.can_browse);
-        actions.snapshot_load |= ImGui::MenuItem(tr("Load snapshot..."), nullptr, false, status.can_browse);
-        ImGui::EndMenu();
-    }
 
     ImGui::Separator();
     actions.toggle_fullscreen |= ImGui::MenuItem(tr("Full screen"), "F11", status.fullscreen);
@@ -482,7 +474,7 @@ void draw_disk_menu(const PlayStatus& status, PlayActions& actions) {
 
 float strip_space(const Skin& skin, float scale) { return (skin.strip_height + skin.groove_width) * scale; }
 
-void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fonts, PlayActions& actions) {
+void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fonts, PlayActions& actions, bool notice_here) {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     const float scale = status.scale;
     const float strip_h = skin.strip_height * scale;
@@ -491,6 +483,27 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     ImGui::GetBackgroundDrawList()->AddRectFilled({viewport->Pos.x, strip_top - groove},
                                                   {viewport->Pos.x + viewport->Size.x, strip_top}, to_imgui(skin.groove));
 
+    // The groove above the strip is a handle: dragging it makes the strip and its keys taller or shorter
+    {
+        const float grab = std::max(6.0f * scale, groove * 3.0f);
+        ImGui::SetNextWindowPos({viewport->Pos.x, strip_top - groove - grab * 0.5f});
+        ImGui::SetNextWindowSize({viewport->Size.x, groove + grab});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::Begin("##strip_edge", nullptr,
+                     ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNav |
+                         ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing |
+                         ImGuiWindowFlags_NoScrollWithMouse);
+        ImGui::PopStyleVar(2);
+        ImGui::InvisibleButton("##strip_edge_grab", {viewport->Size.x, groove + grab});
+        if (ImGui::IsItemHovered() || ImGui::IsItemActive()) {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+        }
+        if (ImGui::IsItemActive()) {
+            actions.strip_drag = ImGui::GetIO().MouseDelta.y;
+        }
+        ImGui::End();
+    }
     ImGui::SetNextWindowPos({viewport->Pos.x, strip_top});
     ImGui::SetNextWindowSize({viewport->Size.x, strip_h});
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
@@ -537,6 +550,15 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     const float machine_x = ImGui::GetItemRectMin().x;
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("%s: %s", tr("Machine and ROMs"), preset.c_str());
+    }
+    // Game saves beside the machine: they hold the whole machine
+    actions.quick_save |= strip.game_save("##save", fonts.strong, ui_px * 0.8f, status.game_saved ? skin.role(Role::Notice).on_case : skin.label);
+    const float save_x = ImGui::GetItemRectMin().x;
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+        ImGui::OpenPopup(kSaveMenu);
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("Game save: click or F9 saves; right click opens the menu"));
     }
 
     strip.divider();
@@ -659,27 +681,9 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     draw->AddText(fonts.ui, ui_px, {plate_pos.x + pad * 2.0f, text_y}, to_imgui(skin.muted), "free");
     draw->AddText(fonts.strong, ui_px, {plate_pos.x + pad * 2.0f + free_size.x, text_y}, to_imgui(skin.label), "TVC");
     draw->AddLine({plate_pos.x, strip_top + strip_h * 0.25f}, {plate_pos.x, strip_top + strip_h * 0.75f}, to_imgui(skin.rib));
-    // The speed, left of the nameplate: a click pauses or resumes
-    char state[32];
-    if (status.paused) {
-        std::snprintf(state, sizeof state, "%s", tr("paused"));
-    } else if (status.speed_percent < 0.0) {
-        std::snprintf(state, sizeof state, "%s", tr("running"));
-    } else {
-        std::snprintf(state, sizeof state, "%3.0f %%", status.speed_percent);
-    }
-    const Colour state_colour = status.paused ? skin.role(Role::Notice).on_case : skin.label;
-    ImFont* const state_font = status.paused ? fonts.ui : fonts.data;
-    const float state_px = status.paused ? ui_px : data_px;
-    const float state_w = state_font->CalcTextSizeA(state_px, FLT_MAX, 0.0f, state).x + pad * 2.0f;
-    const float state_x = plate_pos.x - state_w;
-    actions.toggle_pause |= strip.button("##state", state, state_font, state_px, state_colour, true, state_x - ImGui::GetWindowPos().x);
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", status.paused ? tr("Paused: click or Pause to resume")
-                                              : tr("Speed in percent of a real TVC: click or Pause to pause"));
-    }
-    draw->AddLine({state_x, strip_top + strip_h * 0.25f}, {state_x, strip_top + strip_h * 0.75f}, to_imgui(skin.rib));
-    // REC and the camera left of the speed: a click acts, a right click opens their menu
+    // The speed and the paused state are in the window title (main.cpp)
+    const float state_x = plate_pos.x;
+    // REC and the camera left of the nameplate: a click acts, a right click opens their menu
     char time[16];
     const int seconds = static_cast<int>(status.record_seconds);
     std::snprintf(time, sizeof time, "%02d:%02d", seconds / 60, seconds % 60);
@@ -687,6 +691,7 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     const float time_w = status.recording ? fonts.data->CalcTextSizeA(data_px, FLT_MAX, 0.0f, time).x + pad * 2.0f : 0.0f;
     const float printer_w = 52.0f * strip_h / 45.0f;
     const float media_x = state_x - printer_w - key_w * 2.0f - time_w;
+    actions.strip_width = (last_x - viewport->Pos.x) + (viewport->Pos.x + viewport->Size.x - media_x) + pad * 2.0f;
     ImGui::SameLine(media_x - ImGui::GetWindowPos().x, 0.0f);
     ImGui::Dummy({0.0f, strip_h});
     // The printer: faded while none is on the port, in the notice colour while it prints
@@ -727,7 +732,7 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     }
     draw->AddLine({media_x, strip_top + strip_h * 0.25f}, {media_x, strip_top + strip_h * 0.75f}, to_imgui(skin.rib));
 
-    if (!status.notice.empty()) {
+    if (notice_here && !status.notice.empty()) {
         const double lifetime = status.notice_is_error ? kErrorSeconds : kNoticeSeconds;
         const float alpha = static_cast<float>(lifetime - status.notice_age);
         if (alpha > 0.0f) {
@@ -828,9 +833,88 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
         actions.open_screenshot_dir |= ImGui::MenuItem(tr("Open the screenshots folder"));
         ImGui::EndPopup();
     }
+    if (begin_menu(kSaveMenu, save_x, menu_top, actions)) {
+        ImGui::PushStyleVar(ImGuiStyleVar_SeparatorTextAlign, {0.5f, 0.5f});
+        ImGui::SeparatorText(tr("Game saves"));
+        actions.quick_load |= ImGui::MenuItem(tr("Last save"), "Shift+F9", false, status.quick_snapshot);
+        const auto save_items = [&](const GameSaveList& list) {
+            for (std::size_t i = 0; i < list.saves.size() && i < 15; ++i) {
+                const GameSaveItem& save = list.saves[i];
+                ImGui::PushID(save.file.c_str());
+                if (ImGui::MenuItem(save.name.c_str(), save.when.c_str())) {
+                    actions.load_save = save.file;
+                }
+                ImGui::PopID();
+            }
+        };
+        // The running game with its saves, then every game in a submenu
+        if (!status.game_saves.empty() && status.game_saves.front().game == status.game) {
+            ImGui::SeparatorText(status.game_saves.front().game.c_str());
+            save_items(status.game_saves.front());
+        }
+        ImGui::PopStyleVar();
+        ImGui::Separator();
+        if (ImGui::BeginMenu(tr("All games"), !status.game_saves.empty())) {
+            for (const GameSaveList& list : status.game_saves) {
+                if (ImGui::BeginMenu(list.game.c_str())) {
+                    save_items(list);
+                    ImGui::EndMenu();
+                }
+            }
+            ImGui::EndMenu();
+        }
+        actions.open_save_dir |= ImGui::MenuItem(tr("Saves folder"));
+        ImGui::EndPopup();
+    }
     ImGui::PopFont();
     ImGui::End();
 }
+
+namespace {
+
+// The latest notice in the notice colour, centred on the top border above the paper (framebuffer rows 23-47 of a
+// usual picture), fading out; cut with "..." when too wide, whole on hover
+void draw_border_notice(const PlayStatus& status, const Skin& skin, const SkinFonts& fonts, const ScreenRect& shown) {
+    if (status.notice.empty()) {
+        return;
+    }
+    const double lifetime = status.notice_is_error ? kErrorSeconds : kNoticeSeconds;
+    const float alpha = std::min(1.0f, static_cast<float>(lifetime - status.notice_age));
+    if (alpha <= 0.0f) {
+        return;
+    }
+    constexpr float kBorderTop = 23.0f;
+    constexpr float kPaperTop = 48.0f;
+    const ImVec2 top = shown.at(0.0f, kBorderTop);
+    const ImVec2 bottom = shown.at(0.0f, kPaperTop);
+    const float band = std::max(0.0f, bottom.y - std::max(top.y, shown.min.y));
+    const float px = std::clamp(band * 0.62f, 12.0f, skin.font_ui_size * status.scale * 1.4f);
+    const float left = shown.min.x + px;
+    const float right = shown.min.x + shown.size.x - px;
+    const std::string notice(status.notice);
+    std::string shown_text = notice;
+    const auto width = [&](const std::string& text) { return fonts.strong->CalcTextSizeA(px, FLT_MAX, 0.0f, text.c_str()).x; };
+    if (width(shown_text) > right - left) {
+        const float dots = width("...");
+        while (!shown_text.empty() && width(shown_text) + dots > right - left) {
+            while (shown_text.size() > 1 && (static_cast<unsigned char>(shown_text.back()) & 0xC0) == 0x80) {
+                shown_text.pop_back();  // a UTF-8 character goes whole
+            }
+            shown_text.pop_back();
+        }
+        shown_text += "...";
+    }
+    const float w = width(shown_text);
+    const float y = std::max(top.y, shown.min.y) + (band - px) * 0.5f;
+    const ImVec2 at{shown.min.x + (shown.size.x - w) * 0.5f, y};
+    ImDrawList* draw = ImGui::GetForegroundDrawList();
+    draw->AddText(fonts.strong, px, at, with_alpha(skin.role(Role::Notice).on_case, alpha), shown_text.c_str());
+    if (shown_text != notice && ImGui::IsMouseHoveringRect(at, {at.x + w, at.y + px}, false)) {
+        ImGui::SetTooltip("%s", notice.c_str());
+    }
+}
+
+}  // namespace
 
 PlayActions draw_play(const PlayStatus& status, const Skin& skin, const SkinFonts& fonts) {
     PlayActions actions;
@@ -856,8 +940,9 @@ PlayActions draw_play(const PlayStatus& status, const Skin& skin, const SkinFont
             const ImVec2 p0{shown.min.x + (shown.size.x - size.x) * 0.5f, shown.min.y + (shown.size.y - size.y) * 0.5f};
             background->AddImage(status.splash, p0, p0 + size, {0, 0}, {1, 1}, IM_COL32(255, 255, 255, static_cast<int>(a * 0.45f * 255.0f)));
         }
+        draw_border_notice(status, skin, fonts, shown);
     }
-    draw_strip(status, skin, fonts, actions);
+    draw_strip(status, skin, fonts, actions, status.screen == ImTextureID_Invalid);
     return actions;
 }
 

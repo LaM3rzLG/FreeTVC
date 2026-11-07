@@ -83,7 +83,7 @@ freetvc --preset 64k-1.2
 freetvc --autostart game.cas  # load and run a program
 ```
 
-The window opens at 1000 × 760 and can be resized; its title is `freeTVC · <preset>`. At start, at power on and when a card changes, a faint photo of the TVC 64k+ covers the TV picture until the machine draws (at least 2.5 s, at most 10 s); the machine runs underneath. Messages go to stderr in English: where the ROMs came from (`freetvc: ROMs from DIR (why)`), which renderer draws (`drawing with ...`), the servers' ports, and every notice the strip shows. After power-on the TVC shows its animated logo and waits for a key; any key leads to the BASIC prompt.
+The window opens at 1000 × 760 and can be resized; its title is `freeTVC · <preset> · <speed>`: the speed in percent of a real TVC, or *paused*. At start, at power on and when a card changes, a faint photo of the TVC 64k+ covers the TV picture until the machine draws (at least 2.5 s, at most 10 s); the machine runs underneath. Messages go to stderr in English: where the ROMs came from (`freetvc: ROMs from DIR (why)`), which renderer draws (`drawing with ...`), the servers' ports, and every notice the strip shows. After power-on the TVC shows its animated logo and waits for a key; any key leads to the BASIC prompt.
 
 ### Machine presets
 
@@ -110,6 +110,7 @@ One strip of drawn keys runs along the bottom of the window, in Play and in Benc
 | four slot ribs | lit for a slot with a card in it | opens the **Cards** menu |
 | cartridge and **Cart** | the cartridge's name while one is in (SD Dual for the SD Dual) | opens the **Cartridge** menu |
 | a small TVC | the machine; the tooltip names the preset | opens the **machine** menu |
+| a small screen with an arrow | the game save key; lit for a moment after a save | saves the game (as F9); a right click opens the **game saves** menu ([section 4.6](#46-game-saves-and-snapshots)) |
 | keyboard | the tooltip names the mapping | opens the **Keyboard** menu |
 | speaker | crossed out in red while muted or without a sound device | mutes or unmutes |
 | 5.25" floppy | faded without the disk card; in the notice colour with the drive letter while a drive works | opens the **Disk** menu; the tooltip lists the drives |
@@ -117,12 +118,14 @@ One strip of drawn keys runs along the bottom of the window, in Play and in Benc
 | ▶ and the counter | ▶ in the notice colour while playing; grey without a tape | plays the tape |
 | ■ | lit while the tape is playing or recording | stops it |
 | ◀◀ | lit with a tape in | rewinds it |
-| notice | the latest message: 6 s, errors 15 s; a long one is cut with "..." and shows whole on hover | |
 | printer | faded without a printer; in the notice colour while it prints | opens the **Printer** menu |
 | REC | a blinking dot and the time while recording | starts or stops a video; a right click opens its menu |
 | camera | | takes a screenshot; a right click opens its menu |
-| speed | `paused`, `running`, or the speed in percent of a real TVC | pauses or resumes |
 | **free**TVC | | opens the **main** menu |
+
+**Notices** (what was loaded, saved, an error) appear in yellow on the top border of the TV picture, centred: 6 s, errors 15 s; a long one is cut with "..." and shows whole on hover. In Bench they stay in the strip.
+
+**The strip's size**: drag the dark groove above the strip up or down (the pointer becomes ↕), or choose it in Settings → Interface → Status strip (75–250 %; `strip_size`). The keys grow with it; when they would not fit, the window becomes as wide as they need.
 
 A menu opens upward from its key. Clicking another key while a menu is open switches to that menu; Escape or a click elsewhere closes it. While a menu is open the keys go to the menu and every held TVC key is released.
 
@@ -133,7 +136,6 @@ A menu opens upward from its key. Clicking another key while a menu is open swit
 | Load program... | CAS, WAV, TTP, DSK, IMG; see [section 4](#4-loading-software). Cartridges go in from the Cart key. |
 | Recent programs ▸ | the last ten programs loaded, newest first (kept in `freetvc.ini`, key `recent`); the tooltip shows the path |
 | Run NAME again | autostarts the attached cassette again |
-| Snapshot ▸ | Quick save (F9), Quick load (Shift+F9), Save snapshot..., Load snapshot... |
 | Full screen (F11) | |
 | Skin ▸ | every skin found, Reload skin |
 | Language ▸ | English and every installed translation, under its own name |
@@ -164,8 +166,8 @@ These host keys never reach the TVC:
 
 | Key | Play | Bench |
 |---|---|---|
-| F9 | quick save to `quick.tvcs` in the user data folder | checkpoint at the Listing's cursor |
-| Shift+F9 | quick load of `quick.tvcs` | |
+| F9 | game save: asks for its name ([section 4.6](#46-game-saves-and-snapshots)) | checkpoint at the Listing's cursor |
+| Shift+F9 | loads the running game's newest save | |
 | F10 (held) | rewind: the machine stands still and steps back one kept second every 200 ms | the same |
 | F11 | full screen on or off | the same |
 | F12 | Bench | back to Play |
@@ -276,14 +278,20 @@ Recording (`--tape-record FILE`, the cassette's menu → Record to WAV...) write
 
 Disks are raw 360 or 720 KiB images (`.dsk`, `.img`) in drives A: to D: of the HBF disk card. `--disk [A-D:]FILE` (repeatable; without a letter the next drive) or the floppy's menu inserts one; a disk going in while the card is out puts the card in and powers on. Written sectors go back to the file; a read-only file is a write-protected disk. With the card in, BASIC's `LOAD` and `SAVE` use drive A:, not the cassette; that is why the card is off by default. A CAS or tape autostart with the card in gives the cassette back for that load. See [section 5](#5-expansion-cards) for the card's ROMs.
 
-### 4.6 Snapshots
+### 4.6 Game saves and snapshots
 
-A snapshot (`.tvcs`) holds the whole machine: CPU, RAM, video RAM, video and sound state, cards and cartridge, and the tape and cassette by path. It restores the exact moment.
+A snapshot (`.tvcs`) holds the whole machine: CPU, RAM, video RAM, video and sound state, the cards in their slots with their EPROMs and state, the cartridge, and the media by path: tape, cassette, disks, SD card images, the NanoSD's folder and the TVC256k++'s pendrive folder. It restores the exact moment. The contents of disks, SD cards and folders are not copied into it.
 
-| Way | |
+**Game saves** keep snapshots per program, so a game can be continued later:
+
+- **Saving**: F9, or a click on the game save key (the small screen with an arrow, beside the TVC key). The machine stops, the picture dims, and a window in the middle asks for the save's name; the running game's name is in the field. **Save** (Enter) writes it, **Cancel** (Escape) does not; the machine then runs on. When a save of that name exists, it asks whether to replace it.
+- **Where**: `SaveState/<game>/<name>.tvcs` in the user data folder (`save_dir` in `freetvc.ini` moves it), with a PNG of the screen beside it. The game is the program started last (autostart of a `.cas`, tape or disk, a disk inserted from the floppy menu, a cartridge), else the NanoSD's or the pendrive's folder while that card is in, else `GameCard` with the GameCard in, else `TVC`. A card going in or out, a power cycle or another preset forgets the program.
+- **Loading**: Shift+F9 loads the running game's newest save. A right click on the game save key opens the menu: **Last save** (Shift+F9), the running game's saves with their times (newest first), **Game saves ▸** with every game and its saves, and **Saves folder**, which opens the folder.
+- Loading follows the save's board, ROM set and cards; media that are gone are left out with a message.
+
+| Other ways | |
 |---|---|
-| F9 / Shift+F9 (Play), main menu → Snapshot ▸ Quick save / Quick load | `quick.tvcs` in the user data folder |
-| main menu → Snapshot ▸ Save snapshot... / Load snapshot..., a dropped file | any file |
+| a dropped `.tvcs` file | any snapshot file |
 | `--snapshot FILE` | start from it (GUI and headless) |
 | `freetvc-headless --save-snapshot FILE` | write one at the end of the run |
 | monitor `dump` / `undump`, MCP `snapshot`, DZRP READ/WRITE_STATE | |
@@ -332,15 +340,15 @@ Notes:
 
 ### 6.1 The settings window
 
-Main menu → **Settings...** opens a sheet at the right of the window (below Bench's run bar in Bench); the picture or Bench's panels make room for it, so a change shows at once. Escape or **Close** closes it; keys stay out of the TVC while it has them. A value decided on the command line shows "Set by --x for this run; a change here is saved".
+Main menu → **Settings...** opens a sheet at the right of the window, its text as large as the strip's menus, (below Bench's run bar in Bench); the picture or Bench's panels make room for it, so a change shows at once. Escape or **Close** closes it; keys stay out of the TVC while it has them. A value decided on the command line shows "Set by --x for this run; a change here is saved".
 
 | Section | Contents |
 |---|---|
-| Machine | presets; the ROM folder in use, Choose folder... (writes `rom_dir`; powers on only when the preset's ROMs differ), Default places (removes `rom_dir`), Download ROMs; the disk card and its EPROM (VT-DOS 1.1, VT-DOS 1.2, an image file); the other cards and the SID chip |
-| Picture | the picture files and their sliders; the TVC's rear switch (Colour, Black and white); Full screen (F11), Start in full screen, Full raster (debug); what draws, and "Use SDL's renderer" from the next start |
+| Machine | the ROM folder in use, Choose folder... (writes `rom_dir`; powers on only when the preset's ROMs differ), Default places (removes `rom_dir`), Download ROMs. The machine and the cards are chosen in the strip's TVC and Cards menus |
+| Picture | the pictures (Black and white TV, CRT TV emulation, RGB monitor emulation, Sharp picture) and their sliders; the TVC's rear switch (Colour, Black and white); Full screen (F11), Start in full screen, Full raster (debug); what draws, and "Use SDL's renderer" from the next start |
 | Sound | Mute, Volume, Sound output (from the next start) |
 | Keyboard and joysticks | Symbolic or Positional, the key layout, Edit the layout..., the joystick keys |
-| Interface | Language, Skin, Reload skin, the settings file's path and whether it is the portable one |
+| Interface | Language; Text: the size of the menus', this window's and the strip's text (a list, 12–36 pt; `ui_font_size`); Status strip: its height with its keys (75–250 %; `strip_size`); Skin, Reload skin; the settings file's path and whether it is the portable one |
 | Remote | the text monitor, the MCP server (HTTP) with its token and **Copy**, Allow monitor commands over MCP, DZRP for DeZog with TVC banks, the GDB stub: each switched on or off and given a port at once; the port each listens on or why it could not start |
 
 ### 6.2 freetvc.ini
@@ -361,6 +369,9 @@ Main menu → **Settings...** opens a sheet at the right of the window (below Be
 | `language` | `en` or a translation's code (`hu`) | the OS's preferred language | written only after a choice in the menu or the settings window |
 | `audio` | flag | yes | open the sound device at start |
 | `volume` | 0–100 | 100 | |
+| `ui_font_size` | 12–36 | the skin's (22 with `bronze`) | the menus' and the settings window's text in points; the rest of the GUI in proportion |
+| `strip_size` | 75–250 | 100 | the status strip's height and keys in percent |
+| `save_dir` | a folder | `SaveState` in the user data folder | where game saves go |
 | `fullscreen` | flag | no | start in full screen |
 | `full_raster` | flag | no | read only, never written |
 | `renderer` | `gl`, `sdl` | `gl` | |
@@ -726,7 +737,7 @@ Exit codes: 0 normal exit; 1 an error at start (no ROMs and the download decline
 | next to the program (optional) | `freetvc.ini`, `layout.ini` | portable mode |
 | user data folder | `freetvc.ini`, `layout.ini` | settings, Bench layout and watch list |
 | user data folder | `roms/` | downloaded ROMs, with `ROMS-README.txt` |
-| user data folder | `quick.tvcs` | the quick snapshot |
+| user data folder | `SaveState/` | game saves, one folder per program ([section 4.6](#46-game-saves-and-snapshots)) |
 | user data folder | `screenshots/` | GUI screenshots |
 | user data folder | `prompt/` | saved BASIC-prompt states that make autostarts fast |
 | user data folder | `skins/`, `pictures/`, `keymaps/` | user skins, and the copies the settings window and the keyboard editor write (they shadow the shipped files) |
