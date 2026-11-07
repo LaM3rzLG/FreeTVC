@@ -11,7 +11,7 @@ Közös (Windows + Mac), nem platformfüggő fejlesztések. A Mac-es fordítás/
 - 3. billentyűzetkiosztás: **KÉSŐBBRE** (2026-11-02). A rajz már megvan (`keyboard_editor.cpp`, a TVC-gombok alatt a
   gép-gombok); hiányzik: csak megnézős mód menüből/gyorsbillentyűvel (~1-2 óra), Mac-es alapkiosztás `mac.keys`
   (a MacBookon nincs jobb Ctrl = FIRE és számbillentyűzet = 2. joystick; ~1 óra), esetleg gamepad (~1 óra).
-- 4. About + „Bronze” sötét betű: **ELVETVE** (a felhasználó döntése, 2026-11-02)
+- 4. About + „Bronze” sötét betű: **KÉSZ** (a szöveg a kinézet világos színeivel; az #1 issue-ban jelezve 2026-11-07)
 
 ## Ep128web (kks2003.github.io/Ep128web) — mit tud, amit mi nem (felmérés 2026-11-06)
 Böngészős ep128emu (Varga István, GPL-2, WebAssembly) Enterprise + TVC géppel. A tények angolul:
