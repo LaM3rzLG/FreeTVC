@@ -83,7 +83,7 @@ freetvc --preset 64k-1.2
 freetvc --autostart game.cas  # load and run a program
 ```
 
-The window opens at 1000 × 760 and can be resized; its title is `freeTVC · <preset>`. Messages go to stderr in English: where the ROMs came from (`freetvc: ROMs from DIR (why)`), which renderer draws (`drawing with ...`), the servers' ports, and every notice the strip shows. After power-on the TVC shows its animated logo and waits for a key; any key leads to the BASIC prompt.
+The window opens at 1000 × 760 and can be resized; its title is `freeTVC · <preset>`. At start, at power on and when a card changes, a faint photo of the TVC 64k+ covers the TV picture until the machine draws (at least 2.5 s, at most 10 s); the machine runs underneath. Messages go to stderr in English: where the ROMs came from (`freetvc: ROMs from DIR (why)`), which renderer draws (`drawing with ...`), the servers' ports, and every notice the strip shows. After power-on the TVC shows its animated logo and waits for a key; any key leads to the BASIC prompt.
 
 ### Machine presets
 
@@ -95,52 +95,68 @@ The window opens at 1000 × 760 and can be resized; its title is `freeTVC · <pr
 | `64k+-2.1` | TVC 64k+ (64 KiB video RAM) | `sys21.bin` + `ext2x.bin` | BASIC 2.1, 42155 bytes free |
 | `64k+-2.2` (default) | TVC 64k+ | `sys22.bin` + `ext2x.bin` | BASIC 2.2, 42155 bytes free |
 
-Switching the preset (machine menu or Settings → Machine) powers the machine on with the new board and ROMs; the cartridge and the cards stay in, except the TVC256k++, which the 32k + HBM board cannot hold. The board details are in [tvc-hardware.md](hardware/tvc-hardware.md).
+Switching the preset (the machine key's menu or Settings → Machine) powers the machine on with the new board and ROMs; the cartridge and the cards stay in, except the TVC256k++, which the 32k + HBM board cannot hold. The board details are in [tvc-hardware.md](hardware/tvc-hardware.md).
 
 ### The screen
 
-Play mode shows the TVC's picture, centred, at the PAL aspect. By default it shows the **TV area**: 650 × 287 of the 800 × 314 framebuffer pixels, what a PAL set shows. **Full raster (debug)** (main menu → Screen, Settings → Picture, or `--full-raster`) shows every pixel of the beam path, sync and blanking included, with the TV area outlined. How the picture is drawn (sharp pixels or a TV model) is chosen with the picture files ([section 6.3](#63-picture)).
+Play mode shows the TVC's picture, centred, at the PAL aspect. By default it shows the **TV area**: 650 × 287 of the 800 × 314 framebuffer pixels, what a PAL set shows. **Full raster (debug)** (Settings → Picture, or `--full-raster`) shows every pixel of the beam path, sync and blanking included, with the TV area outlined. How the picture is drawn (sharp pixels or a TV model) is chosen with the picture files ([section 6.3](#63-picture)).
 
 ### The status strip
 
-One strip runs along the bottom of the window, in Play and in Bench. Left to right:
+One strip of drawn keys runs along the bottom of the window, in Play and in Bench. A key with something in it is lit; an empty one is faded. Left to right:
 
-| Item | Shows | Click |
+| Key | Shows | Click |
 |---|---|---|
 | four slot ribs | lit for a slot with a card in it | opens the **Cards** menu |
-| **free**TVC nameplate | | opens the **main** menu |
-| preset name | the machine | opens the **machine** menu |
-| state | `paused`, `running`, or the speed in percent of a real TVC | pauses or resumes |
-| `symbolic keys` / `positional keys` | the keyboard mapping | switches it |
-| `sound` / `muted` / `no sound` | the sound output | mutes or unmutes |
-| play/stop key | a triangle (play) or a square (stop) | stops a moving tape, plays an inserted one, or with no tape opens a file dialog and plays the chosen tape |
-| `no tape` / `tape play 0:42` | the tape deck: state and counter, in the notice colour while the tape moves | opens the **Tape** menu |
-| `disk` / `disk A:` (only while the disk card is in) | the drive light: the drive in use, in the notice colour | opens the **Disk** menu; the tooltip lists the drives |
-| notice (right-aligned) | the latest message: 6 s, errors 15 s; a long one is cut with "..." and shows whole on hover | |
+| cartridge and **Cart** | the cartridge's name while one is in (SD Dual for the SD Dual) | opens the **Cartridge** menu |
+| a small TVC | the machine; the tooltip names the preset | opens the **machine** menu |
+| keyboard | the tooltip names the mapping | opens the **Keyboard** menu |
+| speaker | crossed out in red while muted or without a sound device | mutes or unmutes |
+| 5.25" floppy | faded without the disk card; in the notice colour with the drive letter while a drive works | opens the **Disk** menu; the tooltip lists the drives |
+| cassette | faded without a tape; while the tape moves, the signal under the head as a small wave | opens the **Tape** menu |
+| ▶ and the counter | ▶ in the notice colour while playing; grey without a tape | plays the tape |
+| ■ | lit while the tape is playing or recording | stops it |
+| ◀◀ | lit with a tape in | rewinds it |
+| notice | the latest message: 6 s, errors 15 s; a long one is cut with "..." and shows whole on hover | |
+| printer | faded without a printer; in the notice colour while it prints | opens the **Printer** menu |
+| REC | a blinking dot and the time while recording | starts or stops a video; a right click opens its menu |
+| camera | | takes a screenshot; a right click opens its menu |
+| speed | `paused`, `running`, or the speed in percent of a real TVC | pauses or resumes |
+| **free**TVC | | opens the **main** menu |
 
-A menu opens upward from its item. Clicking another strip item while a menu is open switches to that menu; Escape or a click elsewhere closes it. While a menu is open the keys go to the menu and every held TVC key is released.
+A menu opens upward from its key. Clicking another key while a menu is open switches to that menu; Escape or a click elsewhere closes it. While a menu is open the keys go to the menu and every held TVC key is released.
 
-**Main menu**
+**Main menu** (the **free**TVC nameplate)
 
-| Section | Items |
+| Item | |
 |---|---|
-| Program | Load program... (CAS, WAV, TTP, CRT, ROM, DSK, IMG; see [section 4](#4-loading-software)), Run NAME again, Eject NAME (the attached cassette) |
-| Snapshot | Quick save (F9), Quick load (Shift+F9), Save snapshot..., Load snapshot... |
-| Keyboard | Symbolic, Positional |
-| Skin | every skin found, Reload skin |
-| Language | English and every installed translation, under its own name |
-| Screen | Full raster (debug), Screenshot, Full screen (F11) |
-| | Settings..., Bench (F12), Quit |
+| Load program... | CAS, WAV, TTP, DSK, IMG; see [section 4](#4-loading-software). Cartridges go in from the Cart key. |
+| Recent programs ▸ | the last ten programs loaded, newest first (kept in `freetvc.ini`, key `recent`); the tooltip shows the path |
+| Run NAME again | autostarts the attached cassette again |
+| Snapshot ▸ | Quick save (F9), Quick load (Shift+F9), Save snapshot..., Load snapshot... |
+| Full screen (F11) | |
+| Skin ▸ | every skin found, Reload skin |
+| Language ▸ | English and every installed translation, under its own name |
+| Download ROMs | see [section 2](#2-getting-the-roms) |
+| Settings..., Bench (F12), About freeTVC..., Quit | |
 
-**Screenshot** saves a PNG of the area in view, one pixel per framebuffer pixel (650 × 287 or 800 × 314), as `screenshots/freetvc-<preset>-YYYYMMDD-HHMMSS.png` in the user data folder; the strip shows the path.
+**Machine menu** (the TVC key): under *Version* the four factory machines, TVC 32K, 64K and 64K+ with their BASIC (the 32K + HBM board is the *HBM 32 KiB RAM card* at the bottom of the Cards menu); Pause (the Pause key), Reset (the reset button: memory is kept), Power cycle (RAM cleared).
 
-**Machine menu**: the five presets, Download ROMs, Pause (the Pause key), Reset (the reset button: memory is kept), Power cycle (RAM cleared).
+**Cards menu** (the slot ribs): *Slot 0* to *Slot 3*, each with the card in it. A slot opens the list of cards: Empty, HBF disk card (slot 0 only), GameCard, Multichip sound card, TVC256k++, 2dfx graphics card, NanoSD, Serial card. Choosing one puts it in that slot (taking out what was there, moving it from another slot) and powers the machine on. The NanoSD and the TVC256k++ open a submenu instead, so their storage goes in with them: *SD card folder...*, or *Pendrive folder...* and *Flash drive image...*, or *Insert it empty*. The card in a slot opens its own settings: the HBF card its disk system (VT-DOS 1.1, 1.2), the TVC256k++ its USB port and flash drive, the NanoSD its SD card, the serial card its cable and files.
 
-**Cards menu**: the expansion cards ([section 5](#5-expansion-cards)), the printer port, and the cartridge port: Insert cartridge..., Remove NAME, New MultiCart image..., SD Dual cartridge with its two card sockets, New SD card image....
+**Cartridge menu** (Cart): Insert cartridge..., Remove NAME, New MultiCart image..., SD Dual cartridge with its two card sockets, New SD card image....
 
-**Tape menu**: Insert tape..., Run the tape, Play, Stop, Rewind, Record to WAV..., Eject tape, Fast tape.
+**Keyboard menu**: Symbolic, Positional, and Key layout ▸ with the layouts found and Edit the layout....
 
-**Disk menu**: for each drive A: to D: "insert disk..." or "eject NAME", and Fast disk.
+**Disk menu** (the floppy): *Load a program directly...*: a disk image goes into the first empty drive (A: when all are full; the disk card goes in if needed) and its first program starts; then for each drive A: to D: "insert disk..." or "eject NAME", and Fast disk.
+
+**Tape menu** (the cassette): Insert tape..., Run the tape, Play, Stop, Rewind, Record to WAV..., Eject tape, Fast tape.
+
+**Printer menu**: Printer to a file..., No printer ([section 5](#5-expansion-cards)).
+
+**REC** saves an MP4 ([section 4.8](#48-video-recording)) named after the program and the time (`NAME YYYY-MM-DD hh-mm-ss.mp4`) in the Videos folder; its menu starts and stops, picks the folder (`video_dir`) and opens it. While recording, a red dot blinks in the picture's top right corner too (on the window only).
+
+**Camera** saves a PNG of the TV area at the TV's 4:3 aspect (1534 × 1148) on the desktop, named like the video; its menu picks the folder (`screenshot_dir`) and opens it.
 
 ### Reserved keys
 
@@ -161,7 +177,7 @@ F1–F8 go to the TVC. Bench adds F4–F8 and Shift+F6/F7 while the Screen panel
 
 The TVC has a Hungarian keyboard: QWERTZ, with the letters Ö Ü Ó Ő Ú Ű É Á Í, and keys a PC lacks (@ ; < \ [ ] * ^ as separate keys), plus INS, ESC, DEL, RETURN, LOCK, SHIFT, CTRL and ALT. Its cursor keys are the built-in joystick 1. STOP is CTRL+ESC. The layout is drawn in [tvc-hardware.md](hardware/tvc-hardware.md) §7.
 
-Two **mappings** decide how host keys become TVC keys (`--keymap symbolic|positional`, `keymap` in `freetvc.ini`, the strip item, main menu → Keyboard, Settings → Keyboard and joysticks):
+Two **mappings** decide how host keys become TVC keys (`--keymap symbolic|positional`, `keymap` in `freetvc.ini`, the keyboard key's menu, Settings → Keyboard and joysticks):
 
 - **Symbolic** (default): a host key that types a character types the same character on the TVC, pressing the TVC's SHIFT as the TVC needs it. It follows the host's own keyboard layout. Letters keep the user's SHIFT, so the TVC's LOCK still works. Characters the TVC lacks are ignored. Keys that type no character (Enter, Esc, arrows, F1–F8, Ctrl, Alt, the keypad's joystick keys...) follow the key layout below; AltGr only composes characters.
 - **Positional**: every host key presses the TVC key the key layout gives it, by position. Use it for games.
@@ -191,15 +207,15 @@ On a gamepad the d-pad or the left stick (past half deflection) gives the direct
 
 ### Mouse
 
-The TVC256k++ card has a USB port that can hold a mouse (Cards menu → TVC256k++ → Mouse, `--card256-usb mouse`). Then a left click on the picture (in Play, no menu open) captures the host mouse and sends its motion and buttons to the card once a frame; **Ctrl+Alt** or leaving the window releases it. Keys still reach the TVC while it is captured.
+The TVC256k++ card has a USB port that can hold a mouse (Cards → the TVC256k++'s slot → TVC256k++ → Mouse, `--card256-usb mouse`). Then a left click on the picture (in Play, no menu open) captures the host mouse and sends its motion and buttons to the card once a frame; **Ctrl+Alt** or leaving the window releases it. Keys still reach the TVC while it is captured.
 
 ### Sound
 
-The TVC's sound and every sound card are mixed into one 48 kHz stream to the default sound device. With sound on, the emulation keeps time by the sound device; with no device (or `--no-audio`) it keeps time by the clock. The strip item mutes; Settings → Sound sets the volume (0–100 %, `volume`) and whether sound is opened at the next start (`audio`).
+The TVC's sound and every sound card are mixed into one 48 kHz stream to the default sound device. With sound on, the emulation keeps time by the sound device; with no device (or `--no-audio`) it keeps time by the clock. The speaker key mutes; Settings → Sound sets the volume (0–100 %, `volume`) and whether sound is opened at the next start (`audio`).
 
 ### Full screen and speed
 
-F11 or main menu → Screen → Full screen switches full screen; `fullscreen = yes` starts in it. The machine runs at real speed, except: an autostart runs at full speed with the screen blanked until the program starts; **Fast tape** (Tape menu, on by default) runs at full speed while the tape moves; **Fast disk** (Disk menu, on by default) runs at full speed while a drive works (the machine's own timing stays exact).
+F11 or main menu → Full screen switches full screen; `fullscreen = yes` starts in it. The machine runs at real speed, except: an autostart runs at full speed with the screen blanked until the program starts; **Fast tape** (the cassette's menu, on by default) runs at full speed while the tape moves; **Fast disk** (the floppy's menu, on by default) runs at full speed while a drive works (the machine's own timing stays exact).
 
 ## 4. Loading software
 
@@ -207,7 +223,7 @@ F11 or main menu → Screen → Full screen switches full screen; `fullscreen = 
 
 A CAS file is the TVC's cassette file format ([file-formats.md](hardware/file-formats.md)). freeTVC serves BASIC's `LOAD`, `SAVE` and the OS's cassette calls directly from files, without a tape signal (the **host cassette**):
 
-- `--cas FILE` (or main menu → Program, or a drop with Ctrl held) attaches a file: `LOAD` with an empty name, or with its own name, reads it. Its folder is readable too (read-only), so a program in several parts finds its next file.
+- `--cas FILE` (or a drop with Ctrl held) attaches a file: `LOAD` with an empty name, or with its own name, reads it. Its folder is readable too (read-only), so a program in several parts finds its next file.
 - `--cas-dir DIR` makes a folder the cassette, read and write: `LOAD "NAME"` reads `DIR/NAME.CAS` (case ignored), `SAVE "NAME"` writes it. Without a writable folder, `SAVE` fails with a protection error and the strip says why.
 - A name found nowhere returns "end of tape" at once (a real tape would search until STOP). The ROM's "Searching / Found" messages are not printed; the strip shows the file instead.
 
@@ -219,9 +235,9 @@ A CAS file is the TVC's cassette file format ([file-formats.md](hardware/file-fo
 |---|---|
 | `.cas` | through the host cassette |
 | `.wav`, `.ttp` | through the tape deck: `LOAD`, PLAY pressed |
-| `.dsk`, `.img` (up to 720 KiB) | into drive A: with the disk card, then `LOAD` of the first `.CAS` file of its root |
+| `.dsk`, `.img` (up to 720 KiB) | into the first empty drive (A: when all are full) with the disk card, then `LOAD` of the first `.CAS` file of its root from that drive |
 | `.img` larger than 720 KiB (GUI open or drop) | into the SD Dual's microSD socket, with the cartridge |
-| `.crt`, `.rom`, `.bin` (GUI open or drop) | inserted as a cartridge, machine powered on |
+| `.crt`, `.rom`, `.bin` (a drop; *Load program...* refuses them) | inserted as a cartridge, machine powered on |
 | `.tvcs`, `.tvs` (GUI open or drop) | loaded as a snapshot |
 
 With Ctrl held, a dropped file is only attached or inserted, not run. `--autostart-tape FILE` autostarts through the tape deck, a `.cas` included.
@@ -236,11 +252,11 @@ The deck plays a real tape signal to the ROM's own tape routines, for programs w
 | `.ttp` | the ROM's byte stream (`TTP0` files) |
 | `.cas` played as a tape | encoded with the standard cassette timing |
 
-Recording (`--tape-record FILE`, Tape menu → Record to WAV...) writes a 44 100 Hz 16-bit mono WAV at stop, eject or exit. `--tape FILE` puts a tape in and presses PLAY. While a tape is in, the host cassette serves nothing; inserting a tape detaches the cassette's file, and attaching a `.cas` ejects the tape. **Run the tape** types `LOAD` and plays.
+Recording (`--tape-record FILE`, the cassette's menu → Record to WAV...) writes a 44 100 Hz 16-bit mono WAV at stop, eject or exit. `--tape FILE` puts a tape in and presses PLAY. While a tape is in, the host cassette serves nothing; inserting a tape detaches the cassette's file, and attaching a `.cas` ejects the tape. **Run the tape** types `LOAD` and plays.
 
 ### 4.4 Cartridges
 
-`--cart FILE`, Cards menu → Insert cartridge..., or a dropped `.crt`, `.rom` or `.bin`. Inserting or removing a cartridge powers the machine on; a preset change keeps it.
+`--cart FILE`, Cart → Insert cartridge..., or a dropped `.crt`, `.rom` or `.bin`. Inserting or removing a cartridge powers the machine on; a preset change keeps it.
 
 | Type | Image | Chosen when |
 |---|---|---|
@@ -252,13 +268,13 @@ Recording (`--tape-record FILE`, Tape menu → Record to WAV...) writes a 44 100
 
 `--cart-type TYPE` overrides the rules. Bytes past the image read FFh.
 
-**MultiCart images**: Cards menu → New MultiCart image... asks for `.cas` programs and `.crt` cartridges (in menu order), then for the image's name; the image goes in with the English firmware. `freetvc-headless --multicart-build OUT --multicart-add FILE ... [--multicart-lang en|hu|es]` builds one without inserting it and lists its contents. Both need `multicart-<lang>.rom`.
+**MultiCart images**: Cart → New MultiCart image... asks for `.cas` programs and `.crt` cartridges (in menu order), then for the image's name; the image goes in with the English firmware. `freetvc-headless --multicart-build OUT --multicart-add FILE ... [--multicart-lang en|hu|es]` builds one without inserting it and lists its contents. Both need `multicart-<lang>.rom`.
 
 **VT-DOS**: the VT-DOS cartridges `vtdos11.rom` and `vtdos12.rom` go in like any cartridge, together with the disk card.
 
 ### 4.5 Disks and the disk card
 
-Disks are raw 360 or 720 KiB images (`.dsk`, `.img`) in drives A: to D: of the HBF disk card. `--disk [A-D:]FILE` (repeatable; without a letter the next drive) or the Disk menu inserts one; a disk going in while the card is out puts the card in and powers on. Written sectors go back to the file; a read-only file is a write-protected disk. With the card in, BASIC's `LOAD` and `SAVE` use drive A:, not the cassette; that is why the card is off by default. A CAS or tape autostart with the card in gives the cassette back for that load. See [section 5](#5-expansion-cards) for the card's ROMs.
+Disks are raw 360 or 720 KiB images (`.dsk`, `.img`) in drives A: to D: of the HBF disk card. `--disk [A-D:]FILE` (repeatable; without a letter the next drive) or the floppy's menu inserts one; a disk going in while the card is out puts the card in and powers on. Written sectors go back to the file; a read-only file is a write-protected disk. With the card in, BASIC's `LOAD` and `SAVE` use drive A:, not the cassette; that is why the card is off by default. A CAS or tape autostart with the card in gives the cassette back for that load. See [section 5](#5-expansion-cards) for the card's ROMs.
 
 ### 4.6 Snapshots
 
@@ -266,8 +282,8 @@ A snapshot (`.tvcs`) holds the whole machine: CPU, RAM, video RAM, video and sou
 
 | Way | |
 |---|---|
-| F9 / Shift+F9 (Play), main menu → Snapshot → Quick save / Quick load | `quick.tvcs` in the user data folder |
-| main menu → Save snapshot... / Load snapshot..., a dropped file | any file |
+| F9 / Shift+F9 (Play), main menu → Snapshot ▸ Quick save / Quick load | `quick.tvcs` in the user data folder |
+| main menu → Snapshot ▸ Save snapshot... / Load snapshot..., a dropped file | any file |
 | `--snapshot FILE` | start from it (GUI and headless) |
 | `freetvc-headless --save-snapshot FILE` | write one at the end of the run |
 | monitor `dump` / `undump`, MCP `snapshot`, DZRP READ/WRITE_STATE | |
@@ -284,23 +300,23 @@ The machine's state is kept once a second of machine time for the last 60 s. Hol
 
 The TV picture (the 650 × 287 TV area at the PAL aspect: every line 4 times, the pixels area-averaged across to 1534 × 1148, 4:3, at the TVC's 49.76 frames per second) and the sound go into an MP4 file (H.264 and AAC) that plays in browsers, QuickTime, VLC and on video sites. Only the running machine is recorded: no Bench panels, menus or picture effects. freeTVC hands the frames to an `ffmpeg` program: the release packages carry a small one in `ffmpeg/` next to freeTVC (GPL, with its sources named in `ffmpeg/README.txt`); without that folder freeTVC looks for an installed ffmpeg (on macOS also in Homebrew's folders), then on `PATH`. While recording, the frames go to `FILE.video.mp4` and the sound to `FILE.audio.raw` beside the output; at the end ffmpeg joins them into `FILE` and both are removed. If ffmpeg fails, its last messages are reported and its log stays in `FILE.ffmpeg.log`.
 
-`freetvc-headless --video FILE` records the whole run; after `--autostart` it starts when the program runs.
+In the GUI the REC key starts and stops a recording ([section 3](#the-status-strip)). `freetvc-headless --video FILE` records the whole run; after `--autostart` it starts when the program runs.
 
 ## 5. Expansion cards
 
-The TVC has four card slots (0–3), each with 16 I/O ports at 10h + 10h·n and an 8 KiB memory window at C000h–DFFFh. Putting a card in or taking it out powers the machine on. Two cards cannot share a slot. The GUI starts with the cards that were in when it closed, in the same slots (the `freetvc.ini` keys below). In the Cards menu, **Put in slot** (or **Move to slot** while the card is in) under a card chooses its slot; a slot holding another card is greyed out with that card's name. Settings → Machine has the same choice as slot buttons 0–3 beside each card. Details of each card are in [cards.md](design/cards.md).
+The TVC has four card slots (0–3), each with 16 I/O ports at 10h + 10h·n and an 8 KiB memory window at C000h–DFFFh. Putting a card in or taking it out powers the machine on. Two cards cannot share a slot. The GUI starts with the cards that were in when it closed, in the same slots (the `freetvc.ini` keys below). In the Cards menu each slot lists the cards; choosing one puts it into that slot ([section 3](#the-status-strip)). Settings → Machine has the same choice as slot buttons 0–3 beside each card. Details of each card are in [cards.md](design/cards.md).
 
 | Card | Command line | `freetvc.ini` | GUI | ROM | Default slot |
 |---|---|---|---|---|---|
-| HBF disk card (Videoton), VT-DOS | `--disk-card`, `--disk-rom 1.1\|1.2\|FILE`, `--disk [A-D:]FILE` | `disk_card`, `disk_rom` | Cards → Disk card in slot 0; Settings → Machine | `hbf.rom` (VT-DOS 1.1, default) or `hbf12.rom` (VT-DOS 1.2), or a 16 KiB image (UPM, ...) | 0 (fixed) |
-| GameCard (dikdom): SN76489 sound, joysticks 3 and 4, boot menu with games | `--gamecard [SLOT]`, `--gamecard-rom FILE` (64 KiB) | `gamecard` | Cards → GameCard | `gamecard.rom`; without it no boot menu | 1 |
-| Multichip sound card (Vass Sándor): SN76489, SAA1099, YM3812 (OPL2) | `--multichip [SLOT]`, `--multichip-rom FILE` (32 KiB) | `multichip` | Cards → Multichip sound card | `multichip.rom`; without it the chips still play; its start-up screen plays a demo on each chip after SPACE | 2 |
-| SID card: a MOS 6581 or 8580 on reSID, at ports E0h–FFh outside the slots (WinTVC's layout; no real card's documentation is known) | `--sid-card [6581\|8580]` (default 6581), `--sid-clock HZ` (100 000–4 000 000, default 985 248) | `sid_card` (`off`, `6581`, `8580`) | Cards → SID card, MOS 6581 / MOS 8580 | none | no slot |
-| TVC256k++ (dikdom): 256 KiB fast RAM over U2/U3, 8 MiB paged RAM, overlay graphics and sprites, drives, mouse, vSID sound, `EXT n` command line (n = its slot) | `--card256 [SLOT]`, `--card256-rom FILE` (12 KiB), `--card256-usb DIR\|mouse\|none`, `--card256-flash FILE\|DIR` | `card256`, `card256_usb`, `card256_flash` | Cards → TVC256k++, with Pendrive folder..., Mouse, USB port empty, Flash drive image... (none of these powers on) | `card256.rom`; optional `card256-font.bin`, `card256-picture.bmp` (power-on screen) and `card256-flash.bin` (drive 2) | 0, else the first free; not on `32k+hbm-1.2` |
-| NanoSD (Vass Sándor): an SD card through an Arduino Nano; file-select menu at power-on (ESC skips it), `EXT 0` command line | `--nanosd [SLOT]`, `--nanosd-rom FILE` (64 KiB), `--nanosd-sd DIR` (a folder as the SD card; brings the card) | `nanosd`, `nanosd_sd`, `nanosd_menu`, `nanosd_sort` | Cards → NanoSD, with SD card folder... and Take the SD card out | `nanosd.rom` | 3 |
-| Serial card (Videoton, an 8251A): BASIC's device #6 (`LIST #6`, `SAVE #6`, `LOAD #6`) | `--serial-card [SLOT]`, `--serial PEER`, `--serial-flow rts\|none`, `--serial-send FILE`, `--serial-capture FILE` (each brings the card) | `serial_card`, `serial_line`, `serial_flow` | Cards → Serial card, with Cable unplugged, Cable to TCP port 6585, Send a file..., Capture to a file... | none | 1, else (its GUI switch) the first free |
-| SD Dual cartridge (Sebestyén Pál): two SD sockets, VT-DOS 1.2 and a file manager in flash; in BASIC `EXT 2` starts the VT-DOS command line, `EXT 3` the file manager | `--sddual`, `--sddual-gm`, `--sddual-rom FILE`, `--sddual-flash-write`, `--sd FILE` (microSD), `--sd2 FILE` (SD) | (not kept) | Cards → SD Dual cartridge, with its card images and Take ... out; New SD card image... | `sddual.rom` or `sddual-gm.rom` | the cartridge port |
-| Printer on the main board's Centronics port | `--printer FILE\|on` | `printer` (`off`, `on`, a file) | Cards → Printer port: Printer to a file..., No printer | none | |
+| HBF disk card (Videoton), VT-DOS | `--disk-card`, `--disk-rom 1.1\|1.2\|FILE`, `--disk [A-D:]FILE` | `disk_card`, `disk_rom` | Cards → Slot 0 → HBF disk card; Settings → Machine | `hbf.rom` (VT-DOS 1.1, default) or `hbf12.rom` (VT-DOS 1.2), or a 16 KiB image (UPM, ...) | 0 (fixed) |
+| GameCard (dikdom): SN76489 sound, joysticks 3 and 4, boot menu with games | `--gamecard [SLOT]`, `--gamecard-rom FILE` (64 KiB) | `gamecard` | Cards → Slot n → GameCard | `gamecard.rom`; without it no boot menu | 1 |
+| Multichip sound card (Vass Sándor): SN76489, SAA1099, YM3812 (OPL2) | `--multichip [SLOT]`, `--multichip-rom FILE` (32 KiB) | `multichip` | Cards → Slot n → Multichip sound card | `multichip.rom`; without it the chips still play; its start-up screen plays a demo on each chip after SPACE | 2 |
+| SID card: a MOS 6581 or 8580 on reSID, at ports E0h–FFh outside the slots (WinTVC's layout; no real card's documentation is known) | `--sid-card [6581\|8580]` (default 6581), `--sid-clock HZ` (100 000–4 000 000, default 985 248) | `sid_card` (`off`, `6581`, `8580`) | Settings → Machine: SID card, MOS 6581 / MOS 8580 | none | no slot |
+| TVC256k++ (dikdom): 256 KiB fast RAM over U2/U3, 8 MiB paged RAM, overlay graphics and sprites, drives, mouse, vSID sound, `EXT n` command line (n = its slot) | `--card256 [SLOT]`, `--card256-rom FILE` (12 KiB), `--card256-usb DIR\|mouse\|none`, `--card256-flash FILE\|DIR` | `card256`, `card256_usb`, `card256_flash` | Cards → Slot n → TVC256k++, with Pendrive folder..., Mouse, USB port empty, Flash drive image... (none of these powers on) | `card256.rom`; optional `card256-font.bin`, `card256-picture.bmp` (power-on screen) and `card256-flash.bin` (drive 2) | 0, else the first free; not on `32k+hbm-1.2` |
+| NanoSD (Vass Sándor): an SD card through an Arduino Nano; file-select menu at power-on (ESC skips it), `EXT 0` command line | `--nanosd [SLOT]`, `--nanosd-rom FILE` (64 KiB), `--nanosd-sd DIR` (a folder as the SD card; brings the card) | `nanosd`, `nanosd_sd`, `nanosd_menu`, `nanosd_sort` | Cards → Slot n → NanoSD, with SD card folder... and Take the SD card out | `nanosd.rom` | 3 |
+| Serial card (Videoton, an 8251A): BASIC's device #6 (`LIST #6`, `SAVE #6`, `LOAD #6`) | `--serial-card [SLOT]`, `--serial PEER`, `--serial-flow rts\|none`, `--serial-send FILE`, `--serial-capture FILE` (each brings the card) | `serial_card`, `serial_line`, `serial_flow` | Cards → Slot n → Serial card, with Cable unplugged, Cable to TCP port 6585, Send a file..., Capture to a file... | none | 1, else (its GUI switch) the first free |
+| SD Dual cartridge (Sebestyén Pál): two SD sockets, VT-DOS 1.2 and a file manager in flash; in BASIC `EXT 2` starts the VT-DOS command line, `EXT 3` the file manager | `--sddual`, `--sddual-gm`, `--sddual-rom FILE`, `--sddual-flash-write`, `--sd FILE` (microSD), `--sd2 FILE` (SD) | (not kept) | Cart → SD Dual cartridge, with its card images and Take ... out; New SD card image... | `sddual.rom` or `sddual-gm.rom` | the cartridge port |
+| Printer on the main board's Centronics port | `--printer FILE\|on` | `printer` (`off`, `on`, a file) | the printer key: Printer to a file..., No printer | none | |
 
 Notes:
 
@@ -308,7 +324,7 @@ Notes:
 - **Serial line** (`--serial PEER`): `off` (default, the cable unplugged: sending waits until STOP), `on` (freeTVC itself is the peer: `--serial-send`, `--serial-capture`, the monitor and MCP), `listen[:PORT]` (a TCP client on 127.0.0.1 is the peer, default port 6585) or `connect:PORT`. Two freeTVC instances can talk: one with `--serial listen`, the other with `--serial connect:6585`. `--serial-flow rts` (default) sends to the TVC only while its RTS is on, as the factory cable does.
 - **TVC256k++ drives**: `--card256-usb DIR` makes a folder the pendrive (drive 0, written at once); the USB port holds the pendrive or the mouse, not both; the flash drive (drive 2) is a read-only littlefs image or a folder packed into one.
 - **NanoSD**: the SD card is a host folder, seen through 8.3 names; files are written at once. `SAVE` onto an existing name appends, as the card's firmware does. `nanosd_menu` (yes/no) and `nanosd_sort` (`none`, `name`, `size`) hold the Nano's EEPROM settings.
-- **SD Dual cards** are raw whole-card images (`.img`, FAT12/16/32, MBR or a super floppy, up to 2 TiB), written in place; a read-only file sets the write-protect switch. `--sd` alone brings the cartridge unless `--cart` or `--snapshot` brings the machine. Cards → New SD card image... builds a 64 MiB card with one FAT16 partition from chosen files and puts it into the microSD socket; `freetvc-headless --sd-build OUT --sd-add PATH ... [--sd-size MIB]` builds one (default 64 MiB), `--sd-list FILE` lists one. `--sddual-flash-write` sets the flash write jumper, so its firmware updater can write.
+- **SD Dual cards** are raw whole-card images (`.img`, FAT12/16/32, MBR or a super floppy, up to 2 TiB), written in place; a read-only file sets the write-protect switch. `--sd` alone brings the cartridge unless `--cart` or `--snapshot` brings the machine. Cart → New SD card image... builds a 64 MiB card with one FAT16 partition from chosen files and puts it into the microSD socket; `freetvc-headless --sd-build OUT --sd-add PATH ... [--sd-size MIB]` builds one (default 64 MiB), `--sd-list FILE` lists one. `--sddual-flash-write` sets the flash write jumper, so its firmware updater can write.
 - **Disk card EPROM**: VT-DOS 1.1 (`hbf.rom`) is the default; switching the EPROM in Settings → Machine while the card is in powers the machine on. Full VT-DOS also needs its cartridge (`vtdos11.rom` or `vtdos12.rom`); either works with either EPROM.
 - A card whose ROM is missing: from the command line freeTVC exits with the places searched; from `freetvc.ini` the card is left out with a notice. **Download ROMs** fetches them all.
 
@@ -723,10 +739,10 @@ Exit codes: 0 normal exit; 1 an error at start (no ROMs and the download decline
 | A card is "left out" at start | Its ROM is missing; Download ROMs fetches it, or give the file with the card's `-rom` option. |
 | The window is black or does not open; graphics driver without OpenGL 3.3 | Start with `--renderer sdl` (or set `renderer = sdl`, Settings → Picture). freeTVC also falls back to SDL's renderer by itself when it gets no OpenGL 3.3 context; stderr says `drawing with ...`. |
 | No sound, or the sound device misbehaves | The strip shows `no sound` when no device opened; stderr gives the reason, and the clock keeps time instead. `--no-audio` (or `audio = no`) skips the device. |
-| Keys type the wrong characters | Switch between symbolic and positional mapping (strip item), choose the `hungarian` or `us` layout, or rebind keys in the keyboard editor. In symbolic mapping the host's own keyboard layout decides the characters. |
+| Keys type the wrong characters | Switch between symbolic and positional mapping (the keyboard key), choose the `hungarian` or `us` layout, or rebind keys in the keyboard editor. In symbolic mapping the host's own keyboard layout decides the characters. |
 | Keys do nothing in Bench | Click the Screen panel: only it passes keys to the TVC. |
 | `LPRINT` hangs | No printer is plugged in; press STOP (CTRL+ESC), or plug one in (Cards → Printer port). |
-| `LOAD` reads the disk instead of the cassette | The disk card (or NanoSD, SD Dual, TVC256k++ drives) takes over LOAD and SAVE; take it out in the Cards menu, or autostart the CAS, which gives the cassette back for that load. |
+| `LOAD` reads the disk instead of the cassette | The disk card (or NanoSD, SD Dual, TVC256k++ drives) takes over LOAD and SAVE; take it out in the Cards menu (Empty in its slot), or autostart the CAS, which gives the cassette back for that load. |
 | `SAVE` fails with a protection error | The host cassette has no writable folder: start with `--cas-dir DIR`. |
 | A server does not start | The port is taken: choose another (`--monitor-port`, Settings → Remote). From `freetvc.ini` the error shows in the settings window; from the command line the program exits. |
 | MCP over HTTP answers 401 or 403 | Send `Authorization: Bearer <token>` with the token printed on stderr (or set one with `--mcp-token`); do not send a foreign `Origin` header. |
