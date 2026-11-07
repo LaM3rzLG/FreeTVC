@@ -713,6 +713,9 @@ msgstr "A lemez az A: meghajtóba kerül (ha kell, a lemezes kártya is bekerül
 msgid "A cartridge goes in from the Cart key"
 msgstr "Cartridge-et a Cart gombbal lehet betenni"
 
+msgid "Insert it empty"
+msgstr "Betétel üresen"
+
 msgid "Version"
 msgstr "Verzió"
 

@@ -308,6 +308,38 @@ void draw_cards_menu(const PlayStatus& status, PlayActions& actions) {
                 }
                 continue;
             }
+            // A card with storage (an SD card, a pendrive, a flash drive) can take it as it goes in
+            if ((c.kind == CardKind::NanoSd || c.kind == CardKind::Card256) && c.kind != held) {
+                if (ImGui::BeginMenu(c.name)) {
+                    const auto put_in = [&] {
+                        actions.slot_card = c.kind;
+                        actions.slot_card_to = s;
+                    };
+                    if (c.kind == CardKind::NanoSd) {
+                        if (ImGui::MenuItem(tr("SD card folder..."), nullptr, false, status.can_browse)) {
+                            put_in();
+                            actions.nanosd_sd = true;
+                        }
+                    } else {
+                        if (ImGui::MenuItem(tr("Pendrive folder..."), nullptr, false, status.can_browse)) {
+                            put_in();
+                            actions.card256_pendrive = true;
+                        }
+                        if (ImGui::MenuItem(tr("Flash drive image..."), nullptr, false, status.can_browse)) {
+                            put_in();
+                            actions.card256_flash = true;
+                        }
+                    }
+                    if (ImGui::MenuItem(tr("Insert it empty"))) {
+                        put_in();
+                    }
+                    ImGui::EndMenu();
+                }
+                if (c.tip && ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("%s", c.tip);
+                }
+                continue;
+            }
             if (ImGui::MenuItem(c.name, nullptr, c.kind == held, allowed) && c.kind != held) {
                 if (c.kind == CardKind::None) {
                     actions.slot_clear = s;

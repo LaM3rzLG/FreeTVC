@@ -106,6 +106,9 @@ a felhasználó a GUI-ban végignézte és jóváhagyta az alábbiakat; release 
   a régi A: az első üres meghajtóba — a felhasználó még nem döntött.
 - **SIDSoftEMU + HBF**: a felhasználónál „nem jó” (2026-11-07), nálam A:-ról (64K/1.2, HBF) a fájlkezelő és a SONG1.STC
   lejátszás megy (IT 5008 Hz, valós sebesség). A felhasználótól még kell: mi a hiba pontosan, melyik gép/slot.
+- **Tárolós kártyák betétele (2026-11-07)**: a slot listájában a még nem betett NanoSD és TVC256k++ almenüt kap
+  (SD-kártya mappa… / Pendrive mappa… / Flash meghajtó képfájl… / Betétel üresen): a kártya bekerül, és rögtön nyílik a
+  tallózó (a meglévő `nanosd_sd` / `card256_pendrive` / `card256_flash` akciók).
 - Elvetve: program-autodetect / programlista (a felhasználó: „aki nem tudja, mi kell hozzá, így járt”).
 - Hátra a GUI-ból: Nyomtató végleges helye; Ctrl/Cmd+R gyorsbillentyű
   (a CTRL a TVC-nek is kell — megbeszélni); cartridge-mappa (javaslat: `cartridges/` a felhasználói adatmappában, a
