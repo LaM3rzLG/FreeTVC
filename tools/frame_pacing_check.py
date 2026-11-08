@@ -13,6 +13,8 @@ import sys
 from collections import Counter
 
 FRAME_MS = 62800 / 3.125e6 * 1000  # 20.096 ms
+STALL_MS = 3 * FRAME_MS  # a present this late is a host stall: the display then jumps to catch up
+AFTER_STALL_NS = 1e9
 
 
 def main() -> int:
@@ -39,9 +41,17 @@ def main() -> int:
     for t, shown, _machine, _late in rows:
         if not changes or shown != changes[-1][1]:
             changes.append((t, shown))
-    steps = Counter(b[1] - a[1] for a, b in zip(changes, changes[1:]))
-    dropped = sum((step - 1) * n for step, n in steps.items() if 1 < step <= 8)
-    jumps = sum(n for step, n in steps.items() if step > 8 or step < 1)
+    stalls = [b[0] for a, b in zip(rows, rows[1:]) if (b[0] - a[0]) / 1e6 > STALL_MS]
+    dropped = after_stall = jumps = 0
+    for a, b in zip(changes, changes[1:]):
+        step = b[1] - a[1]
+        if step > 8 or step < 1:
+            jumps += 1
+        elif step > 1:
+            if any(0 <= b[0] - t <= AFTER_STALL_NS for t in stalls):
+                after_stall += step - 1
+            else:
+                dropped += step - 1
     held_ms = [(b[0] - a[0]) / 1e6 for a, b in zip(changes, changes[1:])]
     late = rows[-1][3] - rows[0][3]
     behind = statistics.mean(m - s for _t, s, m, _l in rows)
@@ -53,6 +63,8 @@ def main() -> int:
     print(f"on screen for:  " + ", ".join(f"{ms} ms x{n}" for ms, n in sorted(Counter(round(x) for x in held_ms).items())))
     print(f"display lag:    {behind:.2f} frames behind the machine on average")
     print(f"dropped frames: {dropped}")
+    if stalls:
+        print(f"host stalls:    {len(stalls)} presents later than {STALL_MS:.0f} ms; {after_stall} frames skipped to catch up (not counted)")
     print(f"late picks:     {late}")
     if jumps:
         print(f"discontinuities: {jumps} (a load, reset, snapshot or pause: not counted)")

@@ -19,6 +19,14 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 - **ROM-letöltés:** a "ROM-ok letöltése" a beállított `rom_dir` mappába tölt (ha van), különben a felhasználói
   adatmappába. `.gitignore`: `/roms/`, `/ROMS/`, `.DS_Store`. A felhasználó kipróbálta: a ROM-ok jó helyre mennek.
 
+## Képütemezés (`frame-pacing` ág, 2026-11-08)
+- A kész TVC-képek sorba kerülnek (`FramePacer`), a kijelző egyenletes órával, 1,5 képpel a gép mögött veszi ki őket: nem marad ki kép
+  (előtte ~6% kimaradt). A gép sebessége nem változik. Leírás: `docs/design/ui.md` "Frame pacing".
+- Mérés: `FREETVC_FRAME_LOG=fájl` a GUI-nak, utána `python3 tools/frame_pacing_check.py fájl`.
+- Mac: az OpenGL 180 Hz-es monitoron is csak 60 Hz; `--renderer sdl` (Metal) 180 Hz, 0 kihagyás. NYITOTT: Macen Metal legyen-e az alap,
+  vagy a képmodell (picture) kerüljön át Metalra. Windows (PC, 60 Hz): OpenGL 0 kihagyás; D3D egyszer vsync nélkül futott.
+- A felhasználó a Befosás scrollját a Macen simának látta ("mint a TMC20").
+
 ## 2dfx grafikus kártya (`2dfx` ág, 2026-11-06)
 - Kártyák menü / Beállítások / ini `twodfx` / `--2dfx [SLOT]`; bármelyik slot, minden kártya mellé, kivéve TVC256k++.
 - Tesztprogramok (tvc.homeserver.hu 2026/Kis_Róbert(AnyStone)): Cube, Wolf3D, AnyShow — mind jók, headless és GUI.

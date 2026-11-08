@@ -72,6 +72,8 @@ The machine is paced by the audio device (or the wall clock) and runs in slices 
 - Paused, rewinding, autostart and fast tape or disk show the machine's newest frame directly and empty the queue.
 - `FREETVC_FRAME_LOG=FILE` writes one line per present: host ns, the shown frame, the machine's frame count, late picks. `tools/frame_pacing_check.py FILE` summarises the last 20 s.
 - macOS: OpenGL presents at 60 Hz even on a 180 Hz display; the SDL renderer (Metal) follows the display ✓ (M4, macOS 27, 2026-11-08).
+- Windows 11, Radeon 780M, 60 Hz: OpenGL 0 dropped of 996 ✓; the SDL renderer (Direct3D) presented once at 143.6 Hz on the 60 Hz display, without vsync ⚑ (2026-11-08).
+- A host stall (a present later than 3 frames) makes the display jump to catch up; `frame_pacing_check.py` lists those frames apart from drops.
 
 ### Status strip
 
