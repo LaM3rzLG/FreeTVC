@@ -3890,3 +3890,45 @@ msgstr "Az alsó sáv és a gombjai magassága."
 
 msgid "strip_size is 75 to 250"
 msgstr "a strip_size 75 és 250 között lehet"
+
+msgid "Frame blending"
+msgstr "Képkeverés"
+
+msgid "Automatic"
+msgstr "Automatikus"
+
+msgid "Off"
+msgstr "Ki"
+
+msgid "On a 60, 120 or 144 Hz monitor the TVC's 50 Hz picture jerks; blending smooths it. A 50 or 100 Hz monitor needs none."
+msgstr "60, 120 vagy 144 Hz-es monitoron a TVC 50 Hz-es képe döccen, a keverés ezt simítja. 50 vagy 100 Hz-es monitoron nem kell."
+
+msgid "Blending on this display now."
+msgstr "Most kever."
+
+msgid "Not blending on this display now."
+msgstr "Most nem kever."
+
+msgid "frame_blend is auto, on or off"
+msgstr "a frame_blend értéke auto, on vagy off lehet"
+
+msgid "frame blending on"
+msgstr "képkeverés be"
+
+msgid "frame blending off"
+msgstr "képkeverés ki"
+
+msgid "Frame blending on: smooth motion on a display that is not 50 Hz; click to turn it off; right click: sharpness"
+msgstr "Képkeverés be: sima mozgás nem 50 Hz-es kijelzőn; kattintásra kikapcsol; jobb klikk: élesség"
+
+msgid "Frame blending off: click to turn it on (smooth motion on a 60, 120 or 144 Hz display)"
+msgstr "Képkeverés ki: kattintásra bekapcsol (sima mozgás 60, 120 vagy 144 Hz-es kijelzőn)"
+
+msgid "Sharpness"
+msgstr "Élesség"
+
+msgid "blend_sharpness is 0 to 100"
+msgstr "a blend_sharpness 0 és 100 között lehet"
+
+msgid "0 %: smoothest; higher: sharper"
+msgstr "0 %: legsimább; nagyobb: élesebb"

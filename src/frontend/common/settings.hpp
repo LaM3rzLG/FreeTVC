@@ -63,6 +63,8 @@ struct Settings {
     std::optional<std::string> renderer;       // gl (default) or sdl
     std::optional<std::string> picture;        // a picture file's name or path
     std::optional<bool> colour_switch;         // the TVC's rear switch: colour (yes) or B/W
+    std::optional<std::string> frame_blend;    // auto, on or off: two frames mixed between the display's refreshes
+    std::optional<int> blend_sharpness;        // 0-100 %: how little of the way between two frames is mixed
     std::optional<std::string> keys;           // the host key layout's name or path
 };
 

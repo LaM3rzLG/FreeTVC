@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.3.2 — 2026-11-08
+
+### New
+
+- **Frame blending** for displays that are not 50 Hz: the TVC draws 49.76 frames a second, so a 60 Hz display must show every fifth frame twice and a scroll jerks ten times a second (less visibly at 120, 144 or 180 Hz). Blending mixes the two frames around each refresh, so motion is even. *Automatic* (default) blends unless the display runs at 50 or 100 Hz, where there is no jerk. Settings → Picture → Frame blending, `frame_blend` in `freetvc.ini`.
+- **Hz key** in the strip, beside the speaker: bright while blending is on, dim while off; a click turns it on or off. While it is on, a right click opens the **Sharpness** slider (0 %: smoothest; higher: only the change is mixed and most pictures stay sharp; `blend_sharpness`, default 50 %).
+
+### Fixed
+
+- **Strip keys did not react to clicks** after the strip was made smaller by dragging its groove: the groove's invisible handle had the UI's minimum window size and covered the upper part of the keys.
+
+### Linux
+
+- Use **Ubuntu 24.04 LTS** or newer (or another Linux of 2024 or later: Debian 13, Fedora 40). Ubuntu 22.04 is too old.
+- The program is the file `freetvc` in the unpacked folder. A double click in the Files app does not start it; open a terminal in the folder and run `./freetvc` (step by step in the Quick start below and in [README.md](README.md#running-on-linux)).
+
+### Downloads
+
+| File | For |
+|---|---|
+| `freeTVC-1.3.2-windows-x64.zip` | 64-bit Windows: unpack anywhere and run `freetvc.exe`. The programs are not signed, so Windows SmartScreen may warn on the first start. |
+| `freeTVC-1.3.2-linux-x86_64.tar.gz` | 64-bit Linux: Ubuntu 24.04 LTS or newer (Debian 13, Fedora 40 or newer also work): unpack and run `./freetvc` in a terminal. |
+| `freeTVC-1.3.2-macos-arm64.zip` | macOS 13 or newer on Apple Silicon (M1 and later): unpack and run `freetvc`. |
+| `freeTVC-1.3.2-macos-x86_64.zip` | macOS 13 or newer on Intel Macs. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | checksums of the archives |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | the sources of the bundled ffmpeg (GPL) |
+
 ## 1.3.1 — 2026-11-08
 
 ### New

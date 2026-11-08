@@ -43,6 +43,7 @@
 #include "frontend/sdl/play_view.hpp"
 #include "frontend/sdl/save_prompt.hpp"
 #include "frontend/sdl/display.hpp"
+#include "frontend/sdl/frame_blend.hpp"
 #include "frontend/sdl/frame_pacer.hpp"
 #include "frontend/sdl/present_timing.hpp"
 #include "frontend/sdl/keyboard_editor.hpp"
@@ -79,6 +80,16 @@ void upload_frame(freetvc::sdl::Display& display, ImTextureID texture, const fre
         pixels[i] = 0xFF000000u | freetvc::kRgbPalette[index < freetvc::Framebuffer::kColours ? index : 0];
     }
     display.update_texture(texture, pixels.data(), freetvc::Framebuffer::kWidth * 4);
+}
+
+void upload_blend(freetvc::sdl::Display& display, ImTextureID texture, const freetvc::Framebuffer& a, const freetvc::Framebuffer& b, float mix) {
+    static std::vector<std::uint32_t> pixels(static_cast<std::size_t>(freetvc::Framebuffer::kWidth) * freetvc::Framebuffer::kHeight);
+    freetvc::sdl::blend_frames(a, b, mix, pixels.data());
+    display.update_texture(texture, pixels.data(), freetvc::Framebuffer::kWidth * 4);
+}
+
+const char* blend_setting(freetvc::sdl::FrameBlend mode) {
+    return mode == freetvc::sdl::FrameBlend::On ? "on" : mode == freetvc::sdl::FrameBlend::Off ? "off" : "auto";
 }
 
 // The picture file in use, watched like the skin (design/ui.md "Picture")
@@ -497,6 +508,12 @@ int main(int argc, char** argv) {
     std::string picture_option = settings.values.picture.value_or("sharp");
     bool picture_given = false;
     bool colour_switch = settings.values.colour_switch.value_or(true);
+    const std::string blend_at_start = settings.values.frame_blend.value_or("auto");
+    freetvc::sdl::FrameBlend frame_blend = blend_at_start == "on"    ? freetvc::sdl::FrameBlend::On
+                                           : blend_at_start == "off" ? freetvc::sdl::FrameBlend::Off
+                                                                     : freetvc::sdl::FrameBlend::Auto;
+    bool blending = false;  // frame_blend applied to the window's display
+    int blend_sharpness = settings.values.blend_sharpness.value_or(50);
     std::string keys_option = settings.values.keys.value_or("hungarian");
     bool keys_given = false;
     bool language_given = false;
@@ -2434,6 +2451,8 @@ int main(int argc, char** argv) {
         status.layout = input.keymap().name;
         status.audio = audio != nullptr;
         status.muted = muted;
+        status.blending = blending;
+        status.blend_sharpness = blend_sharpness;
         status.fullscreen = (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
         status.full_raster = full_raster;
         status.skins = skins.list;
@@ -2635,6 +2654,9 @@ int main(int argc, char** argv) {
         sheet.picture_edited = !pictures.path.empty() && pictures.path.parent_path() == user_dir / "pictures";
         sheet.picture_error = picture_error;
         sheet.colour_switch = machine.config().colour;
+        sheet.frame_blend = frame_blend;
+        sheet.blending = blending;
+        sheet.blend_sharpness = blend_sharpness;
         for (std::size_t i = 0; i < servers.size(); ++i) {
             sheet.servers[i] = {servers[i].on, static_cast<int>(servers[i].port), server_port(i), servers[i].given, servers[i].error};
         }
@@ -2670,17 +2692,27 @@ int main(int argc, char** argv) {
         if (const std::uint64_t t = SDL_GetTicksNS(); present_at_ns > t) {
             SDL_DelayPrecise(present_at_ns - t);
         }
+        float mix = 0.0f;
         if (!warping && paced) {
             const freetvc::Framebuffer* shown = pacer.pick(SDL_GetTicksNS(), machine.frame_count());
             picture_frame = shown ? pacer.shown_frame() : machine.frame_count();
-            upload_frame(*display, texture, shown ? *shown : machine.framebuffer());
+            const freetvc::Framebuffer* next = shown && blending ? pacer.next_frame(mix) : nullptr;
+            mix = freetvc::sdl::shaped_mix(mix, blend_sharpness);
+            if (next && mix >= 0.99f) {
+                upload_frame(*display, texture, *next);
+            } else if (next && mix > 0.01f) {
+                upload_blend(*display, texture, *shown, *next, mix);
+            } else {
+                mix = 0.0f;
+                upload_frame(*display, texture, shown ? *shown : machine.framebuffer());
+            }
         }
         display->prepare_picture(texture, machine.config().colour, picture_frame);
         display->present(skins.skin.frame);
         if (frame_log) {
-            std::fprintf(frame_log, "%llu %llu %llu %llu\n", static_cast<unsigned long long>(SDL_GetTicksNS()),
+            std::fprintf(frame_log, "%llu %llu %llu %llu %d\n", static_cast<unsigned long long>(SDL_GetTicksNS()),
                          static_cast<unsigned long long>(picture_frame), static_cast<unsigned long long>(machine.frame_count()),
-                         static_cast<unsigned long long>(pacer.late_count()));
+                         static_cast<unsigned long long>(pacer.late_count()), static_cast<int>(std::lround(mix * 1000.0f)));
             std::fflush(frame_log);
         }
         {
@@ -2688,6 +2720,8 @@ int main(int argc, char** argv) {
             const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(shown_on);
             const std::uint64_t now = SDL_GetTicksNS();
             present_at_ns = now + present_timing.presented(now, shown_on, mode ? mode->refresh_rate : 0.0f);
+            blending = freetvc::sdl::blends(frame_blend, mode ? mode->refresh_rate : 0.0);
+            pacer.set_refresh(blending && mode ? mode->refresh_rate : 0.0);
             if (present_timing.take_change()) {
                 const bool vsync = present_timing.mode() == freetvc::sdl::PresentTiming::Mode::Vsync;
                 display->set_vsync(vsync);
@@ -2872,6 +2906,16 @@ int main(int argc, char** argv) {
             if (const auto shipped = pictures.find(name)) {
                 use_picture(*shipped);
             }
+        }
+        if (sheet_actions.blend_sharpness >= 0) {
+            blend_sharpness = sheet_actions.blend_sharpness;
+        }
+        if (sheet_actions.blend_sharpness_done) {
+            save_settings({{"blend_sharpness", std::to_string(blend_sharpness)}});
+        }
+        if (sheet_actions.frame_blend) {
+            frame_blend = *sheet_actions.frame_blend;
+            save_settings({{"frame_blend", blend_setting(frame_blend)}});
         }
         if (sheet_actions.colour_switch >= 0) {
             machine.set_colour_switch(sheet_actions.colour_switch == 1);
@@ -3473,6 +3517,18 @@ int main(int argc, char** argv) {
         }
         if (actions.mapping >= 0) {
             input.set_mapping(static_cast<freetvc::sdl::KeyMapping>(actions.mapping));
+        }
+        if (actions.blend_sharpness >= 0) {
+            blend_sharpness = actions.blend_sharpness;
+        }
+        if (actions.blend_sharpness_done) {
+            save_settings({{"blend_sharpness", std::to_string(blend_sharpness)}});
+        }
+        if (actions.toggle_blend) {
+            frame_blend = blending ? freetvc::sdl::FrameBlend::Off : freetvc::sdl::FrameBlend::On;
+            blending = !blending;
+            save_settings({{"frame_blend", blend_setting(frame_blend)}});
+            notice.show_text(false, blending ? N_("frame blending on") : N_("frame blending off"));
         }
         if (actions.toggle_mute && audio) {
             muted = !muted;

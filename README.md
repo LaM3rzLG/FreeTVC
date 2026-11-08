@@ -10,6 +10,19 @@ An emulator of the Videoton TV Computer (TVC), the Hungarian Z80 home computer o
 
 What is emulated and how its accuracy was checked: [docs/status.md](docs/status.md). Ready-to-run packages for Windows and Linux are on the [releases page](https://github.com/LaM3rzLG/FreeTVC/releases); [CHANGELOG.md](CHANGELOG.md) lists what each release contains.
 
+## Running on Linux
+
+Use **Ubuntu 24.04 LTS** or newer (Debian 13, Fedora 40 or newer also work; Ubuntu 22.04 is too old). Download `freeTVC-<version>-linux-x86_64.tar.gz` from the [releases page](https://github.com/LaM3rzLG/FreeTVC/releases), then in a terminal:
+
+```sh
+cd ~/Downloads
+tar xzf freeTVC-*-linux-x86_64.tar.gz
+cd freeTVC-*-linux-x86_64
+./freetvc
+```
+
+The program is the file `freetvc` in that folder; the ROMs, skins and the rest are beside it, so move the whole folder, not the file alone. A double click on `freetvc` in the Files app does not start it: run it from a terminal as above, or right-click it and choose *Run as a Program* where the file manager offers that.
+
 ## Build
 
 On Ubuntu 24.04 or a similar Linux (the full package list is in the [developer guide](docs/developer-guide.md#prerequisites)):

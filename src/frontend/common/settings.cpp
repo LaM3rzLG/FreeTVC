@@ -19,7 +19,7 @@ constexpr std::string_view kHeader =
     "; not saved. Keys: rom_dir, preset, skin, keymap, language, audio, volume, fullscreen, full_raster, disk_card, disk_rom,\n"
     "; gamecard, multichip, sid_card, card256, card256_usb, card256_flash, twodfx, nanosd, nanosd_sd, nanosd_menu, nanosd_sort,\n"
     "; printer, serial_card, serial_line, serial_flow, video_dir, screenshot_dir, save_dir, monitor, mcp, mcp_allow_monitor, dzrp, dzrp_banks, gdb, renderer,\n"
-    "; picture, colour_switch, keys, recent, ui_font_size, strip_size.\n";
+    "; picture, colour_switch, frame_blend, blend_sharpness, keys, recent, ui_font_size, strip_size.\n";
 
 std::string_view trim(std::string_view s) {
     const auto first = s.find_first_not_of(" \t\r");
@@ -156,6 +156,19 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
                 s.colour_switch = value == "colour";
             } else {
                 fail(msg("colour_switch is colour or bw"));
+            }
+        } else if (key == "frame_blend") {
+            if (value == "auto" || value == "on" || value == "off") {
+                s.frame_blend = value;
+            } else {
+                fail(msg("frame_blend is auto, on or off"));
+            }
+        } else if (key == "blend_sharpness") {
+            const int value_int = std::all_of(value.begin(), value.end(), [](char c) { return c >= '0' && c <= '9'; }) && !value.empty() && value.size() <= 3 ? std::stoi(value) : -1;
+            if (value_int >= 0 && value_int <= 100) {
+                s.blend_sharpness = value_int;
+            } else {
+                fail(msg("blend_sharpness is 0 to 100"));
             }
         } else if (key == "preset") {
             s.preset = value;

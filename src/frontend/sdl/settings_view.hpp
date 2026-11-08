@@ -8,6 +8,7 @@
 #include <string>
 #include <string_view>
 
+#include "frontend/sdl/frame_blend.hpp"
 #include "frontend/sdl/keymap.hpp"
 #include "frontend/sdl/picture.hpp"
 #include "frontend/sdl/play_view.hpp"
@@ -53,6 +54,9 @@ struct SettingsStatus {
     bool picture_edited = false;   // it is the user data folder's copy
     std::string_view picture_error;
     bool colour_switch = true;     // the TVC's rear switch
+    FrameBlend frame_blend = FrameBlend::Auto;
+    bool blending = false;         // it mixes frames on the window's display now
+    int blend_sharpness = 50;      // percent
     std::span<const KeymapEntry> layouts;  // host key layouts
     std::string_view layout;       // the one in use
     bool layout_given = false;
@@ -85,6 +89,9 @@ struct SettingsActions {
     bool picture_edit_done = false;    // a slider let go: the values go into the user data folder's copy
     bool picture_reset = false;        // that copy removed: the shipped values back
     int colour_switch = -1;            // 0 B/W, 1 colour
+    std::optional<FrameBlend> frame_blend;
+    int blend_sharpness = -1;          // a new sharpness, shown at once
+    bool blend_sharpness_done = false; // the slider let go: written to freetvc.ini
     int renderer_sdl = -1;
     std::string layout;                // a layout file's path to switch to
     bool edit_layout = false;          // the keyboard editor opens

@@ -2,6 +2,33 @@
 
 A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 
+## 1.3.2 — 2026-11-08
+
+### Új
+
+- **Képkeverés** nem 50 Hz-es monitorhoz: a TVC másodpercenként 49,76 képet rajzol, ezért 60 Hz-es monitoron minden ötödik kép kétszer látszik, és a scroll másodpercenként tízszer döccen (120, 144, 180 Hz-en kevésbé). A keverés a frissítés körüli két képet összemossa, így a mozgás egyenletes. *Automatikus* módban (alapértelmezés) kever, kivéve 50 vagy 100 Hz-es monitoron, ahol nincs döccenés. Beállítások → Kép → Képkeverés, a `freetvc.ini`-ben `frame_blend`.
+- **Hz gomb** az alsó sávban, a hangszóró mellett: világos, ha a keverés be van kapcsolva, halvány, ha nincs; kattintásra be- és kikapcsol. Bekapcsolva jobb kattintásra megnyílik az **Élesség** csúszka (0 %: legsimább; nagyobb: csak a váltás keveredik, a legtöbb kép éles marad; `blend_sharpness`, alapból 50 %).
+
+### Javítva
+
+- **Az alsó sáv gombjai nem reagáltak a kattintásra**, miután a sávot a fölötte lévő barázdával kisebbre húztuk: a barázda láthatatlan fogantyúja a felület legkisebb ablakméretét kapta, és rálógott a gombok felső részére.
+
+### Linux
+
+- **Ubuntu 24.04 LTS** vagy újabb ajánlott (vagy más, 2024-es vagy újabb Linux: Debian 13, Fedora 40). Az Ubuntu 22.04 már túl régi.
+- A program a kicsomagolt mappában lévő `freetvc` fájl. A Fájlok alkalmazásban dupla kattintásra nem indul: nyiss terminált a mappában, és írd be: `./freetvc` (lépésenként lent, a Gyors kezdésben és a [README.md](README.md#running-on-linux)-ben).
+
+### Letöltések
+
+| Fájl | Mire |
+|---|---|
+| `freeTVC-1.3.2-windows-x64.zip` | 64 bites Windows: bárhová kicsomagolható, a `freetvc.exe` indítja. A program nincs aláírva, ezért a SmartScreen első indításkor figyelmeztethet. |
+| `freeTVC-1.3.2-linux-x86_64.tar.gz` | 64 bites Linux: Ubuntu 24.04 LTS vagy újabb (Debian 13, Fedora 40 vagy újabb is jó): kicsomagolás után terminálban `./freetvc`. |
+| `freeTVC-1.3.2-macos-arm64.zip` | macOS 13 vagy újabb, Apple Silicon (M1 és újabb): kicsomagolás után `freetvc`. |
+| `freeTVC-1.3.2-macos-x86_64.zip` | macOS 13 vagy újabb, Intel. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | az archívumok ellenőrzőösszegei |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | a mellékelt ffmpeg forrásai (GPL) |
+
 ## 1.3.1 — 2026-11-08
 
 ### Új

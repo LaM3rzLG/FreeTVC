@@ -27,6 +27,7 @@ constexpr const char* kKeysMenu = "##keys_menu";
 constexpr const char* kPrinterMenu = "##printer_menu";
 constexpr const char* kRecordMenu = "##record_menu";
 constexpr const char* kShotMenu = "##shot_menu";
+constexpr const char* kBlendMenu = "##blend_menu";
 constexpr const char* kSaveMenu = "##save_menu";
 
 // Opens `id` above the strip at window x `anchor`; true while it is open (EndPopup is the caller's)
@@ -490,11 +491,12 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
         ImGui::SetNextWindowSize({viewport->Size.x, groove + grab});
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, {1.0f, 1.0f});  // the style's minimum would cover the strip's keys
         ImGui::Begin("##strip_edge", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNav |
                          ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing |
                          ImGuiWindowFlags_NoScrollWithMouse);
-        ImGui::PopStyleVar(2);
+        ImGui::PopStyleVar(3);
         ImGui::InvisibleButton("##strip_edge_grab", {viewport->Size.x, groove + grab});
         if (ImGui::IsItemHovered() || ImGui::IsItemActive()) {
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
@@ -580,6 +582,16 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
     }
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("%s", sound);
+    }
+    strip.divider();
+    actions.toggle_blend |= strip.button("##blend", "Hz", fonts.strong, ui_px * 1.4f, status.blending ? skin.label : skin.muted);
+    const float blend_x = ImGui::GetItemRectMin().x;
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && status.blending) {
+        ImGui::OpenPopup(kBlendMenu);
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", status.blending ? tr("Frame blending on: smooth motion on a display that is not 50 Hz; click to turn it off; right click: sharpness")
+                                                : tr("Frame blending off: click to turn it on (smooth motion on a 60, 120 or 144 Hz display)"));
     }
     strip.divider();
 
@@ -824,6 +836,20 @@ void draw_strip(const PlayStatus& status, const Skin& skin, const SkinFonts& fon
         actions.toggle_record |= ImGui::MenuItem(status.recording ? tr("Stop recording") : tr("Start recording"));
         actions.video_dir |= ImGui::MenuItem(tr("Recordings folder..."), nullptr, false, status.can_browse);
         actions.open_video_dir |= ImGui::MenuItem(tr("Open the recordings folder"));
+        ImGui::EndPopup();
+    }
+    if (begin_menu(kBlendMenu, blend_x, menu_top, actions)) {
+        ImGui::SeparatorText(tr("Frame blending"));
+        int sharpness = status.blend_sharpness;
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 12.0f);
+        ImGui::PushStyleColor(ImGuiCol_SliderGrab, IM_COL32_WHITE);
+        ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, IM_COL32_WHITE);
+        if (ImGui::SliderInt(tr("Sharpness"), &sharpness, 0, 90, "%d %%")) {
+            actions.blend_sharpness = sharpness;
+        }
+        actions.blend_sharpness_done |= ImGui::IsItemDeactivatedAfterEdit();
+        ImGui::PopStyleColor(2);
+        ImGui::TextDisabled("%s", tr("0 %: smoothest; higher: sharper"));
         ImGui::EndPopup();
     }
     if (begin_menu(kShotMenu, shot_x, menu_top, actions)) {

@@ -17,6 +17,8 @@ public:
     static constexpr double kLag = 1.5;                    // frames between the newest frame and the one shown
 
     void set_next(FrameSink* next) { next_ = next; }
+    // The display's refresh rate, or 0: with one, the display clock moves in whole refreshes, not by the jittery time of each pick
+    void set_refresh(double hz) { refresh_hz_ = hz; }
     void frame_done(const Framebuffer& frame) override;
 
     // Forgets the queue: the next pick starts again from the newest frame.
@@ -25,6 +27,8 @@ public:
     const Framebuffer* pick(std::uint64_t now_ns, std::uint64_t machine_frames);
     // The machine's number of the frame pick() returned.
     std::uint64_t shown_frame() const { return shown_frame_; }
+    // The frame after it, or nullptr when not yet completed; `mix` = how far the display clock is towards it (0-1)
+    const Framebuffer* next_frame(float& mix) const;
     std::uint64_t late_count() const { return late_; }
 
 private:
@@ -46,6 +50,8 @@ private:
     std::uint64_t shown_frame_ = 0;
     std::uint64_t late_ = 0;        // picks that wanted a frame not yet completed
     std::uint64_t shown_ = 0;       // the queue index shown last
+    float mix_ = 0.0f;              // pos_ past shown_, 0-1
+    double refresh_hz_ = 0.0;
 };
 
 }  // namespace freetvc::sdl

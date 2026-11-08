@@ -28,6 +28,16 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
   A felhasználó a 180 Hz-es saját időzítést jónak látta. Teljes képernyő nincs ellenőrizve. Windows (PC, 60/144 Hz): OpenGL és D3D 0 kihagyás; a felhasználó szemmel is jónak látta.
 - A felhasználó a Befosás scrollját a Macen simának látta ("mint a TMC20").
 
+## Képkeverés és a sáv kattintási hibája (1.3.2, 2026-11-08)
+- Hiba: kisebbre húzott sávnál a gombok nem reagáltak; a barázda láthatatlan fogantyú-ablaka az ImGui `WindowMinSize`-t kapta
+  és rálógott a gombokra. Javítva (`play_view.cpp`), szintetikus kattintással ellenőrizve.
+- Képkeverés (`frame_blend.cpp`): 60/120/144/180 Hz-en a két szomszédos TVC-képet a kijelzőóra szerint keveri (lineáris fényben);
+  Automatikus = nem kever 50/100 Hz-en. Élesség (`blend_sharpness`, alap 50 %). Alsó sáv: **Hz** gomb (bal klikk be/ki,
+  bekapcsolva jobb klikk: Élesség csúszka, fehér fogantyú). Mérés a Hóvágtán (betöltés, 5 mp, Space, D) a beépített 60 Hz-es
+  kijelzőn: az arány frissítésenként 0,17-et lép, 0 kimaradt kép. A felhasználó a GUI-ban kipróbálta.
+- Szintetikus egérkattintás a GUI-ba: kis Swift program `CGEvent`-tel (a VS Code-nak van Accessibility joga), a
+  `screencapture -C` mutatja a kurzort. Ideiglenes ImGui-napló a kattintás címzettjéről segített megtalálni a hibát.
+
 ## Ikon (2026-11-08)
 - Az indítókép TVC-fotója sötét, lekerekített alapon (`data/icon/freetvc.svg`); `sh tools/make_icons.sh` készíti belőle az
   ablakikont (`data/about/freetvc-icon.png`, Dock/tálca) és a Windows exe ikonját (`data/icon/freetvc.ico`, `.rc`).

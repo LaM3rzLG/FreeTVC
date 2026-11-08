@@ -5,6 +5,8 @@
 #include <cfloat>
 #include <cstdio>
 #include <filesystem>
+#include <iterator>
+#include <utility>
 
 #include "frontend/sdl/deck.hpp"
 #include "frontend/sdl/text.hpp"
@@ -213,6 +215,33 @@ void draw_picture(const Sheet& s, const PlayStatus& status, const SettingsStatus
     }
     play.toggle_full_raster |= check(tr("Full raster (debug)"), status.full_raster);
     note(s, tr("Full raster shows the whole beam path, sync and blanking included, with the TV area outlined."));
+
+    heading(s, tr("Frame blending"));
+    const std::pair<FrameBlend, const char*> blend_modes[] = {
+        {FrameBlend::Auto, tr("Automatic")}, {FrameBlend::On, tr("On")}, {FrameBlend::Off, tr("Off")}};
+    for (std::size_t i = 0; i < std::size(blend_modes); ++i) {
+        if (i > 0) {
+            ImGui::SameLine();
+        }
+        const auto& [mode, label] = blend_modes[i];
+        if (ImGui::RadioButton(label, st.frame_blend == mode) && st.frame_blend != mode) {
+            a.frame_blend = mode;
+        }
+    }
+    note(s, tr("On a 60, 120 or 144 Hz monitor the TVC's 50 Hz picture jerks; blending smooths it. A 50 or 100 Hz monitor needs none."));
+    int sharpness = st.blend_sharpness;
+    ImGui::BeginDisabled(!st.blending);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, IM_COL32_WHITE);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, IM_COL32_WHITE);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.6f);
+    if (ImGui::SliderInt(tr("Sharpness"), &sharpness, 0, 90, "%d %%")) {
+        a.blend_sharpness = sharpness;
+    }
+    a.blend_sharpness_done |= ImGui::IsItemDeactivatedAfterEdit();
+    ImGui::PopStyleColor(2);
+    ImGui::EndDisabled();
+    note(s, tr("0 %: smoothest; higher: sharper"));
+    note(s, st.blending ? tr("Blending on this display now.") : tr("Not blending on this display now."));
 
     heading(s, tr("Drawing"));
     ImGui::PushFont(s.fonts.data, 0.0f);

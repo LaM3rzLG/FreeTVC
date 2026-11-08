@@ -26,8 +26,8 @@ def main() -> int:
     with open(sys.argv[1], encoding="ascii") as f:
         for line in f:
             parts = line.split()
-            if len(parts) == 4:
-                rows.append(tuple(int(p) for p in parts))
+            if len(parts) >= 4:
+                rows.append(tuple(int(p) for p in parts[:4]))
     if len(rows) < 100:
         print(f"too few lines ({len(rows)}): run the machine for at least {seconds:.0f} s")
         return 2

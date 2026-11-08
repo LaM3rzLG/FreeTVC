@@ -52,6 +52,8 @@ struct PlayStatus {
     std::string_view layout;
     bool audio = false;  // an audio device is open
     bool muted = false;
+    bool blending = false;  // frame blending on the window's display now
+    int blend_sharpness = 50;  // percent
     bool fullscreen = false;
     bool full_raster = false;  // show kFullRaster with the TV area outlined, else kTvArea
     std::span<const SkinEntry> skins;
@@ -127,6 +129,9 @@ struct PlayActions {
     bool toggle_fullscreen = false;
     bool toggle_full_raster = false;
     bool toggle_mute = false;
+    bool toggle_blend = false;  // frame blending on or off
+    int blend_sharpness = -1;            // a new sharpness, shown at once
+    bool blend_sharpness_done = false;   // the slider let go: written to freetvc.ini
     bool reload_skin = false;
     bool quit = false;
     bool load_program = false;    // file dialog, then autostart

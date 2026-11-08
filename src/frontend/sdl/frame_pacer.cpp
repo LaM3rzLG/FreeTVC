@@ -47,7 +47,10 @@ const Framebuffer* FramePacer::pick(std::uint64_t now_ns, std::uint64_t machine_
         pos_ = target;
         shown_ = 0;
     } else {
-        const double dt = static_cast<double>(now_ns - last_ns_) / 1e9;
+        double dt = static_cast<double>(now_ns - last_ns_) / 1e9;
+        if (refresh_hz_ > 0.0) {
+            dt = std::max(1.0, std::round(dt * refresh_hz_)) / refresh_hz_;
+        }
         pos_ += dt * 1e9 / static_cast<double>(kFrameNs);
         const double error = target - pos_;
         pos_ = std::abs(error) > kResyncFrames ? target : pos_ + error * std::min(dt / kTrackSeconds, 1.0);
@@ -67,7 +70,13 @@ const Framebuffer* FramePacer::pick(std::uint64_t now_ns, std::uint64_t machine_
     }
     shown_ = want;
     shown_frame_ = base_ + want;
+    mix_ = static_cast<float>(std::clamp(pos_ - static_cast<double>(want), 0.0, 1.0));
     return &slots_[want % kSlots].frame;
+}
+
+const Framebuffer* FramePacer::next_frame(float& mix) const {
+    mix = mix_;
+    return started_ && shown_ != 0 && shown_ < produced_ ? &slots_[(shown_ + 1) % kSlots].frame : nullptr;
 }
 
 }  // namespace freetvc::sdl

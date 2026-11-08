@@ -113,6 +113,7 @@ One strip of drawn keys runs along the bottom of the window, in Play and in Benc
 | a small screen with an arrow | the game save key; lit for a moment after a save | saves the game (as F9); a right click opens the **game saves** menu ([section 4.6](#46-game-saves-and-snapshots)) |
 | keyboard | the tooltip names the mapping | opens the **Keyboard** menu |
 | speaker | crossed out in red while muted or without a sound device | mutes or unmutes |
+| Hz | bright while frame blending is on, dim while off | turns frame blending on or off; while it is on, a right click sets its sharpness ([section 6](#6-settings)) |
 | 5.25" floppy | faded without the disk card; in the notice colour with the drive letter while a drive works | opens the **Disk** menu; the tooltip lists the drives |
 | cassette | faded without a tape; while the tape moves, the signal under the head as a small wave | opens the **Tape** menu |
 | ▶ and the counter | ▶ in the notice colour while playing; grey without a tape | plays the tape |
@@ -345,7 +346,7 @@ Main menu → **Settings...** opens a sheet at the right of the window, its text
 | Section | Contents |
 |---|---|
 | Machine | the ROM folder in use, Choose folder... (writes `rom_dir`; powers on only when the preset's ROMs differ), Default places (removes `rom_dir`), Download ROMs. The machine and the cards are chosen in the strip's TVC and Cards menus |
-| Picture | the pictures (Black and white TV, CRT TV emulation, RGB monitor emulation, Sharp picture) and their sliders; the TVC's rear switch (Colour, Black and white); Full screen (F11), Start in full screen, Full raster (debug); what draws, and "Use SDL's renderer" from the next start |
+| Picture | the pictures (Black and white TV, CRT TV emulation, RGB monitor emulation, Sharp picture) and their sliders; the TVC's rear switch (Colour, Black and white); Full screen (F11), Start in full screen, Full raster (debug); Frame blending (Automatic, On, Off) and its Sharpness; what draws, and "Use SDL's renderer" from the next start |
 | Sound | Mute, Volume, Sound output (from the next start) |
 | Keyboard and joysticks | Symbolic or Positional, the key layout, Edit the layout..., the joystick keys |
 | Interface | Language; Text: the size of the menus', this window's and the strip's text (a list, 12–36 pt; `ui_font_size`); Status strip: its height with its keys (75–250 %; `strip_size`); Skin, Reload skin; the settings file's path and whether it is the portable one |
@@ -377,6 +378,8 @@ Main menu → **Settings...** opens a sheet at the right of the window, its text
 | `renderer` | `gl`, `sdl` | `gl` | |
 | `picture` | a picture name or a path | `sharp` | |
 | `colour_switch` | `colour`, `bw` | `colour` | the TVC's rear switch |
+| `frame_blend` | `auto`, `on`, `off` | `auto` | frame blending: `auto` blends unless the display runs at a multiple of 50 Hz |
+| `blend_sharpness` | 0–100 | 50 | frame blending's sharpness in percent |
 | `disk_card` | flag | no | |
 | `disk_rom` | `1.1`, `1.2` or a file | `1.1` | |
 | `gamecard` | flag or a slot 0–3 | no | `yes` = slot 1 |
@@ -411,6 +414,8 @@ A picture file (`--picture NAME|FILE`, `picture` in `freetvc.ini`, Settings → 
 | `bw-tv` | mono | a black and white TV: the colour subcarrier shows as fine dots in coloured areas |
 
 The tube model adds beam width by brightness, an aperture grille or shadow mask, glow, curvature and vignette. Settings → Picture has sliders for the luma and chroma bandwidth, saturation, chroma phase error, the PAL delay line, spot width, beam on black and on white, mask type, strength and pitch, glow, curvature, vignette, tube gamma and brightness. They apply at once; when a slider is let go the whole picture is written to `pictures/<name>.picture` in the user data folder, which then shadows the shipped file; **Back to the shipped values** removes that copy. Picture files are searched in `pictures/` in the user data folder, then `pictures/` next to the program; the file in use is watched and reapplied when it changes on disk. `data/pictures/pal-tv.picture` lists every key with a comment. The model is described in [ui.md](design/ui.md).
+
+**Frame blending** (`frame_blend`): the TVC draws 49.76 frames a second. A 60 Hz display must show every fifth frame twice, so a scroll jerks ten times a second (less visibly at 120, 144 or 180 Hz). Blending shows the two frames around each refresh mixed by how far the display is between them: the motion is even, moving edges a little soft. *Automatic* blends unless the display runs at about 50 or 100 Hz. **Sharpness** (0–90 %, `blend_sharpness`): at 0 % the frames are mixed all the way from one to the next, the smoothest; higher values mix only around the change, so most pictures stay sharp. The **Hz** key in the strip turns blending on or off; while blending is on, a right click on it opens the Sharpness slider.
 
 The **rear switch** (`colour_switch`): on black and white, the TVC sends no colour subcarrier, so a TV shows grey. Programs can read the switch at port 59h.
 
