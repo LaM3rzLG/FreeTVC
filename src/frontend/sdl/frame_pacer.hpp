@@ -45,6 +45,7 @@ private:
     std::uint64_t last_ns_ = 0;
     std::uint64_t shown_frame_ = 0;
     std::uint64_t late_ = 0;        // picks that wanted a frame not yet completed
+    std::uint64_t shown_ = 0;       // the queue index shown last
 };
 
 }  // namespace freetvc::sdl

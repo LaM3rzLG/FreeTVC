@@ -44,6 +44,7 @@
 #include "frontend/sdl/save_prompt.hpp"
 #include "frontend/sdl/display.hpp"
 #include "frontend/sdl/frame_pacer.hpp"
+#include "frontend/sdl/present_timing.hpp"
 #include "frontend/sdl/keyboard_editor.hpp"
 #include "frontend/sdl/keymap.hpp"
 #include "frontend/sdl/picture.hpp"
@@ -934,6 +935,8 @@ int main(int argc, char** argv) {
     SDL_Window* window = display->window();
     std::fprintf(stderr, "freetvc: drawing with %s\n", std::string(display->name()).c_str());
     display->set_vsync(true);
+    freetvc::sdl::PresentTiming present_timing;
+    std::uint64_t present_at_ns = 0;
     if (fullscreen_at_start) {
         SDL_SetWindowFullscreen(window, true);
     }
@@ -2369,15 +2372,9 @@ int main(int argc, char** argv) {
             speed_ticks = 0;
         }
         std::uint64_t picture_frame = machine.frame_count();
-        if (!warping) {
-            const freetvc::Framebuffer* shown = nullptr;
-            if (paced) {
-                shown = pacer.pick(SDL_GetTicksNS(), machine.frame_count());
-                picture_frame = pacer.shown_frame();
-            } else {
-                pacer.reset();
-            }
-            upload_frame(*display, texture, shown ? *shown : machine.framebuffer());
+        if (!warping && !paced) {
+            pacer.reset();
+            upload_frame(*display, texture, machine.framebuffer());
         }
         for (std::string& line : tape.take_messages()) {
             notice.set(std::move(line), false);
@@ -2664,6 +2661,15 @@ int main(int argc, char** argv) {
         actions.menu_open |= prompting;
         ImGui::Render();
 
+        // Self-timed presents wait here, so the frame is picked and shown at the same point of each refresh
+        if (const std::uint64_t t = SDL_GetTicksNS(); present_at_ns > t) {
+            SDL_DelayPrecise(present_at_ns - t);
+        }
+        if (!warping && paced) {
+            const freetvc::Framebuffer* shown = pacer.pick(SDL_GetTicksNS(), machine.frame_count());
+            picture_frame = shown ? pacer.shown_frame() : machine.frame_count();
+            upload_frame(*display, texture, shown ? *shown : machine.framebuffer());
+        }
         display->prepare_picture(texture, machine.config().colour, picture_frame);
         display->present(skins.skin.frame);
         if (frame_log) {
@@ -2671,6 +2677,20 @@ int main(int argc, char** argv) {
                          static_cast<unsigned long long>(picture_frame), static_cast<unsigned long long>(machine.frame_count()),
                          static_cast<unsigned long long>(pacer.late_count()));
             std::fflush(frame_log);
+        }
+        {
+            const SDL_DisplayID shown_on = SDL_GetDisplayForWindow(window);
+            const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(shown_on);
+            const std::uint64_t now = SDL_GetTicksNS();
+            present_at_ns = now + present_timing.presented(now, shown_on, mode ? mode->refresh_rate : 0.0f);
+            if (present_timing.take_change()) {
+                const bool vsync = present_timing.mode() == freetvc::sdl::PresentTiming::Mode::Vsync;
+                display->set_vsync(vsync);
+                if (!vsync) {
+                    std::fprintf(stderr, "freetvc: presents at %.1f Hz on a %.1f Hz display: timing them at the display's rate\n",
+                                 present_timing.measured_hz(), mode ? mode->refresh_rate : 0.0f);
+                }
+            }
         }
 
         if (actions.menu_open && !menu_open) {

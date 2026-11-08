@@ -13,7 +13,7 @@ import sys
 from collections import Counter
 
 FRAME_MS = 62800 / 3.125e6 * 1000  # 20.096 ms
-STALL_MS = 3 * FRAME_MS  # a present this late is a host stall: the display then jumps to catch up
+STALL_MS = FRAME_MS  # a present this late is a host stall: a frame due meanwhile could not be shown
 AFTER_STALL_NS = 1e9
 
 

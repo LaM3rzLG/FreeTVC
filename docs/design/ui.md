@@ -67,13 +67,14 @@ Play is the default mode at start: the 4:3 screen, centred in the frame colour, 
 The machine is paced by the audio device (or the wall clock) and runs in slices that may complete two frames in one pass of the GUI loop, while the host display refreshes at its own rate (60, 120, 144, 180 Hz...). Showing the newest frame at each present would drop the frame in between and make a smooth scroll jump.
 
 - Every completed frame goes into a queue of 8 (`FramePacer` in `frontend/sdl/frame_pacer.hpp`, the machine's `FrameSink`; the video recorder is chained behind it).
-- At each present the display takes the frame due on its own clock, which advances at 62 800 T per frame and follows the machine 1.5 frames behind, corrected over about a second; more than 4 frames off, it jumps. The machine's speed is never changed.
+- Right before each present the display takes the frame due on its own clock, which advances at 62 800 T per frame and follows the machine 1.5 frames behind, corrected over about a second; more than 4 frames off, it jumps. A present that comes late shows the next frame rather than skipping one (at most one frame behind; the faster display catches up). The machine's speed is never changed.
+- **Vsync or self-timed** (`PresentTiming` in `frontend/sdl/present_timing.hpp`): at start and whenever the window moves to another display or its refresh rate changes, the GUI presents with vsync and takes the median present rate over 1 s (after 0.5 s to settle). Within 12 % of the display's refresh rate, vsync stays. Otherwise (capped below it, or far above it because vsync is ignored) vsync goes off and the loop waits for each refresh period itself, just before the present, at the rate SDL reports for the window's display; stderr says so once. A composited window shows no tearing that way ⚑ (fullscreen not checked).
 - On a fixed-rate display each frame stays up for a whole number of refreshes (on 180 Hz: 3 or 4, 16.7 or 22.2 ms; on 60 Hz: 1 or 2).
 - Paused, rewinding, autostart and fast tape or disk show the machine's newest frame directly and empty the queue.
 - `FREETVC_FRAME_LOG=FILE` writes one line per present: host ns, the shown frame, the machine's frame count, late picks. `tools/frame_pacing_check.py FILE` summarises the last 20 s.
-- macOS: OpenGL presents at 60 Hz even on a 180 Hz display; the SDL renderer (Metal) follows the display ✓ (M4, macOS 27, 2026-11-08).
+- macOS (M4, macOS 27, 2026-11-08) ✓: OpenGL with vsync presents at 60 Hz even on a 180 Hz display, so it goes self-timed there (180 Hz, 0 dropped in 30 s) and keeps vsync on the 60 Hz built-in display (0 dropped in 30 s); moving the window between them switches both ways. The SDL renderer (Metal) keeps vsync at 180 Hz (0 dropped).
 - Windows 11, Radeon 780M, 60 Hz: OpenGL 0 dropped of 996 ✓; the SDL renderer (Direct3D) presented once at 143.6 Hz on the 60 Hz display, without vsync ⚑ (2026-11-08).
-- A host stall (a present later than 3 frames) makes the display jump to catch up; `frame_pacing_check.py` lists those frames apart from drops.
+- A host stall (a present later than one frame, 20.1 ms) loses the frame due meanwhile; `frame_pacing_check.py` lists those frames apart from drops.
 
 ### Status strip
 

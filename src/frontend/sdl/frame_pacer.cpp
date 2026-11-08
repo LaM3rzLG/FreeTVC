@@ -45,6 +45,7 @@ const Framebuffer* FramePacer::pick(std::uint64_t now_ns, std::uint64_t machine_
         started_ = true;
         base_ = machine_frames - produced_;
         pos_ = target;
+        shown_ = 0;
     } else {
         const double dt = static_cast<double>(now_ns - last_ns_) / 1e9;
         pos_ += dt * 1e9 / static_cast<double>(kFrameNs);
@@ -60,6 +61,11 @@ const Framebuffer* FramePacer::pick(std::uint64_t now_ns, std::uint64_t machine_
         ++late_;
         want = produced_;
     }
+    // A present that comes late shows the next frame, not the one after it: at most one frame behind, the later ones catch up
+    if (shown_ != 0 && want == shown_ + 2) {
+        --want;
+    }
+    shown_ = want;
     shown_frame_ = base_ + want;
     return &slots_[want % kSlots].frame;
 }

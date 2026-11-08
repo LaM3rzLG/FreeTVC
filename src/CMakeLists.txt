@@ -147,6 +147,7 @@ if(FREETVC_BUILD_GUI)
         frontend/sdl/display_gl.cpp
         frontend/sdl/display_sdl.cpp
         frontend/sdl/frame_pacer.cpp
+        frontend/sdl/present_timing.cpp
         frontend/sdl/host_input.cpp
         frontend/sdl/keyboard_editor.cpp
         frontend/sdl/play_view.cpp
