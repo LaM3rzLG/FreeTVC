@@ -62,6 +62,17 @@ Play is the default mode at start: the 4:3 screen, centred in the frame colour, 
 - **Full raster (debug)**, in the main menu under Screen, in the settings window, or with `--full-raster`: all 800 × 314 framebuffer pixels, sync and blanking included, with the TV area outlined (label colour, 60 % alpha). Meant for code that changes the CRTC, border or blanking.
 - The TV area has no overscan: a real set cuts another 5–10 %.
 
+### Frame pacing
+
+The machine is paced by the audio device (or the wall clock) and runs in slices that may complete two frames in one pass of the GUI loop, while the host display refreshes at its own rate (60, 120, 144, 180 Hz...). Showing the newest frame at each present would drop the frame in between and make a smooth scroll jump.
+
+- Every completed frame goes into a queue of 8 (`FramePacer` in `frontend/sdl/frame_pacer.hpp`, the machine's `FrameSink`; the video recorder is chained behind it).
+- At each present the display takes the frame due on its own clock, which advances at 62 800 T per frame and follows the machine 1.5 frames behind, corrected over about a second; more than 4 frames off, it jumps. The machine's speed is never changed.
+- On a fixed-rate display each frame stays up for a whole number of refreshes (on 180 Hz: 3 or 4, 16.7 or 22.2 ms; on 60 Hz: 1 or 2).
+- Paused, rewinding, autostart and fast tape or disk show the machine's newest frame directly and empty the queue.
+- `FREETVC_FRAME_LOG=FILE` writes one line per present: host ns, the shown frame, the machine's frame count, late picks. `tools/frame_pacing_check.py FILE` summarises the last 20 s.
+- macOS: OpenGL presents at 60 Hz even on a 180 Hz display; the SDL renderer (Metal) follows the display ✓ (M4, macOS 27, 2026-11-08).
+
 ### Status strip
 
 One status strip at the bottom (the keyboard deck), separated by the groove line. Its keys are line drawings in the machine key's style (`frontend/sdl/deck.*`); the user guide's section 3 lists them. Left to right:

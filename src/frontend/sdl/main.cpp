@@ -43,6 +43,7 @@
 #include "frontend/sdl/play_view.hpp"
 #include "frontend/sdl/save_prompt.hpp"
 #include "frontend/sdl/display.hpp"
+#include "frontend/sdl/frame_pacer.hpp"
 #include "frontend/sdl/keyboard_editor.hpp"
 #include "frontend/sdl/keymap.hpp"
 #include "frontend/sdl/picture.hpp"
@@ -1673,8 +1674,12 @@ int main(int argc, char** argv) {
         return cassette.empty() ? std::string(freetvc::kPresets[preset_index].name) : cassette;
     };
     freetvc::VideoRecorder recorder;
+    freetvc::sdl::FramePacer pacer;
+    machine.set_frame_sink(&pacer);
+    // Diagnostics (design/ui.md "Frame pacing"): one line per presented picture
+    FILE* frame_log = std::getenv("FREETVC_FRAME_LOG") ? std::fopen(std::getenv("FREETVC_FRAME_LOG"), "w") : nullptr;
     const auto stop_recording = [&] {
-        machine.set_frame_sink(nullptr);
+        pacer.set_next(nullptr);
         std::vector<float> rest(machine.audio_available());
         machine.read_audio(rest);
         recorder.audio(rest);
@@ -2265,6 +2270,7 @@ int main(int argc, char** argv) {
         }
 
         std::uint64_t ran = 0;
+        bool paced = false;  // this pass ran at real-time speed: the display takes its frames from the pacer
         // Rewind: while F10 is held the machine stands still and steps back one kept second every 200 ms
         if (rewinding && now_ns >= rewind_next_ns) {
             rewind_next_ns = now_ns + 200'000'000;
@@ -2326,6 +2332,7 @@ int main(int argc, char** argv) {
             machine.read_audio(samples);
             wall_pending = 0;
         } else if (audio) {
+            paced = !stopped;
             const auto queued = static_cast<std::uint64_t>(std::max(SDL_GetAudioStreamQueued(audio), 0)) / sizeof(float);
             if (!stopped && queued < queue_target) {
                 const std::uint64_t ticks = (queue_target - queued) * kTicksPerSecond / machine.audio_rate() + 1;
@@ -2337,6 +2344,7 @@ int main(int argc, char** argv) {
                 SDL_PutAudioStreamData(audio, samples.data(), static_cast<int>(samples.size() * sizeof(float)));
             }
         } else if (!stopped) {
+            paced = true;
             wall_pending = std::min(wall_pending + (now_ns - last_ns) * kTicksPerSecond / 1'000'000'000, kMaxCatchUp);
             if (wall_pending > 0) {
                 ran = hub->run(wall_pending);
@@ -2360,8 +2368,16 @@ int main(int argc, char** argv) {
             speed_since_ns = now_ns;
             speed_ticks = 0;
         }
+        std::uint64_t picture_frame = machine.frame_count();
         if (!warping) {
-            upload_frame(*display, texture, machine.framebuffer());
+            const freetvc::Framebuffer* shown = nullptr;
+            if (paced) {
+                shown = pacer.pick(SDL_GetTicksNS(), machine.frame_count());
+                picture_frame = pacer.shown_frame();
+            } else {
+                pacer.reset();
+            }
+            upload_frame(*display, texture, shown ? *shown : machine.framebuffer());
         }
         for (std::string& line : tape.take_messages()) {
             notice.set(std::move(line), false);
@@ -2648,8 +2664,14 @@ int main(int argc, char** argv) {
         actions.menu_open |= prompting;
         ImGui::Render();
 
-        display->prepare_picture(texture, machine.config().colour, machine.frame_count());
+        display->prepare_picture(texture, machine.config().colour, picture_frame);
         display->present(skins.skin.frame);
+        if (frame_log) {
+            std::fprintf(frame_log, "%llu %llu %llu %llu\n", static_cast<unsigned long long>(SDL_GetTicksNS()),
+                         static_cast<unsigned long long>(picture_frame), static_cast<unsigned long long>(machine.frame_count()),
+                         static_cast<unsigned long long>(pacer.late_count()));
+            std::fflush(frame_log);
+        }
 
         if (actions.menu_open && !menu_open) {
             input.release_all();
@@ -3471,7 +3493,7 @@ int main(int argc, char** argv) {
                 machine.read_audio(before);
                 const fs::path out = video_dir() / fs::path(std::u8string(reinterpret_cast<const char8_t*>(timestamped(media_name(), ".mp4").c_str())));
                 if (recorder.start(out, *ffmpeg, full_raster ? freetvc::kFullRaster : freetvc::kTvArea, machine.audio_rate(), error)) {
-                    machine.set_frame_sink(&recorder);
+                    pacer.set_next(&recorder);
                     notice.show(false, "recording to %s", utf8(out.filename()).c_str());
                 } else {
                     notice.show(true, "recording failed: %s", error.c_str());
@@ -3537,6 +3559,9 @@ int main(int argc, char** argv) {
     about_view.release(*display);
     display.reset();  // its ImGui backends and the window go with it
     ImGui::DestroyContext();
+    if (frame_log) {
+        std::fclose(frame_log);
+    }
     SDL_Quit();
     return 0;
 }
