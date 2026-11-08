@@ -934,6 +934,11 @@ int main(int argc, char** argv) {
     }
     SDL_Window* window = display->window();
     std::fprintf(stderr, "freetvc: drawing with %s\n", std::string(display->name()).c_str());
+    // The window, taskbar and Dock icon (data/icon/freetvc.svg, rendered by tools/make_icons.sh)
+    if (SDL_Surface* icon = SDL_LoadPNG((base_dir / "about" / "freetvc-icon.png").string().c_str())) {
+        SDL_SetWindowIcon(window, icon);
+        SDL_DestroySurface(icon);
+    }
     display->set_vsync(true);
     freetvc::sdl::PresentTiming present_timing;
     std::uint64_t present_at_ns = 0;

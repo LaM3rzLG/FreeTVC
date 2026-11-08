@@ -155,6 +155,13 @@ if(FREETVC_BUILD_GUI)
         frontend/sdl/settings_view.cpp
         frontend/sdl/skin_style.cpp)
     target_link_libraries(freetvc PRIVATE freetvc_frontend_common freetvc_remote freetvc_skin freetvc_keymap freetvc_imgui SDL3::SDL3)
+    if(WIN32)
+        # The .exe's icon in Explorer (data/icon/freetvc.ico, rendered by tools/make_icons.sh)
+        enable_language(RC)
+        set(freetvc_rc ${CMAKE_CURRENT_BINARY_DIR}/generated/freetvc.rc)
+        file(WRITE ${freetvc_rc} "1 ICON \"${PROJECT_SOURCE_DIR}/data/icon/freetvc.ico\"\n")
+        target_sources(freetvc PRIVATE ${freetvc_rc})
+    endif()
     freetvc_warnings(freetvc)
 
     # The About window's build line, refreshed at every build (cmake/FreeTVCBuildInfo.cmake)
