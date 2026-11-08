@@ -1,11 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 512 512">
- <!-- SPDX-License-Identifier: GPL-3.0-or-later. freeTVC icon: the start picture's TV Computer on a dark tile, the TVC's own colours below -->
+ <!-- SPDX-License-Identifier: GPL-3.0-or-later. freeTVC icon: the start picture's TV Computer on a dark tile -->
  <defs>
   <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2624"/><stop offset="1" stop-color="#141211"/></linearGradient>
-  <radialGradient id="glow" cx="0.5" cy="0.62" r="0.5"><stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.55" r="0.5"><stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
  </defs>
  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bg)"/>
  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#glow)"/>
- <image x="30" y="96" width="452" height="283" preserveAspectRatio="xMidYMid meet" href="../about/tvc64kplus.png" xlink:href="../about/tvc64kplus.png"/>
- <g transform="translate(0,6)"><rect x="96" y="408" width="40" height="14" fill="#ff0000"/><rect x="136" y="408" width="40" height="14" fill="#ffff00"/><rect x="176" y="408" width="40" height="14" fill="#00ff00"/><rect x="216" y="408" width="40" height="14" fill="#00ffff"/><rect x="256" y="408" width="40" height="14" fill="#0000ff"/><rect x="296" y="408" width="40" height="14" fill="#ff00ff"/><rect x="336" y="408" width="40" height="14" fill="#ffffff"/><rect x="376" y="408" width="40" height="14" fill="#920000"/></g>
+ <image x="24" y="110" width="464" height="291" preserveAspectRatio="xMidYMid meet" href="../about/tvc64kplus.png" xlink:href="../about/tvc64kplus.png"/>
 </svg>
