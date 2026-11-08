@@ -2,6 +2,18 @@
 
 A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 
+## Következő kiadás
+
+### Új
+
+- **Ikon**: a TV Computer fotója sötét, lekerekített alapon; látszik a Dockban, a tálcán, az Alt+Tab / Cmd+Tab váltóban és a Windowsos `freetvc.exe` fájlon.
+
+### Változott
+
+- **Simulékony megjelenítés**: a finom scroll és a mozgás egyenletes, nem ugrik. Eddig minden ~16. TVC-kép kimaradt a képernyőről, mert a gép a hang ütemében csomagokban számol; most minden kép sorba kerül, és a kijelző egyenletes órával, kb. 30 ms késéssel veszi ki őket. A gép sebessége nem változott (49,76 kép/s, ahogy a valódi TVC-n).
+- Bármilyen monitorfrekvencián (60, 75, 120, 144, 180 Hz…) működik: indításkor és monitorváltáskor a program 1 másodpercig méri, követi-e a VSync a monitort; ha nem (macOS-en az OpenGL 60 Hz-re fogja a 180 Hz-es monitort is), magától átáll a monitor ütemére, a képhatások maradnak.
+- Mérés: `FREETVC_FRAME_LOG=fájl` környezeti változóval a GUI naplózza a kirakott képeket, a `tools/frame_pacing_check.py fájl` kiírja, maradt-e ki kép.
+
 ## 1.3.0 — 2026-11-07
 
 ### Új

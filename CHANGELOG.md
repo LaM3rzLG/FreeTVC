@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### New
+
+- **Icon**: the TV Computer's photo on a dark rounded tile, in the Dock, the taskbar, the Alt+Tab / Cmd+Tab switcher and on the Windows `freetvc.exe`.
+
+### Changed
+
+- **Smooth display**: fine scrolling and motion are even, without jumps. About every 16th TVC frame never reached the screen, because the machine runs in slices paced by the audio; now every frame is queued and the display takes them on an even clock about 30 ms behind. The machine's speed is unchanged (49.76 frames/s, as on the real TVC).
+- Works at any refresh rate (60, 75, 120, 144, 180 Hz...): at start and after a display change the GUI checks for 1 s whether vsync follows the display; when it does not (macOS OpenGL holds even a 180 Hz display at 60 Hz), it times presents at the display's rate itself, with the picture effects kept.
+- Measuring: with `FREETVC_FRAME_LOG=file` the GUI logs every present, and `tools/frame_pacing_check.py file` reports dropped frames.
+
 ## 1.3.0 — 2026-11-07
 
 ### New
