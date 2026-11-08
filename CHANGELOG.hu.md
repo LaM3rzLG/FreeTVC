@@ -2,7 +2,7 @@
 
 A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 
-## Következő kiadás
+## 1.3.1 — 2026-11-08
 
 ### Új
 
@@ -13,6 +13,17 @@ A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 - **Simulékony megjelenítés**: a finom scroll és a mozgás egyenletes, nem ugrik. Eddig minden ~16. TVC-kép kimaradt a képernyőről, mert a gép a hang ütemében csomagokban számol; most minden kép sorba kerül, és a kijelző egyenletes órával, kb. 30 ms késéssel veszi ki őket. A gép sebessége nem változott (49,76 kép/s, ahogy a valódi TVC-n).
 - Bármilyen monitorfrekvencián (60, 75, 120, 144, 180 Hz…) működik: indításkor és monitorváltáskor a program 1 másodpercig méri, követi-e a VSync a monitort; ha nem (macOS-en az OpenGL 60 Hz-re fogja a 180 Hz-es monitort is), magától átáll a monitor ütemére, a képhatások maradnak.
 - Mérés: `FREETVC_FRAME_LOG=fájl` környezeti változóval a GUI naplózza a kirakott képeket, a `tools/frame_pacing_check.py fájl` kiírja, maradt-e ki kép.
+
+### Letöltések
+
+| Fájl | Mire |
+|---|---|
+| `freeTVC-1.3.1-windows-x64.zip` | 64 bites Windows: bárhová kicsomagolható, a `freetvc.exe` indítja. A program nincs aláírva, ezért a SmartScreen első indításkor figyelmeztethet. |
+| `freeTVC-1.3.1-linux-x86_64.tar.gz` | 64 bites Linux, glibc 2.39 vagy újabb (Ubuntu 24.04, Debian 13, Fedora 40 vagy újabb): kicsomagolás után `./freetvc`. |
+| `freeTVC-1.3.1-macos-arm64.zip` | macOS 13 vagy újabb, Apple Silicon (M1 és újabb): kicsomagolás után `freetvc`. |
+| `freeTVC-1.3.1-macos-x86_64.zip` | macOS 13 vagy újabb, Intel. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | az archívumok ellenőrzőösszegei |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | a mellékelt ffmpeg forrása (GPL) |
 
 ## 1.3.0 — 2026-11-07
 

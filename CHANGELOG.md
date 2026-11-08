@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.1 — 2026-11-08
 
 ### New
 
@@ -11,6 +11,17 @@
 - **Smooth display**: fine scrolling and motion are even, without jumps. About every 16th TVC frame never reached the screen, because the machine runs in slices paced by the audio; now every frame is queued and the display takes them on an even clock about 30 ms behind. The machine's speed is unchanged (49.76 frames/s, as on the real TVC).
 - Works at any refresh rate (60, 75, 120, 144, 180 Hz...): at start and after a display change the GUI checks for 1 s whether vsync follows the display; when it does not (macOS OpenGL holds even a 180 Hz display at 60 Hz), it times presents at the display's rate itself, with the picture effects kept.
 - Measuring: with `FREETVC_FRAME_LOG=file` the GUI logs every present, and `tools/frame_pacing_check.py file` reports dropped frames.
+
+### Downloads
+
+| File | For |
+|---|---|
+| `freeTVC-1.3.1-windows-x64.zip` | 64-bit Windows: unpack anywhere and run `freetvc.exe`. The programs are not signed, so Windows SmartScreen may warn on the first start. |
+| `freeTVC-1.3.1-linux-x86_64.tar.gz` | 64-bit Linux with glibc 2.39 or newer (Ubuntu 24.04, Debian 13, Fedora 40 or newer): unpack and run `./freetvc`. |
+| `freeTVC-1.3.1-macos-arm64.zip` | macOS 13 or newer on Apple Silicon (M1 and later): unpack and run `freetvc`. |
+| `freeTVC-1.3.1-macos-x86_64.zip` | macOS 13 or newer on Intel Macs. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | checksums of the archives |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | the sources of the bundled ffmpeg (GPL) |
 
 ## 1.3.0 — 2026-11-07
 
