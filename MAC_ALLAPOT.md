@@ -25,8 +25,13 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 - Mérés: `FREETVC_FRAME_LOG=fájl` a GUI-nak, utána `python3 tools/frame_pacing_check.py fájl`.
 - Mac: az OpenGL VSync-kel 180 Hz-es monitoron is csak 60 Hz -> a GUI ezt 1 s alatt méri, és saját időzítésre vált a monitor
   frekvenciáján (`PresentTiming`); a képhatások maradnak. Belső 60 Hz-es kijelzőn marad a VSync; áthúzáskor újra dönt. Mindenhol 0 kihagyás.
-  A felhasználó a 180 Hz-es saját időzítést jónak látta. Teljes képernyő nincs ellenőrizve. Windows (PC, 60 Hz): OpenGL 0 kihagyás.
+  A felhasználó a 180 Hz-es saját időzítést jónak látta. Teljes képernyő nincs ellenőrizve. Windows (PC, 60/144 Hz): OpenGL és D3D 0 kihagyás; a felhasználó szemmel is jónak látta.
 - A felhasználó a Befosás scrollját a Macen simának látta ("mint a TMC20").
+
+## Ikon (2026-11-08)
+- Az indítókép TVC-fotója sötét, lekerekített alapon (`data/icon/freetvc.svg`); `sh tools/make_icons.sh` készíti belőle az
+  ablakikont (`data/about/freetvc-icon.png`, Dock/tálca) és a Windows exe ikonját (`data/icon/freetvc.ico`, `.rc`).
+  Macen és PC-n a felhasználó látta, jó. Nyitott: Mac `.app` csomag, hogy a Finderben is ikon legyen.
 
 ## 2dfx grafikus kártya (`2dfx` ág, 2026-11-06)
 - Kártyák menü / Beállítások / ini `twodfx` / `--2dfx [SLOT]`; bármelyik slot, minden kártya mellé, kivéve TVC256k++.
