@@ -13,6 +13,14 @@ Közös (Windows + Mac), nem platformfüggő fejlesztések. A Mac-es fordítás/
   (a MacBookon nincs jobb Ctrl = FIRE és számbillentyűzet = 2. joystick; ~1 óra), esetleg gamepad (~1 óra).
 - 4. About + „Bronze” sötét betű: **KÉSZ** (a szöveg a kinézet világos színeivel; az #1 issue-ban jelezve 2026-11-07)
 
+## PC-teendők az 1.3.1 után (2026-11-08)
+- A Windows-gépen (Remote Control session, `ListAgents`): `C:\TVC\FreeTVC` `git pull` a main-en; `gh release download v1.3.1 -p "freeTVC-1.3.1-windows-x64.zip"`
+  -> `C:\TVC\FreeTVC\release\freeTVC-1.3.1-windows-x64`, `freetvc-headless.exe --version` = 1.3.1; a Befosás `CLAUDE.md` teszt-emulátor
+  útja erre (commit + push a Befosas repóban); a próba-mappák (`release\frame-pacing`, `icon`, `icon2`, `icon3`, `present-timing`) törölhetők.
+- A PC mentett beállításában a TVC256k++ a 0. slotban van, ezért a lemezes autostart hibát ad ("slot 0, the disk card's, holds the card256");
+  a felhasználó döntse el, átállítsuk-e.
+- Nyitott (nem PC): Mac `.app` csomag (Finder-ikon); teljes képernyős tearing-ellenőrzés Macen; Linuxon a sima megjelenítés nincs kipróbálva.
+
 ## Játékmentések (megbeszélve 2026-11-07; alap kész az 1.3.0-ban)
 A megbeszélt működés:
 - **Mentés:** memóriakép és konfiguráció (melyik kártya melyik slotban, EPROM-mal és állapottal), a felcsatolt útvonalakkal
