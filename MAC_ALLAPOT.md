@@ -56,9 +56,11 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
   lenyíló listából (`ui_font_size`). Betűtípus-választás kivéve (a vak listából díszbetű lett kiválasztva).
 - Ellenőrzés kattintás nélkül: `screencapture` csak akkor jó, ha az ablak elöl van (`set frontmost`), különben mást fotóz.
 
-## Kiadás (1.1.0-tól; az 1.1.0 kiadva 2026-11-06, az 1.2.0 és az 1.3.0 2026-11-07, az 1.3.1 2026-11-08, a felhasználó fiókjáról)
+## Kiadás (1.1.0-tól; az 1.1.0 kiadva 2026-11-06, az 1.2.0 és az 1.3.0 2026-11-07, az 1.3.1 és az 1.3.2 2026-11-08, a felhasználó fiókjáról)
 - Az Apple clang elnéz hiányzó `#include`-okat (pl. `<cmath>` a `std::lround`-hoz), a Linuxos GCC nem: az 1.3.0 első
   Actions-futása ezen bukott el. Új `std::` függvénynél a fejlécet is be kell írni.
+- Linux: a csomag Ubuntu 24.04 LTS-en vagy újabbon fut (a program glibc 2.38-at kér, minden mást magában hordoz); a fájlkezelőben
+  dupla kattintásra nem indul, terminálból `./freetvc`. Ezt a README „Running on Linux” része és a kiadás leírása is megírja.
 - Linux + Windows: GitHub Actions (`.github/workflows/release.yml`, kézi indítás vagy `v*` tag) → artifact.
 - macOS: `sh tools/mac/make_mac_release.sh OUT` → arm64 és x86_64 zip (macOS 13+, ad-hoc aláírás, nincs notarizálás).
 - A release-t Claude hozza létre a felhasználó fiókjáról (`gh release create`), mind a négy csomaggal, angol és
