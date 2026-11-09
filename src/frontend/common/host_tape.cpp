@@ -1806,6 +1806,10 @@ std::string HostTape::disk_name(unsigned drive) const {
     return drive < FloppyDrives::kDrives && drives_.disk(drive) ? disk_paths_[drive].filename().string() : std::string();
 }
 
+fs::path HostTape::disk_path(unsigned drive) const {
+    return drive < FloppyDrives::kDrives && drives_.disk(drive) ? disk_paths_[drive] : fs::path();
+}
+
 std::string HostTape::disk_describe() const {
     std::string text;
     if (disk_card_on()) {

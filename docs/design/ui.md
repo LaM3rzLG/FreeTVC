@@ -419,6 +419,7 @@ Code: the ROM search in `frontend/common/presets.{hpp,cpp}` (`rom_places`, `find
 | `frame_blend` | `auto`, `on`, `off` | frame blending ("Frame pacing") |
 | `blend_sharpness` | 0–100 | how little of the way between two frames is mixed |
 | `disk_card` | yes/no | the HBF card in slot 0 |
+| `disk_a` … `disk_d` | `none`, file | the disk image in that drive; put back at the next start while the card is in |
 | `disk_rom` | `1.1`, `1.2`, file | its EPROM (VT-DOS 1.1 `hbf.rom`, VT-DOS 1.2 `hbf12.rom`, or an image) |
 | `gamecard` | yes/no/0–3 | the GameCard in slot 1 (`yes`) or that slot; gamepads 3 and 4 are its joysticks 3 and 4 |
 | `multichip` | yes/no/0–3 | the Multichip sound card in slot 2 (`yes`) or that slot |

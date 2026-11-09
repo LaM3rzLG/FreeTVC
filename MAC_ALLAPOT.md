@@ -38,6 +38,12 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 - Szintetikus egérkattintás a GUI-ba: kis Swift program `CGEvent`-tel (a VS Code-nak van Accessibility joga), a
   `screencapture -C` mutatja a kurzort. Ideiglenes ImGui-napló a kattintás címzettjéről segített megtalálni a hibát.
 
+## Lemezek megjegyzése (2026-11-09)
+- Kilépéskor a meghajtókban lévő lemezek útvonala az ini-be kerül (`disk_a` … `disk_d`, `none` = üres); induláskor, ha a
+  lemezkártya bent van, visszakerülnek. Parancssori lemez/kártya (`--disk`, `--disk-card`, .dsk autostart) esetén nem nyúl hozzájuk.
+  Hiányzó fájl: üres meghajtó + üzenet a képen. Ellenőrizve külön példánnyal (MCP autostart → kilépés → újraindítás: A: a.dsk).
+  Kiadva az 1.3.3-ban.
+
 ## Ikon (2026-11-08)
 - Az indítókép TVC-fotója sötét, lekerekített alapon (`data/icon/freetvc.svg`); `sh tools/make_icons.sh` készíti belőle az
   ablakikont (`data/about/freetvc-icon.png`, Dock/tálca) és a Windows exe ikonját (`data/icon/freetvc.ico`, `.rc`).
@@ -56,7 +62,7 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
   lenyíló listából (`ui_font_size`). Betűtípus-választás kivéve (a vak listából díszbetű lett kiválasztva).
 - Ellenőrzés kattintás nélkül: `screencapture` csak akkor jó, ha az ablak elöl van (`set frontmost`), különben mást fotóz.
 
-## Kiadás (1.1.0-tól; az 1.1.0 kiadva 2026-11-06, az 1.2.0 és az 1.3.0 2026-11-07, az 1.3.1 és az 1.3.2 2026-11-08, a felhasználó fiókjáról)
+## Kiadás (1.1.0-tól; az 1.1.0 kiadva 2026-11-06, az 1.2.0 és az 1.3.0 2026-11-07, az 1.3.1 és az 1.3.2 2026-11-08, az 1.3.3 2026-11-09, a felhasználó fiókjáról)
 - Az Apple clang elnéz hiányzó `#include`-okat (pl. `<cmath>` a `std::lround`-hoz), a Linuxos GCC nem: az 1.3.0 első
   Actions-futása ezen bukott el. Új `std::` függvénynél a fejlécet is be kell írni.
 - Linux: a csomag Ubuntu 24.04 LTS-en vagy újabbon fut (a program glibc 2.38-at kér, minden mást magában hordoz); a fájlkezelőben

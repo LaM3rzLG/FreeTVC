@@ -1453,6 +1453,9 @@ msgstr "nem írható: '%s'"
 msgid "disk card left out: %s"
 msgstr "a lemezkártya kimaradt: %s"
 
+msgid "disk %c: left out: %s"
+msgstr "a(z) %c: lemez kimaradt: %s"
+
 #: src/frontend/sdl/main.cpp:1009
 #, c-format
 msgid "GameCard left out: %s"

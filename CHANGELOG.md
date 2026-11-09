@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.3.3 — 2026-11-09
+
+### Changed
+
+- **The disks are remembered**: the disk images in drives A:–D: at exit are written to `freetvc.ini` (`disk_a` … `disk_d`) and go back in their drives at the next start, while the disk card is in. A disk named on the command line (`--disk`, `--disk-card`, a `.dsk` to start) is left out of this. A disk whose file is gone leaves its drive empty, with a notice on the picture.
+
+### Downloads
+
+| File | For |
+|---|---|
+| `freeTVC-1.3.3-windows-x64.zip` | 64-bit Windows: unpack anywhere and run `freetvc.exe`. The programs are not signed, so Windows SmartScreen may warn on the first start. |
+| `freeTVC-1.3.3-linux-x86_64.tar.gz` | 64-bit Linux: Ubuntu 24.04 LTS or newer (Debian 13, Fedora 40 or newer also work): unpack and run `./freetvc` in a terminal. |
+| `freeTVC-1.3.3-macos-arm64.zip` | macOS 13 or newer on Apple Silicon (M1 and later): unpack and run `freetvc`. |
+| `freeTVC-1.3.3-macos-x86_64.zip` | macOS 13 or newer on Intel Macs. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | checksums of the archives |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | the sources of the bundled ffmpeg (GPL) |
+
 ## 1.3.2 — 2026-11-08
 
 ### New

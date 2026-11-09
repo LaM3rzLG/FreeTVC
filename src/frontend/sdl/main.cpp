@@ -1132,7 +1132,24 @@ int main(int argc, char** argv) {
     if (!autostart_path.empty() && freetvc::HostTape::is_disk_file(autostart_path)) {
         disk_card_given = true;
     }
+    // The disks of the last run, unless the command line names the card or its disks
+    if (!disk_card_given && tape.disk_card_on()) {
+        for (unsigned d = 0; d < freetvc::FloppyDrives::kDrives; ++d) {
+            const std::string& path = settings.values.disks[d].value_or("none");
+            if (path != "none" && !tape.disk_insert(d, path, error)) {
+                notice.show(true, "disk %c: left out: %s", static_cast<char>('A' + d), error.c_str());
+            }
+        }
+    }
     const bool disk_card_at_start = tape.disk_card_on();
+    const auto disk_setting = [&](unsigned drive) {
+        const fs::path path = tape.disk_card_on() ? tape.disk_path(drive) : fs::path();
+        return path.empty() ? std::string("none") : utf8(fs::absolute(path).lexically_normal());
+    };
+    std::array<std::string, freetvc::FloppyDrives::kDrives> disks_at_start;
+    for (unsigned d = 0; d < freetvc::FloppyDrives::kDrives; ++d) {
+        disks_at_start[d] = disk_setting(d);
+    }
     // The GameCard: from freetvc.ini or the command line
     if (!gamecard_rom_path.empty()) {
         auto rom = freetvc::read_file(gamecard_rom_path, 0x10000, error);
@@ -1590,6 +1607,12 @@ int main(int argc, char** argv) {
         }
         if ((!disk_card_given && (settings.values.disk_card.has_value() || tape.disk_card_on())) || tape.disk_card_on() != disk_card_at_start) {
             values.emplace_back("disk_card", tape.disk_card_on() ? "yes" : "no");
+        }
+        for (unsigned d = 0; d < freetvc::FloppyDrives::kDrives; ++d) {
+            const std::string disk_now = disk_setting(d);
+            if ((!disk_card_given && settings.values.disks[d].value_or("none") != disk_now) || disk_now != disks_at_start[d]) {
+                values.emplace_back(std::string("disk_") + static_cast<char>('a' + d), disk_now);
+            }
         }
         const int gamecard_now = tape.gamecard_slot();
         if ((!gamecard_given && (settings.values.gamecard.has_value() || gamecard_now >= 0)) || gamecard_now != gamecard_at_start) {

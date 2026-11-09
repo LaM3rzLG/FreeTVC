@@ -2,6 +2,23 @@
 
 A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 
+## 1.3.3 — 2026-11-09
+
+### Változott
+
+- **A lemezeket megjegyzi**: a kilépéskor az A:–D: meghajtókban lévő lemezképek a `freetvc.ini`-be kerülnek (`disk_a` … `disk_d`), és a következő indításkor visszakerülnek a meghajtókba, ha a lemezes kártya bent van. A parancssorban megadott lemezekre (`--disk`, `--disk-card`, indítandó `.dsk`) ez nem vonatkozik. Ha egy lemezfájl közben eltűnt, a meghajtó üres marad, és erről üzenet jelenik meg a képen.
+
+### Letöltések
+
+| Fájl | Mire |
+|---|---|
+| `freeTVC-1.3.3-windows-x64.zip` | 64 bites Windows: bárhová kicsomagolható, a `freetvc.exe` indítja. A program nincs aláírva, ezért a SmartScreen első indításkor figyelmeztethet. |
+| `freeTVC-1.3.3-linux-x86_64.tar.gz` | 64 bites Linux: Ubuntu 24.04 LTS vagy újabb (Debian 13, Fedora 40 vagy újabb is jó): kicsomagolás után terminálban `./freetvc`. |
+| `freeTVC-1.3.3-macos-arm64.zip` | macOS 13 vagy újabb, Apple Silicon (M1 és újabb): kicsomagolás után `freetvc`. |
+| `freeTVC-1.3.3-macos-x86_64.zip` | macOS 13 vagy újabb, Intel. |
+| `SHA256SUMS`, `SHA256SUMS-macos` | az archívumok ellenőrzőösszegei |
+| `ffmpeg-*.tar.xz`, `x264-*.tar.bz2` | a mellékelt ffmpeg forrásai (GPL) |
+
 ## 1.3.2 — 2026-11-08
 
 ### Új

@@ -382,6 +382,7 @@ Main menu → **Settings...** opens a sheet at the right of the window, its text
 | `blend_sharpness` | 0–100 | 50 | frame blending's sharpness in percent |
 | `disk_card` | flag | no | |
 | `disk_rom` | `1.1`, `1.2` or a file | `1.1` | |
+| `disk_a` … `disk_d` | `none` or a disk image | `none` | the disks in the drives at exit; back in the drives at the next start |
 | `gamecard` | flag or a slot 0–3 | no | `yes` = slot 1 |
 | `multichip` | flag or a slot 0–3 | no | `yes` = slot 2 |
 | `sid_card` | `off`, `6581`, `8580` | `off` | |

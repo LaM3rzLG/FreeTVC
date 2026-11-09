@@ -2,6 +2,7 @@
 // The settings file freetvc.ini: `key = value` lines, ';' comments (design/ui.md "Settings file and ROM search").
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <filesystem>
 #include <optional>
@@ -28,6 +29,7 @@ struct Settings {
     std::optional<bool> audio;
     std::optional<bool> full_raster;
     std::optional<bool> disk_card;  // the HBF card in slot 0
+    std::array<std::optional<std::string>, 4> disks;  // disk_a to disk_d: none, or the image in that drive (made absolute)
     // gamecard, multichip, card256, twodfx, nanosd and serial_card are yes, no, or the slot number 0-3 (yes = the card's own slot)
     std::optional<bool> gamecard;   // the GameCard in slot 1
     std::optional<bool> multichip;  // the Multichip sound card in slot 2

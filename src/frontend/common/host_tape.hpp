@@ -155,6 +155,8 @@ public:
     const FloppyDrives& drives() const { return drives_; }
     // File name of the disk in `drive`; empty when there is none.
     std::string disk_name(unsigned drive) const;
+    // The file of the disk in `drive`; empty when there is none.
+    std::filesystem::path disk_path(unsigned drive) const;
     // Writes every disk the machine changed back to its file; false (messages queued) if one could not be written.
     bool save_disks();
 

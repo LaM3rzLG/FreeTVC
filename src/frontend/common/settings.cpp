@@ -17,7 +17,7 @@ constexpr std::string_view kHeader =
     "; freeTVC settings (docs/design/ui.md \"Settings file and ROM search\"). The Settings window writes its keys as they\n"
     "; change; on exit freeTVC rewrites preset, skin, keymap, language, the cards and their media. Command-line options are\n"
     "; not saved. Keys: rom_dir, preset, skin, keymap, language, audio, volume, fullscreen, full_raster, disk_card, disk_rom,\n"
-    "; gamecard, multichip, sid_card, card256, card256_usb, card256_flash, twodfx, nanosd, nanosd_sd, nanosd_menu, nanosd_sort,\n"
+    "; disk_a, disk_b, disk_c, disk_d, gamecard, multichip, sid_card, card256, card256_usb, card256_flash, twodfx, nanosd, nanosd_sd, nanosd_menu, nanosd_sort,\n"
     "; printer, serial_card, serial_line, serial_flow, video_dir, screenshot_dir, save_dir, monitor, mcp, mcp_allow_monitor, dzrp, dzrp_banks, gdb, renderer,\n"
     "; picture, colour_switch, frame_blend, blend_sharpness, keys, recent, ui_font_size, strip_size.\n";
 
@@ -122,6 +122,10 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
             } else {
                 fail(msg("sid_card is off, 6581 or 8580"));
             }
+        } else if (key.size() == 6 && key.substr(0, 5) == "disk_" && key[5] >= 'a' && key[5] <= 'd') {
+            const std::filesystem::path file(value);
+            s.disks[static_cast<std::size_t>(key[5] - 'a')] =
+                value == "none" ? value : (file.is_relative() && !base.empty() ? base / file : file).lexically_normal().string();
         } else if (key == "disk_rom") {
             const std::filesystem::path file(value);
             s.disk_rom = value == "1.1" || value == "1.2" ? value : (file.is_relative() && !base.empty() ? base / file : file).lexically_normal().string();
