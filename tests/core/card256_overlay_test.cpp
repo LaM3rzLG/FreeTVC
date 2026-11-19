@@ -144,11 +144,11 @@ void test_mixing() {
     check(pixel(m, 0, 21, -1) == 0x3, "the border left of the paper is the TVC's");
     check(pixel(m, 256, 21) == 0x3, "the border right of the paper is the TVC's");
     check(pixel(m, 0, 22) == 0x1, "line 22: transparent");
-    // 16-colour mode: B9 latches at 3.125 MHz, one overlay pixel per TVC pixel
+    // 16-colour mode: every overlay pixel shows, as in the other modes
     m.io_write(0x06, 0x02);
     frames(m, 2);
-    check(pixel(m, 0, 21) == 0x4 && pixel(m, 1, 21) == 0x4, "16-colour mode: the even pixel over four dots");
-    check(pixel(m, 254, 21) == 0x0 && pixel(m, 255, 21) == 0x0, "16-colour mode: the odd 256th pixel is not shown (VRAM 00h shows)");
+    check(pixel(m, 0, 21) == 0x4 && pixel(m, 1, 21) == 0xC, "16-colour mode: every overlay pixel shows");
+    check(pixel(m, 254, 21) == 0x0 && pixel(m, 255, 21) == 0x2, "16-colour mode: the 256th pixel shows, colour 8 lets VRAM 00h through");
 }
 
 void test_timing() {

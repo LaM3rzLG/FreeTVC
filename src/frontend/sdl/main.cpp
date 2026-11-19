@@ -2010,6 +2010,7 @@ int main(int argc, char** argv) {
     // A drive counts as active this long after its last step, byte or command (the light and fast disk)
     constexpr std::uint64_t kDiskActiveTicks = freetvc::AudioSynth::kTickRate / 4;
     bool menu_open = false;
+    int strip_min_width = 0;  // the window's minimum width last set for the strip
     // The TVC256k++'s mouse: host motion gathered between frames, sent as one report per frame
     bool mouse_captured = false;
     float mouse_dx = 0.0f;
@@ -2764,11 +2765,14 @@ int main(int argc, char** argv) {
             skins.resize_strip();
         }
         // A larger strip needs a wider window: it grows rather than the keys covering each other
-        if (actions.strip_width > 0.0f && (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED)) == 0) {
+        const int needed = static_cast<int>(std::ceil(actions.strip_width));
+        // Only on a change: every SDL_SetWindowMinimumSize also re-sends the window size
+        if (needed > 0 && needed != strip_min_width &&
+            (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED)) == 0) {
+            strip_min_width = needed;
             int width = 0;
             int height = 0;
             SDL_GetWindowSize(window, &width, &height);
-            const int needed = static_cast<int>(std::ceil(actions.strip_width));
             SDL_SetWindowMinimumSize(window, needed, 0);
             if (width < needed) {
                 SDL_SetWindowSize(window, needed, height);

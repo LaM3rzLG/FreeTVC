@@ -89,7 +89,7 @@ void protocol() {
     EXPECT(request(s, 4, "ping", json::object(), false)["result"].is_object(), "");
 
     json list = request(s, 5, "tools/list", json::object());
-    EXPECT(list["result"]["tools"].size() == s.tool_count() && s.tool_count() == 21 && list["result"]["ttlMs"].is_number(), list.dump());
+    EXPECT(list["result"]["tools"].size() == s.tool_count() && s.tool_count() == 22 && list["result"]["ttlMs"].is_number(), list.dump());
     json legacy_list = request(s, 6, "tools/list", json::object(), false);
     EXPECT(legacy_list["result"]["tools"] == list["result"]["tools"] && !legacy_list["result"].contains("resultType"), "");
 

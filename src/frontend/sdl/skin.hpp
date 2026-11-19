@@ -61,9 +61,9 @@ struct Skin {
     std::string font_data = "AtkinsonHyperlegibleMono-Regular.ttf";
     float font_ui_size = 15.0f;
     float font_data_size = 15.0f;
-    float font_strip_size = 0.0f;  // the status strip's text; 0 = font_ui_size (data text in proportion)
+    float font_strip_size = 22.0f;  // the status strip's text; 0 = font_ui_size (data text in proportion)
 
-    float strip_height = 30.0f;
+    float strip_height = 45.0f;
     float screen_margin = 16.0f;
     float groove_width = 2.0f;
     float rounding = 0.0f;

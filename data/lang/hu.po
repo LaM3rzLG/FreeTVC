@@ -1958,10 +1958,6 @@ msgstr "ismeretlen kulcs: '%s'"
 msgid "beam.max is below beam.min"
 msgstr "a beam.max kisebb a beam.min értékénél"
 
-#: src/frontend/sdl/play_view.cpp:47
-msgid "Program"
-msgstr "Program"
-
 #: src/frontend/sdl/play_view.cpp:48
 msgid "Load program..."
 msgstr "Program betöltése..."
@@ -1974,15 +1970,6 @@ msgstr "%s újraindítása"
 #: src/frontend/sdl/play_view.cpp:52
 msgid "Run again"
 msgstr "Újraindítás"
-
-#: src/frontend/sdl/play_view.cpp:53
-#, c-format
-msgid "Eject %s"
-msgstr "%s kivétele"
-
-#: src/frontend/sdl/play_view.cpp:54
-msgid "Eject cassette"
-msgstr "Kazetta kivétele"
 
 #: src/frontend/sdl/play_view.cpp:64 src/frontend/sdl/settings_view.cpp:277
 msgid "Symbolic"
@@ -2007,13 +1994,6 @@ msgstr "Nyelv"
 #: src/frontend/sdl/play_view.cpp:91 src/frontend/sdl/settings_view.cpp:241
 msgid "Full raster (debug)"
 msgstr "Teljes raszter (hibakereséshez)"
-
-#: src/frontend/sdl/play_view.cpp:93
-msgid ""
-"Show the whole beam path, sync and blanking included; the TV area is outlined"
-msgstr ""
-"A sugár teljes útja, a szinkronnal és a kioltással együtt; a TV-terület "
-"bekeretezve"
 
 #: src/frontend/sdl/play_view.cpp:95
 msgid "Screenshot"
@@ -2052,97 +2032,6 @@ msgstr "Ki- és bekapcsolás"
 #: src/frontend/sdl/play_view.cpp:124
 msgid "Cards"
 msgstr "Kártyák"
-
-#: src/frontend/sdl/play_view.cpp:125
-msgid "Disk card in slot 0"
-msgstr "Lemezkártya a 0. kártyahelyen"
-
-#: src/frontend/sdl/play_view.cpp:127
-msgid ""
-"HBF card in slot 0: LOAD and SAVE use the disks, not the cassette; the "
-"machine powers on"
-msgstr ""
-"HBF kártya a 0. kártyahelyen: a LOAD és a SAVE a lemezeket használja, nem a "
-"kazettát; hidegindítás"
-
-#: src/frontend/sdl/play_view.cpp:131
-#, c-format
-msgid "GameCard in slot %d"
-msgstr "GameCard (%d. kártyahely)"
-
-#: src/frontend/sdl/play_view.cpp
-msgid "Put in slot"
-msgstr "Behelyezés kártyahelyre"
-
-#: src/frontend/sdl/play_view.cpp
-msgid "Move to slot"
-msgstr "Átrakás másik kártyahelyre"
-
-#: src/frontend/sdl/play_view.cpp
-#, c-format
-msgid "Slot %d, ports %d0h-%dFh"
-msgstr "%d. kártyahely (%d0h-%dFh portok)"
-
-#: src/frontend/sdl/play_view.cpp
-#, c-format
-msgid "Slot %d, ports %d0h-%dFh: %s"
-msgstr "%d. kártyahely (%d0h-%dFh portok): %s"
-
-#: src/frontend/sdl/play_view.cpp:137
-msgid ""
-"dikdom's card: SN76489 sound, joysticks 3 and 4 on gamepads 3 and 4, a boot "
-"menu with four games; the machine powers on"
-msgstr ""
-"dikdom kártyája: SN76489 hang, a 3. és 4. botkormány a 3. és 4. gamepaden, "
-"indítómenü négy játékkal; hidegindítás"
-
-#: src/frontend/sdl/play_view.cpp:141
-#, c-format
-msgid "Multichip sound card in slot %d"
-msgstr "Multichip hangkártya (%d. kártyahely)"
-
-#: src/frontend/sdl/play_view.cpp:147
-msgid ""
-"Vass Sándor's card: SN76489, SAA1099 and YM3812 (OPL2) on the TV's sound; "
-"its start-up screen plays a demo on each chip after SPACE; the machine "
-"powers on"
-msgstr ""
-"Vass Sándor kártyája: SN76489, SAA1099 és YM3812 (OPL2) a TV hangján; az "
-"indítóképernyője SPACE után mindegyik chipen lejátszik egy demót; "
-"hidegindítás"
-
-#: src/frontend/sdl/play_view.cpp:152
-msgid "SID card, MOS 6581"
-msgstr "SID-kártya, MOS 6581"
-
-#: src/frontend/sdl/play_view.cpp:152
-msgid "SID card, MOS 8580"
-msgstr "SID-kártya, MOS 8580"
-
-#: src/frontend/sdl/play_view.cpp:156
-msgid ""
-"A SID chip at ports E0h-FFh, outside the slots, where WinTVC puts it (no "
-"real card's documentation is known); reSID on the TV's sound; the machine "
-"powers on"
-msgstr ""
-"Egy SID chip az E0h-FFh portokon, a kártyahelyeken kívül, ahová a WinTVC is "
-"teszi (valódi kártya dokumentációja nem ismert); reSID a TV hangján; "
-"hidegindítás"
-
-#: src/frontend/sdl/play_view.cpp:161
-#, c-format
-msgid "TVC256k++ in slot %d"
-msgstr "TVC256k++ (%d. kártyahely)"
-
-#: src/frontend/sdl/play_view.cpp:167
-msgid ""
-"dikdom's card: 256 KiB fast RAM in place of U2/U3, 8 MiB paged RAM, sprites "
-"and overlay graphics, drives for LOAD and SAVE, a mouse, its EXT command "
-"line (EXT and the slot number), its vSID sound; the machine powers on"
-msgstr ""
-"dikdom kártyája: 256 KiB gyors RAM az U2/U3 helyén, 8 MiB lapozható RAM, "
-"sprite-ok és rávetített grafika, meghajtók a LOAD és a SAVE számára, egér, "
-"saját EXT parancssor (EXT és a kártyahely száma), vSID hang; hidegindítás"
 
 #: src/frontend/sdl/play_view.cpp:175
 #, c-format
@@ -2194,21 +2083,6 @@ msgstr ""
 "Egy littlefs képfájl 2-es meghajtóként, csak olvasható: a kártya indítója és "
 "játékai (card256-flash.bin)"
 
-#: src/frontend/sdl/play_view.cpp:195
-#, c-format
-msgid "NanoSD in slot %d"
-msgstr "NanoSD (%d. kártyahely)"
-
-#: src/frontend/sdl/play_view.cpp:201
-msgid ""
-"Vass Sándor's card: an SD card through an Arduino Nano; LOAD and SAVE go to "
-"it, a file-select menu at power-on (ESC skips it), its command line with EXT "
-"0; the machine powers on"
-msgstr ""
-"Vass Sándor kártyája: SD-kártya egy Arduino Nanón át; a LOAD és a SAVE oda "
-"megy, bekapcsoláskor fájlválasztó menü (az ESC átugorja), saját parancssor "
-"EXT 0-val; hidegindítás"
-
 #: src/frontend/sdl/play_view.cpp:208 src/frontend/sdl/play_view.cpp:296
 #, c-format
 msgid "SD card %s..."
@@ -2230,22 +2104,9 @@ msgstr ""
 msgid "Take the SD card out"
 msgstr "SD-kártya kivétele"
 
-#: src/frontend/sdl/play_view.cpp:217
-#, c-format
-msgid "Serial card in slot %d"
-msgstr "Soros kártya (%d. kártyahely)"
-
 #: src/frontend/sdl/play_view.cpp:219
 msgid "Serial card (RS-232)"
 msgstr "Soros kártya (RS-232)"
-
-#: src/frontend/sdl/play_view.cpp:223
-msgid ""
-"Videoton's RS-232 card (an 8251A): BASIC's device #6 (LIST #6, SAVE #6, LOAD "
-"#6); the machine powers on"
-msgstr ""
-"A Videoton RS-232 kártyája (8251A): a BASIC #6-os eszköze (LIST #6, SAVE #6, "
-"LOAD #6); hidegindítás"
 
 #: src/frontend/sdl/play_view.cpp:228
 msgid "Cable unplugged"
@@ -2430,10 +2291,6 @@ msgstr ""
 "kártya egy FAT16 partícióval; a microSD-foglalatba kerül, az SD Duallal "
 "együtt"
 
-#: src/frontend/sdl/play_view.cpp:320
-msgid "Tape"
-msgstr "Magnó"
-
 #: src/frontend/sdl/play_view.cpp:321
 msgid "Insert tape..."
 msgstr "Szalag behelyezése..."
@@ -2469,10 +2326,6 @@ msgstr "Gyors magnó"
 #: src/frontend/sdl/play_view.cpp:333
 msgid "Run at full speed while the tape moves"
 msgstr "Teljes sebesség, amíg a szalag mozog"
-
-#: src/frontend/sdl/play_view.cpp:339
-msgid "Disk"
-msgstr "Lemez"
 
 #: src/frontend/sdl/play_view.cpp:345
 #, c-format
@@ -2535,14 +2388,6 @@ msgstr "némítva"
 msgid "sound"
 msgstr "hang"
 
-#: src/frontend/sdl/play_view.cpp:468
-msgid "Insert a tape and play it"
-msgstr "Szalag behelyezése és lejátszása"
-
-#: src/frontend/sdl/play_view.cpp:474
-msgid "tape"
-msgstr "magnó"
-
 #: src/frontend/sdl/play_view.cpp:481
 msgid "The tape moves: PLAY or RECORD is down and the motor is on"
 msgstr "A szalag mozog: a PLAY vagy a RECORD le van nyomva, és a motor jár"
@@ -2554,10 +2399,6 @@ msgstr "A magnó; a ROM kapcsolja a motort be és ki"
 #: src/frontend/sdl/play_view.cpp:484 src/frontend/common/host_tape.cpp:345
 msgid "no tape"
 msgstr "nincs szalag"
-
-#: src/frontend/sdl/play_view.cpp:495 src/frontend/sdl/play_view.cpp:497
-msgid "disk"
-msgstr "lemez"
 
 #: src/frontend/sdl/settings_view.cpp:49
 #, c-format
@@ -3656,9 +3497,6 @@ msgstr "Változatadatok másolása"
 msgid "2dfx graphics card"
 msgstr "2dfx grafikus kártya"
 
-msgid "2dfx graphics card in slot %d"
-msgstr "2dfx grafikus kártya (%d. kártyahely)"
-
 msgid "2dfx graphics card in slot %d; powered on"
 msgstr "2dfx grafikus kártya: %d. kártyahely; hidegindítás"
 
@@ -3667,15 +3505,6 @@ msgstr "2dfx grafikus kártya kivéve; hidegindítás"
 
 msgid "2dfx card left out: %s"
 msgstr "a 2dfx kártya kimaradt: %s"
-
-msgid ""
-"Vaczkó Károly's card: sprites, 2D and 3D graphics over the paper, ports "
-"F8h/F9h (a SID card keeps E0h-F7h); not with the TVC256k++; the machine "
-"powers on"
-msgstr ""
-"Vaczkó Károly kártyája: sprite-ok, 2D és 3D grafika a papír fölött, F8h/F9h "
-"port (a SID-kártyának E0h–F7h marad); a TVC256k++-szal nem megy együtt; "
-"hidegindítás"
 
 msgid ""
 "the TVC256k++ cannot go in beside the 2dfx card (both drive EC0-3 and /EXTC)"
@@ -3716,9 +3545,6 @@ msgstr "Képernyőképek helye..."
 
 msgid "Open the screenshots folder"
 msgstr "Képernyőképek mappájának megnyitása"
-
-msgid "recording to %s"
-msgstr "felvétel: %s"
 
 msgid "recording failed: %s"
 msgstr "a felvétel nem sikerült: %s"
@@ -3935,3 +3761,20 @@ msgstr "a blend_sharpness 0 és 100 között lehet"
 
 msgid "0 %: smoothest; higher: sharper"
 msgstr "0 %: legsimább; nagyobb: élesebb"
+
+msgid "cannot make a pipe for ffmpeg"
+msgstr "nem hozható létre cső az ffmpeg felé"
+
+#, c-format
+msgid "cannot start ffmpeg (%s)"
+msgstr "az ffmpeg nem indítható (%s)"
+
+msgid "no video is being recorded"
+msgstr "nincs folyamatban videófelvétel"
+
+msgid "no frame was recorded"
+msgstr "egy képkocka sem került a felvételbe"
+
+#, c-format
+msgid "ffmpeg failed: %s"
+msgstr "az ffmpeg hibát jelzett: %s"

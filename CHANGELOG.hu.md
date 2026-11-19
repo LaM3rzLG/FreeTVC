@@ -2,6 +2,14 @@
 
 A teljes, angol nyelvű változásnapló: [CHANGELOG.md](CHANGELOG.md).
 
+## 1.3.4 — 2026-11-19
+
+### Javítva
+
+- **Húzás közben nőtt az ablak**: Linuxon (Cinnamon alatt látva) a címsoránál fogva mozgatott ablak egyre magasabb lett, amíg az alja ki nem lógott a képernyőről. Mozgatáskor az ablak most megtartja a méretét.
+- **A `deck` skin státuszsávja kisebb volt**, mint a `bronze`-é (45 helyett 30 pont magas, kisebb betűvel): a beépített skin értékei, amelyekből minden skin indul, most megegyeznek a `bronze.skin`-nel.
+- **Magyar felület**: a videófelvétel ffmpeg üzenetei is magyarul jelennek meg.
+
 ## 1.3.3 — 2026-11-09
 
 ### Változott
