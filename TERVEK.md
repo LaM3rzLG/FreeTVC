@@ -36,7 +36,9 @@ A TVCnet hardvere, protokollja és firmware-je: `~/tvc-wifi/firmware` (`HARDVER.
   vannak (`ping`, `get`, `tcp`, `hayes`); `tools/tvcnet/run_checks.sh` mind a négyet lefuttatja helyi HTTP és TCP echo
   szerver ellen. Az ESP firmware lefordul (PlatformIO 6.2.0-val; a 6.2.0-post.1 a platformnak „túl régi”), a valódi
   dongle-ön még nincs kipróbálva.
-- Később: a valódi TVC időzítési határainak mérése (PROTOKOLL 9. fejezet); egy interaktív TVC terminálprogram.
+- KÉSZ (2026-11-23): TVC BASIC példák a firmware repó `tvc/basic/` mappájában (`PING`, `WIFI`, `GET`, `TERM`, listaként és
+  CAS-ként, gépi kódú segéddel); freeTVC-ben begépelve, CAS-ból visszatöltve kipróbálva.
+- Később: a valódi TVC időzítési határainak mérése (PROTOKOLL 9. fejezet).
 
 ## Játékmentések (megbeszélve 2026-11-07; alap kész az 1.3.0-ban)
 A megbeszélt működés:

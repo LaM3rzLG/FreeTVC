@@ -209,6 +209,7 @@ A WiFi modem for a tape socket: an ESP32-S3 board on the DIN plug, powered from 
   - `get`: a GET of a 680-byte file ends with END and the bytes arrive unchanged;
   - `tcp`: OPEN, SEND while still connecting, NEXT until the 17 bytes (00h, FFh, A5h, 6Ah among them) are back from the echo server, CLOSE, then NEXT answers NONE;
   - `hayes`: a scripted session through TERM, compared byte for byte: `ATE0`, `ATI4`, `ATDT` to the echo server and CONNECT, a line echoed back, `+++` between two silent 1.6 s waits and OK with the connection kept, `ATO`, again `+++`, `ATH`, `ATO` answering NO CARRIER, `AT&G` printing the 680-byte body and OK, a refused port answering NO CARRIER, `ATV0` and `ATX` as the numeric 0 and 4.
+- The TVC BASIC examples of the firmware repository (`tvc/basic/`: PING, WIFI, GET and a Hayes terminal) were typed in on the headless runner, saved with SAVE into a `--cas-dir` folder, loaded back from those CAS files and run against a local HTTP server and a TCP echo server, on SYS 2.2 (PING on 1.2 too); checked by screen grabs.
 - The PING and ECHO program ran in the GUI with TVCnet chosen in the Tape menu, driven over the text monitor; the choice came back after a restart.
 - The firmware's own host tests cover the frames, the line code, the commands and the Hayes modem (results, echo, `A/`, backspace, dialing, the escape and its guard time, a peer that closes, a dial that times out or is aborted by a key, `AT&G`) with a fake network.
 
