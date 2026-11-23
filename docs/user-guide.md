@@ -313,7 +313,7 @@ In the GUI the REC key starts and stops a recording ([section 3](#the-status-str
 
 ### 4.9 TVCnet, the tape-port WiFi module
 
-A WiFi modem that plugs into a tape socket: the TVC sends requests as a UART on the socket's motor line (port 05h b7 for CH12, b6 for CH13; a set bit pulls the line low) and reads the replies from the tape input (59h b5). TVCnet's commands fetch web pages (HTTP and HTTPS) for programs written for it. freeTVC runs the TVCnet firmware's own protocol code and uses the computer's network as TVCnet's WiFi.
+A WiFi modem that plugs into a tape socket: the TVC sends requests as a UART on the socket's motor line (port 05h b7 for CH12, b6 for CH13; a set bit pulls the line low) and reads the replies from the tape input (59h b5). TVCnet's commands fetch web pages (HTTP and HTTPS) and hold TCP connections for programs written for it; its TERM command is a Hayes modem, so a terminal program can use AT commands (`ATD"host:port"`, `+++`, `ATH`, `AT&G"url"`). freeTVC runs the TVCnet firmware's own protocol code and uses the computer's network as TVCnet's WiFi.
 
 - Plug it in: the cassette's menu → TVCnet in CH12 or CH13, `--tvcnet [ch12|ch13]`, or `tvcnet = ch12` in `freetvc.ini`. The tape deck then sits in the other socket.
 - `--tvcnet-baud N` (default 2400) and `--tvcnet-t US` (default 250) must match the TVC program; `--tvcnet-offline` or *TVCnet on the network* switched off makes TVCnet answer as if it had no WiFi.

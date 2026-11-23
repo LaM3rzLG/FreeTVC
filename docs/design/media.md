@@ -170,7 +170,7 @@ Five files: headers at 5.3, 17.5, 53.1, 70.2 and 98.7 s (the last three unnamed)
 
 ## TVCnet, the tape-port WiFi module
 
-A WiFi modem for a tape socket: an ESP32-S3 board on the DIN plug, powered from pin 4. The TVC sends requests on the socket's motor line and receives the replies on the tape input; TVCnet does WiFi, DNS, HTTP and HTTPS. Its hardware, protocol and firmware live in TVCnet's own firmware repository. freeTVC builds that firmware's hardware-independent part (`common/`: frames, the alternating bit, the commands and the reply line code) into the core, so the emulated TVCnet runs the same code as the real one.
+A WiFi modem for a tape socket: an ESP32-S3 board on the DIN plug, powered from pin 4. The TVC sends requests on the socket's motor line and receives the replies on the tape input; TVCnet does WiFi, DNS, HTTP and HTTPS GETs, TCP connections and a Hayes modem's AT commands. Its hardware, protocol and firmware live in TVCnet's own firmware repository. freeTVC builds that firmware's hardware-independent part (`common/`: frames, the alternating bit, the commands and the reply line code) into the core, so the emulated TVCnet runs the same code as the real one.
 
 ### The two lines
 
@@ -182,13 +182,14 @@ A WiFi modem for a tape socket: an ESP32-S3 board on the DIN plug, powered from 
 
 - `core/media/tape_tvcnet.*`: the physical layer. The UART receiver takes a falling edge as a start bit and samples the middle of each bit on the machine's half-T ticks; a low stop bit is a framing error and no byte. Each byte goes to the modem stamped with the time of its stop bit's middle, in microseconds of machine time. The modem's reply becomes a queue of edge times, played on 59h b5.
 - `core/media/tape_sockets.*`: the machine's `TapePort`. The two sockets share their input and output lines, and each has its own motor bit (`TapePort::tape_motor` gets both bits). While TVCnet is plugged in, it drives the shared input and the deck sits in the other socket: the deck no longer sees TVCnet's motor bit, so TVCnet's traffic does not move the tape or trigger fast tape. Unplugged, either bit moves the deck as before.
-- The modem (`tvcnet::Modem`, from the firmware): frames from the TVC (A5h, LEN, CTRL, data, an 8-bit sum), the alternating bit with the last reply kept for repeats, a 2 ms turnaround before the reply's first edge, and the commands PING, ECHO, STATUS, WIFI, GET, NEXT and CLOSE. Everything runs on machine time, so a run is deterministic apart from the network itself.
+- The modem (`tvcnet::Modem`, from the firmware): frames from the TVC (A5h, LEN, CTRL, data, an 8-bit sum), the alternating bit with the last reply kept for repeats, a 2 ms turnaround before the reply's first edge, and the commands PING, ECHO, STATUS, WIFI, GET, NEXT, CLOSE, OPEN, SEND and TERM (the Hayes modem: AT commands in command mode, a byte pipe to the TCP connection while online, `+++` with its 1 s guard time). Everything runs on machine time, the Hayes guard and dial times too, so a run is deterministic apart from the network itself.
 - TVCnet is outside the machine state, like a serial peer: it is not in snapshots, and a restart of the machine's clock (power-on, a restored state, rewind) resets its line state and drops a reply still waiting.
 
 ### Network
 
 `frontend/common/tvcnet_network.*` stands in for TVCnet's WiFi with the host's network:
 - GET runs the system curl in a thread: http and https only, also after redirects, at most 60 s and 16 MiB. NEXT answers BUSY until the whole body is in, then DATA in pieces of up to 255 bytes, the last one END. curl's exit codes become TVCnet's status codes (6 DNS, 7 connection, others lost), an HTTP status of 400 or more becomes the HTTP error with the status code.
+- OPEN (and the Hayes `ATD`) connects a host socket to any host by name or address (`remote/net.*`, `Connection::connect_host`) in its own thread; a failed name lookup is the DNS error, a refused or failed connection the connection error. Bytes sent while it connects are queued (at most 4096) and sent once it is up. The thread reads what the peer sends into a buffer of up to 64 KiB, which NEXT and TERM empty; when it is full, the thread stops reading, so TCP holds the peer back. The peer closing the connection is END once the buffer is empty.
 - WIFI keeps the network name and changes nothing; STATUS reports the WiFi as up and 127.0.0.1.
 - "Without a network" (`--tvcnet-offline`, the menu, `tvcnet_network = no`): every network command answers as TVCnet with no WiFi.
 
@@ -203,9 +204,13 @@ A WiFi modem for a tape socket: an ESP32-S3 board on the DIN plug, powered from 
 ### Checks: TVCnet
 
 - `core.tvcnet`: PING through the sockets with the reply's start 2 ms after the stop bit; ECHO with a UART 3 % slow and 3 % fast; the other socket's motor line is not TVCnet's and moves the deck; a low stop bit is a framing error; GET without a network; a clock restart drops the waiting reply; 9600 baud.
-- `tools/tvcnet/run_checks.sh` (outside CTest: it needs sjasmplus and a local HTTP server): Z80 programs on the headless runner bit-bang PING and ECHO and decode the replies; a GET of a 680-byte file from 127.0.0.1 answers BUSY three times, then DATA 255, DATA 255 and END 170, and the bytes arrive unchanged.
-- The same PING and ECHO program ran in the GUI with TVCnet chosen in the Tape menu, driven over the text monitor; the choice came back after a restart.
-- The firmware's own host tests cover the frames, the line code and the commands with a fake network.
+- `tools/tvcnet/run_checks.sh` (outside CTest: it needs sjasmplus and local servers) assembles the TVC programs of the firmware repository's `tvc/` folder (the checkout given to CMake, or the third argument) and runs them on the headless runner against a local HTTP server and a TCP echo server; `check_results.py` reads their logs from memory:
+  - `ping`: PING answers the protocol version, ECHO gives back bytes including 00h, FFh and 6Ah;
+  - `get`: a GET of a 680-byte file ends with END and the bytes arrive unchanged;
+  - `tcp`: OPEN, SEND while still connecting, NEXT until the 17 bytes (00h, FFh, A5h, 6Ah among them) are back from the echo server, CLOSE, then NEXT answers NONE;
+  - `hayes`: a scripted session through TERM, compared byte for byte: `ATE0`, `ATI4`, `ATDT` to the echo server and CONNECT, a line echoed back, `+++` between two silent 1.6 s waits and OK with the connection kept, `ATO`, again `+++`, `ATH`, `ATO` answering NO CARRIER, `AT&G` printing the 680-byte body and OK, a refused port answering NO CARRIER, `ATV0` and `ATX` as the numeric 0 and 4.
+- The PING and ECHO program ran in the GUI with TVCnet chosen in the Tape menu, driven over the text monitor; the choice came back after a restart.
+- The firmware's own host tests cover the frames, the line code, the commands and the Hayes modem (results, echo, `A/`, backspace, dialing, the escape and its guard time, a peer that closes, a dial that times out or is aborted by a key, `AT&G`) with a fake network.
 
 ## Cartridges
 

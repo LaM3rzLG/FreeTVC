@@ -26,12 +26,17 @@ A TVCnet hardvere, protokollja és firmware-je: `~/tvc-wifi/firmware` (`HARDVER.
 - KÉSZ: a firmware közös része (`common/`: keret, vonali kód, modem) a freeTVC magjába fordul (FetchContent, mint az SDL3);
   `TapePort::tape_motor` mindkét motorbitet kapja; `TapeSockets` (a magnó a másik aljzatban), `TapeTvcnet` (UART a motorvonalon,
   impulzusszélesség-kód a 59h b5-ön), hálózat curl-lel (`TvcnetNetwork`); `--tvcnet*`, ini kulcsok, Tape menü, monitor `tvcnet`, MCP;
-  `core.tvcnet` teszt, `tools/tvcnet/run_checks.sh` (PING, ECHO, GET 680 byte), GUI-ban is kipróbálva. Leírás: `docs/design/media.md`.
+  `core.tvcnet` teszt, `tools/tvcnet/run_checks.sh`, GUI-ban is kipróbálva. Leírás: `docs/design/media.md`.
 - HÁTRA a push / kiadás előtt: a firmware repó GitHubra (`Deybacsi/TVCnet`, nyilvános), egy tag, és annak tarballja + SHA256 a
   `FREETVC_TVCNET_URL` / `_SHA256` alapértékébe (`third_party/CMakeLists.txt`); addig a freeTVC csak
   `-DFETCHCONTENT_SOURCE_DIR_TVCNET=~/tvc-wifi/firmware`-rel konfigurálható (a Mac-es `build_mac.sh` is).
-- HÁTRA: az ESP32-S3 firmware (`esp32s3/`, PlatformIO) még nincs lefordítva és kipróbálva; HTTPS tanúsítvány-ellenőrzés nélkül.
-- Később: OPEN/SEND (TCP), a valódi TVC időzítési határainak mérése (PROTOKOLL 9. fejezet).
+- HÁTRA: az ESP32-S3 firmware (`esp32s3/`, PlatformIO) lefordul, de valódi hardveren még nincs kipróbálva; HTTPS tanúsítvány-ellenőrzés nélkül.
+- KÉSZ (2026-11-23): TCP (`OPEN`/`SEND`, a gépen saját socket-szállal) és a Hayes modem (`TERM`, 30h: AT parancsok,
+  `ATD`, `+++`, `ATO`, `ATH`, `AT&G`); protokoll verzió 2. A TVC oldali tesztprogramok a firmware repó `tvc/` mappájában
+  vannak (`ping`, `get`, `tcp`, `hayes`); `tools/tvcnet/run_checks.sh` mind a négyet lefuttatja helyi HTTP és TCP echo
+  szerver ellen. Az ESP firmware lefordul (PlatformIO 6.2.0-val; a 6.2.0-post.1 a platformnak „túl régi”), a valódi
+  dongle-ön még nincs kipróbálva.
+- Később: a valódi TVC időzítési határainak mérése (PROTOKOLL 9. fejezet); egy interaktív TVC terminálprogram.
 
 ## Játékmentések (megbeszélve 2026-11-07; alap kész az 1.3.0-ban)
 A megbeszélt működés:

@@ -392,7 +392,7 @@ Some behaviour can only be checked through the real programs. The scripts are in
 - Sound: `tools/sound/` records the GUI's audio while typing into it, and analyses WAV cycles and dropouts ([tools/sound/README.md](../../tools/sound/README.md)). The GUI's `SOUND PITCH 3950,VOLUME 15,DURATION 50` gives one burst of 1010–1020 ms with every cycle 35.83–35.91 samples (1337.76 Hz), the same as the headless WAV; with `--no-audio` the sink gets exact silence.
 - MCP: `tools/mcp/inspector_check.sh` with the official MCP Inspector, and `tools/mcp/stress_check.py` ([tools/mcp/README.md](../../tools/mcp/README.md)).
 - DZRP and the GDB stub: `tools/dezog/` (DeZog built from source with a patch) and `tools/gdb/gdb_check.sh` (GNU gdb built for the Z80).
-- TVCnet: `tools/tvcnet/run_checks.sh` assembles two Z80 programs with sjasmplus and runs them on the headless runner: PING and ECHO, then a GET from a local HTTP server ([media.md](media.md#checks-tvcnet)).
+- TVCnet: `tools/tvcnet/run_checks.sh` assembles the TVC programs of the TVCnet firmware repository (`tvc/`) with sjasmplus and runs them on the headless runner against a local HTTP server and a TCP echo server: PING and ECHO, GET, OPEN/SEND/NEXT/CLOSE and a scripted Hayes session ([media.md](media.md#checks-tvcnet)).
 - `tools/z80eval/`: the stand-alone CPU harnesses used to choose the Z80 core ([z80-core.md](z80-core.md)).
 
 There is no CI configuration.

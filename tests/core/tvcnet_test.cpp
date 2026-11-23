@@ -90,7 +90,8 @@ void test_ping_through_sockets() {
     send_uart(sockets, tick, frame(tvcnet::cmd::kPing), 2400, 0x80);
     const std::uint64_t sent = tick;
     const Reply reply = listen(sockets, tick);
-    check(reply.bytes == std::vector<std::uint8_t>({1, 0, tvcnet::kProtocolVersion, 2}), "PING answers OK with the version");
+    check(reply.bytes == std::vector<std::uint8_t>({1, 0, tvcnet::kProtocolVersion, static_cast<std::uint8_t>(1 + tvcnet::kProtocolVersion)}),
+          "PING answers OK with the version");
     // The reply starts 2 ms after the middle of the last stop bit; `sent` is one bit after that bit's end
     const std::uint64_t stop_middle = sent - kTicksPerSecond * 3 / (2 * 2400);
     const std::uint64_t due = stop_middle + kTicksPerSecond / 500;
