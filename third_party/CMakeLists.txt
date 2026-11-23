@@ -52,6 +52,34 @@ if(NOT WIN32 OR MINGW)
     endif()
 endif()
 
+# TVCnet's shared firmware code (GPL-3.0-or-later), pinned to a commit of its repository (tools/tvcnet/update_pin.sh
+# moves the pin); a local checkout given as FETCHCONTENT_SOURCE_DIR_TVCNET wins, for developing both together
+set(FREETVC_TVCNET_REPO "https://github.com/Deybacsi/TVCnet")
+set(FREETVC_TVCNET_COMMIT "14acf537e13b349c6d86ad59d1ff2fdc1dd54e83")
+set(FREETVC_TVCNET_PIN_SHA256 "a952afc7cf48ef3aed15369b04cc542e8ae13d16963edc55fd21c21d19b54a2d")
+set(FREETVC_TVCNET_URL "" CACHE STRING "Tarball of the TVCnet firmware instead of the pinned commit; may be a file:// URL")
+set(FREETVC_TVCNET_SHA256 "" CACHE STRING "SHA256 of FREETVC_TVCNET_URL")
+option(FREETVC_TVCNET_CHECK "Warn when the TVCnet repository's main branch is past the pinned commit" ON)
+if(FREETVC_TVCNET_URL STREQUAL "")
+    set(tvcnet_url "${FREETVC_TVCNET_REPO}/archive/${FREETVC_TVCNET_COMMIT}.tar.gz")
+    set(tvcnet_sha256 ${FREETVC_TVCNET_PIN_SHA256})
+elseif(FREETVC_TVCNET_SHA256 STREQUAL "")
+    message(FATAL_ERROR "FREETVC_TVCNET_URL needs FREETVC_TVCNET_SHA256")
+else()
+    set(tvcnet_url ${FREETVC_TVCNET_URL})
+    set(tvcnet_sha256 ${FREETVC_TVCNET_SHA256})
+endif()
+include(FetchContent)
+FetchContent_Declare(tvcnet
+    URL ${tvcnet_url}
+    URL_HASH SHA256=${tvcnet_sha256}
+    DOWNLOAD_EXTRACT_TIMESTAMP ON)
+FetchContent_MakeAvailable(tvcnet)
+if(FREETVC_TVCNET_CHECK AND NOT FETCHCONTENT_SOURCE_DIR_TVCNET AND FREETVC_TVCNET_URL STREQUAL "")
+    include(${CMAKE_CURRENT_LIST_DIR}/../cmake/TvcnetCheck.cmake)
+    freetvc_tvcnet_check(${FREETVC_TVCNET_REPO} ${FREETVC_TVCNET_COMMIT})
+endif()
+
 if(NOT FREETVC_BUILD_GUI)
     return()
 endif()

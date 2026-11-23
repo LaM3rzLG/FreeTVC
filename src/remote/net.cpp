@@ -9,7 +9,9 @@
 #include <ws2tcpip.h>
 #else
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #endif
@@ -81,6 +83,44 @@ Connection Connection::connect_loopback(std::uint16_t port, std::string& error) 
         close_native(s);
         return {};
     }
+    return Connection(wrap(s));
+}
+
+Connection Connection::connect_host(const std::string& host, std::uint16_t port, std::string& error, bool& dns_failed) {
+    startup();
+    dns_failed = false;
+    addrinfo hints{};
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    addrinfo* found = nullptr;
+    const std::string service = std::to_string(port);
+    if (::getaddrinfo(host.c_str(), service.c_str(), &hints, &found) != 0 || !found) {
+        dns_failed = true;
+        error = "cannot resolve " + host;
+        return {};
+    }
+    error = "cannot connect to " + host + ":" + service;
+    Native s = kNone;
+    for (const addrinfo* a = found; a; a = a->ai_next) {
+        s = ::socket(a->ai_family, a->ai_socktype, a->ai_protocol);
+        if (s == kNone) {
+            continue;
+        }
+        if (::connect(s, a->ai_addr, static_cast<socklen_t>(a->ai_addrlen)) == 0) {
+            break;
+        }
+        error += " (" + last_error() + ")";
+        close_native(s);
+        s = kNone;
+    }
+    ::freeaddrinfo(found);
+    if (s == kNone) {
+        return {};
+    }
+    const int yes = 1;
+    ::setsockopt(s, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char*>(&yes), sizeof yes);
+    error.clear();
     return Connection(wrap(s));
 }
 

@@ -134,7 +134,8 @@ void TapeDeck::tape_output(std::uint64_t tick, bool level) {
     record_level_ = level;
 }
 
-void TapeDeck::tape_motor(std::uint64_t tick, bool on) {
+void TapeDeck::tape_motor(std::uint64_t tick, std::uint8_t motors) {
+    const bool on = motors != 0;
     advance(tick);
     if (state_ == TapeState::Recording && motor_ && !on) {
         flush_recording();

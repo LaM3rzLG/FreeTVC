@@ -81,7 +81,8 @@ működnek, az MCP-vezérlés és az időzítés ellenőrizve.
 ## Tudás a repóban
 - Tervek, GitHub-hibajegyek (nem Mac-es): `TERVEK.md`.
 - `CLAUDE.md` (munkaszabályok), `.claude/skills/freetvc-mac/` (fordítás, futtatás, MCP, időzítésmérés).
-- `tools/mac/`: `build_mac.sh` (fordítás, teszt nélkül), `mcp.sh` (egy MCP-hívás), `mcp_pace.py` (valós idejű
+- `tools/mac/`: `build_mac.sh` (fordítás, teszt nélkül; a TVCnet firmware kódját a rögzített GitHub commitból húzza le, és
+  szól, ha a TVCnet repóban van újabb; `TVCNET_DIR=<checkout>` helyi másolatot használ), `mcp.sh` (egy MCP-hívás), `mcp_pace.py` (valós idejű
   sebesség), `mcp_cycles.py` (RAM/VRAM ütemszámok, képkockahossz).
 
 ## Ellenőrizve (2026-10-31)

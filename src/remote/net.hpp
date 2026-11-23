@@ -22,6 +22,8 @@ public:
 
     // 127.0.0.1:port; on failure the connection stays closed and `error` says why.
     static Connection connect_loopback(std::uint16_t port, std::string& error);
+    // Any host by name or address; `dns_failed` tells a failed name lookup from a refused connection.
+    static Connection connect_host(const std::string& host, std::uint16_t port, std::string& error, bool& dns_failed);
 
     bool open() const { return handle_ != kInvalid; }
     bool send_all(std::string_view data);

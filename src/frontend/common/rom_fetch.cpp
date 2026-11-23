@@ -252,6 +252,10 @@ std::string sha256_hex(std::span<const std::uint8_t> bytes) {
     return hex;
 }
 
+std::optional<int> run_program(const fs::path& program, const std::vector<std::string>& args, const fs::path& log) {
+    return run(program, args, log);
+}
+
 CurlCheck find_curl() {
     CurlCheck check;
 #if defined(_WIN32)

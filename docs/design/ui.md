@@ -456,7 +456,7 @@ role.exec = red            ; a TVC colour name: bright on case, dark on putty
 role.read = #00ff00 #009200 ; or two colours: on case, on putty
 font.ui = AtkinsonHyperlegibleNext-Regular.ttf
 font.ui.size = 15
-metric.strip.height = 30
+metric.strip.height = 45
 ```
 
 - Keys missing from a file keep the built-in `bronze` value, so a skin can change a single colour.

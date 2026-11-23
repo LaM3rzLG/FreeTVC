@@ -589,6 +589,16 @@ int main(int argc, char** argv) {
     std::string serial_flow = settings.values.serial_flow.value_or("rts");
     bool serial_line_given = false, serial_flow_given = false;
     std::string serial_send, serial_capture;
+    freetvc::TvcnetSettings tvcnet;
+    if (settings.values.tvcnet) {
+        const auto socket = freetvc::parse_tvcnet_socket(*settings.values.tvcnet);
+        tvcnet.plugged = socket.has_value();
+        tvcnet.socket = socket.value_or(tvcnet.socket);
+    }
+    tvcnet.baud = settings.values.tvcnet_baud.value_or(tvcnet.baud);
+    tvcnet.t_us = settings.values.tvcnet_t.value_or(tvcnet.t_us);
+    tvcnet.network = settings.values.tvcnet_network.value_or(tvcnet.network);
+    bool tvcnet_given = false;
     std::optional<unsigned> card256_slot;  // kCardSlots: slot 0, else the first free one
     if (settings.values.card256.value_or(false)) {
         card256_slot = settings.values.card256_slot.value_or(freetvc::kCardSlots);
@@ -700,6 +710,27 @@ int main(int argc, char** argv) {
                 serial_slot = freetvc::kSerialSlot;
                 serial_given = true;
             }
+        } else if (arg == "--tvcnet") {
+            tvcnet.plugged = tvcnet_given = true;
+            if (i + 1 < argc) {
+                if (const auto socket = freetvc::parse_tvcnet_socket(argv[i + 1])) {
+                    tvcnet.socket = *socket;
+                    ++i;
+                }
+            }
+        } else if ((arg == "--tvcnet-baud" || arg == "--tvcnet-t") && i + 1 < argc) {
+            const std::string value = argv[++i];
+            const bool digits = !value.empty() && value.size() <= 6 && value.find_first_not_of("0123456789") == std::string::npos;
+            const unsigned amount = digits ? static_cast<unsigned>(std::stoul(value)) : 0;
+            if (arg == "--tvcnet-baud" ? amount < 300 || amount > 115200 : amount < 20 || amount > 10000) {
+                std::fprintf(stderr, "freetvc: %s: %s\n", std::string(arg).c_str(), arg == "--tvcnet-baud" ? "300 to 115200" : "20 to 10000");
+                return 1;
+            }
+            (arg == "--tvcnet-baud" ? tvcnet.baud : tvcnet.t_us) = amount;
+            tvcnet.plugged = tvcnet_given = true;
+        } else if (arg == "--tvcnet-offline") {
+            tvcnet.network = false;
+            tvcnet.plugged = tvcnet_given = true;
         } else if (arg == "--disk-card") {
             disk_card_wanted = disk_card_given = true;
         } else if (arg == "--disk-rom" && i + 1 < argc) {
@@ -843,6 +874,7 @@ int main(int argc, char** argv) {
                                  "[--sddual] [--sddual-gm] [--sddual-rom FILE] [--sddual-flash-write] [--sd FILE] [--sd2 FILE] "
                                  "[--disk-card] [--disk-rom 1.1|1.2|FILE] [--disk [A-D:]FILE] [--gamecard [SLOT]] [--gamecard-rom FILE] "
                                  "[--multichip [SLOT]] [--multichip-rom FILE] [--sid-card [6581|8580]] [--sid-clock HZ] [--2dfx [SLOT]] [--nanosd [SLOT]] [--nanosd-rom FILE] [--nanosd-sd DIR] [--printer FILE|on] [--serial-card [SLOT]] [--serial PEER] [--serial-flow rts|none] [--serial-send FILE] [--serial-capture FILE] "
+                                 "[--tvcnet [ch12|ch13]] [--tvcnet-baud N] [--tvcnet-t US] [--tvcnet-offline] "
                                  "[--card256 [SLOT]] [--card256-rom FILE] [--card256-usb DIR|mouse|none] [--card256-flash FILE|DIR] "
                                  "[--keymap symbolic|positional] [--language en|hu] "
                                  "[--skin NAME|FILE] [--keys NAME|FILE] [--picture NAME|FILE] [--renderer gl|sdl] [--full-raster] [--no-audio] [--frames N] [--remote-monitor] "
@@ -1228,6 +1260,8 @@ int main(int argc, char** argv) {
         return 1;
     }
     std::string serial_capture_name = serial_capture.empty() ? std::string() : fs::path(serial_capture).filename().string();
+    tape.set_tvcnet(tvcnet);
+    const freetvc::TvcnetSettings tvcnet_at_start = tape.tvcnet();
     std::string printer_name = tape.printer_setting();
     // The NanoSD: from freetvc.ini or the command line; its EEPROM settings too. --nanosd-sd alone brings the card,
     // unless a snapshot brings the machine
@@ -1650,6 +1684,16 @@ int main(int argc, char** argv) {
         if ((!serial_flow_given && settings.values.serial_flow.has_value()) || tape.serial_rts_flow() != serial_flow_at_start) {
             values.emplace_back("serial_flow", tape.serial_rts_flow() ? "rts" : "none");
         }
+        const freetvc::TvcnetSettings tvcnet_now = tape.tvcnet();
+        const auto tvcnet_changed = [&](auto member) { return tvcnet_now.*member != tvcnet_at_start.*member; };
+        const std::string tvcnet_value = tvcnet_now.plugged ? freetvc::tvcnet_socket_name(tvcnet_now.socket) : "no";
+        if ((!tvcnet_given && settings.values.tvcnet.value_or("no") != tvcnet_value) || tvcnet_changed(&freetvc::TvcnetSettings::plugged) ||
+            tvcnet_changed(&freetvc::TvcnetSettings::socket)) {
+            values.emplace_back("tvcnet", tvcnet_value);
+        }
+        if ((!tvcnet_given && settings.values.tvcnet_network.value_or(true) != tvcnet_now.network) || tvcnet_changed(&freetvc::TvcnetSettings::network)) {
+            values.emplace_back("tvcnet_network", tvcnet_now.network ? "yes" : "no");
+        }
         const std::string sd_now = nanosd_sd_setting();
         if ((!nanosd_sd_given && settings.values.nanosd_sd.value_or("none") != sd_now) || sd_now != nanosd_sd_at_start) {
             values.emplace_back("nanosd_sd", sd_now);
@@ -2010,6 +2054,7 @@ int main(int argc, char** argv) {
     // A drive counts as active this long after its last step, byte or command (the light and fast disk)
     constexpr std::uint64_t kDiskActiveTicks = freetvc::AudioSynth::kTickRate / 4;
     bool menu_open = false;
+    int strip_min_width = 0;  // the window's minimum width last set for the strip
     // The TVC256k++'s mouse: host motion gathered between frames, sent as one report per frame
     bool mouse_captured = false;
     float mouse_dx = 0.0f;
@@ -2533,6 +2578,8 @@ int main(int argc, char** argv) {
         status.tape_wave = tape_wave;
         status.tape_recording = tape_state == freetvc::TapeState::Recording;
         status.fast_tape = fast_tape;
+        status.tvcnet_socket = tape.tvcnet().plugged ? tape.tvcnet().socket : std::uint8_t{0};
+        status.tvcnet_network = tape.tvcnet().network;
         status.fast_disk = fast_disk;
         status.gamecard_slot = tape.gamecard_slot();
         status.multichip_slot = tape.multichip_slot();
@@ -2764,11 +2811,14 @@ int main(int argc, char** argv) {
             skins.resize_strip();
         }
         // A larger strip needs a wider window: it grows rather than the keys covering each other
-        if (actions.strip_width > 0.0f && (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED)) == 0) {
+        const int needed = static_cast<int>(std::ceil(actions.strip_width));
+        // Only on a change: every SDL_SetWindowMinimumSize also re-sends the window size
+        if (needed > 0 && needed != strip_min_width &&
+            (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED)) == 0) {
+            strip_min_width = needed;
             int width = 0;
             int height = 0;
             SDL_GetWindowSize(window, &width, &height);
-            const int needed = static_cast<int>(std::ceil(actions.strip_width));
             SDL_SetWindowMinimumSize(window, needed, 0);
             if (width < needed) {
                 SDL_SetWindowSize(window, needed, height);
@@ -3523,6 +3573,22 @@ int main(int argc, char** argv) {
         if (actions.toggle_fast_disk) {
             fast_disk = !fast_disk;
             notice.show_text(false, fast_disk ? N_("fast disk: full speed while a drive works") : N_("fast disk off: the drives run at real speed"));
+        }
+        if (actions.tvcnet_socket >= 0 || actions.toggle_tvcnet_network) {
+            freetvc::TvcnetSettings now = tape.tvcnet();
+            if (actions.tvcnet_socket >= 0) {
+                now.plugged = actions.tvcnet_socket != 0;
+                now.socket = actions.tvcnet_socket != 0 ? static_cast<std::uint8_t>(actions.tvcnet_socket) : now.socket;
+            }
+            now.network = actions.toggle_tvcnet_network ? !now.network : now.network;
+            tape.set_tvcnet(now);
+            if (actions.toggle_tvcnet_network) {
+                notice.show_text(false, now.network ? N_("TVCnet on the network") : N_("TVCnet without a network"));
+            } else if (!now.plugged) {
+                notice.show_text(false, N_("TVCnet unplugged"));
+            } else {
+                notice.show(false, "TVCnet in %s", now.socket == freetvc::TapeTvcnet::kSocketCh13 ? "CH13" : "CH12");
+            }
         }
         if (actions.toggle_fast_tape) {
             fast_tape = !fast_tape;

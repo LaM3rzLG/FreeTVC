@@ -65,6 +65,7 @@ The module boundaries are described in [architecture.md](architecture.md).
   - SDL 3.4 fails at configure when an enabled extension is missing: install `libxtst-dev`, or configure with `-DSDL_X11_XTEST=OFF` (freeTVC does not use XTest).
   - With `libpipewire-0.3-dev` installed, SDL3 also builds its PipeWire audio backend.
 - **First configure with the GUI:** network access for the SDL3 tarball and the fonts, or local copies (`FREETVC_SDL3_URL`, `FREETVC_FONT_DIR`, below).
+- **Every first configure:** TVCnet's firmware code, from its pinned GitHub tarball or a local checkout (below).
 - **Optional:** Python 3 (tests `remote.png` and `ui.translation_coverage`), sjasmplus (test `debug.disasm_sjasmplus`), curl at run time (the programs' ROM download), MinGW-w64 and Wine (the Windows cross build and its tests).
 
 ## Presets
@@ -98,6 +99,9 @@ Every test preset excludes the label `slow`; `gcc-release-slow` runs only it. Al
 | `FREETVC_USE_SYSTEM_SDL3` | OFF | use an installed SDL3 (`find_package(SDL3 3.2 CONFIG)`) instead of fetching it |
 | `FREETVC_SDL3_URL` | the SDL 3.4.18 release tarball on GitHub | another location of the same tarball, also `file:///path/SDL3-3.4.18.tar.gz`; its SHA-256 is checked either way |
 | `FREETVC_FONT_DIR` | empty | a local folder with the font files instead of downloading them; their SHA-256 is checked either way |
+| `FREETVC_TVCNET_URL`, `FREETVC_TVCNET_SHA256` | empty: the pinned commit | another tarball of the TVCnet firmware and its SHA-256, also a `file://` URL |
+| `FREETVC_TVCNET_CHECK` | `ON` | warn at configure time when the TVCnet repository's `main` is not the pinned commit |
+| `FETCHCONTENT_SOURCE_DIR_TVCNET` | empty | CMake's own override: a local checkout of the TVCnet firmware repository instead of the pinned tarball |
 | `FREETVC_TEST_DATA` and the other test-data variables | `testdata/` | [Test data](#test-data) |
 
 Warnings: GCC and Clang get `-Wall -Wextra -Wpedantic -Wshadow`; MSVC gets `/W4 /utf-8` and, for C++, `/permissive- /Zc:__cplusplus` (`cmake/FreeTVCWarnings.cmake`). Third-party targets keep their defaults; two vendored libraries get one warning switched off each (ymfm `-Wno-stringop-overflow` on GCC, reSID `-Wno-deprecated-enum-float-conversion` on GCC and Clang, both explained in `third_party/CMakeLists.txt`).
@@ -115,6 +119,10 @@ Vendored in `third_party/` (versions, hashes and changes in `THIRD_PARTY.md`):
 | littlefs | v2.11.3 | BSD-3-Clause | the TVC256k++ PSRAM and flash drives |
 | ymfm (Aaron Giles), OPL family only | upstream commit `81aec25` | BSD-3-Clause | the Multichip card's YM3812 |
 | reSID (Dag Lem) | upstream commit `ef7873f`, with a patch that makes `SID::State` complete | GPL-2.0-or-later | the SID card |
+
+Fetched at configure time, in every build:
+
+- **TVCnet's shared firmware code** (GPL-3.0-or-later), the `common/` library of the [TVCnet firmware repository](https://github.com/Deybacsi/TVCnet), through `FetchContent` (`third_party/CMakeLists.txt`), in every build, headless too: GitHub's tarball of a pinned commit (`FREETVC_TVCNET_COMMIT`), checked against its SHA-256 (`FREETVC_TVCNET_PIN_SHA256`). The firmware's `common/` is an interface both sides implement, so freeTVC follows it by moving the pin, not by building whatever is newest: `tools/tvcnet/update_pin.sh [commit]` sets the commit (default: the repository's `main`) and its hash, then the build and the tests show whether freeTVC needs changes. Every configure that uses the pin asks the repository (`git ls-remote`, at most 10 s, `cmake/TvcnetCheck.cmake`) and warns when `main` is at another commit; without git or a network it stays silent, and `-DFREETVC_TVCNET_CHECK=OFF` turns it off. `FREETVC_TVCNET_URL` with `FREETVC_TVCNET_SHA256` names another tarball, and CMake's own `-DFETCHCONTENT_SOURCE_DIR_TVCNET=<checkout>` uses a local copy of the repository, which is how the firmware and the emulator are developed together (no check then).
 
 Fetched at configure time (GUI builds only):
 
@@ -291,6 +299,7 @@ Preset lists: "(5)" runs on `32k-1.2`, `32k+hbm-1.2`, `64k-1.2`, `64k+-2.1` and 
 | `core.multicart` | `multicart_test` | the PLA against the board's `tvcpla.bin` (all 131 072 inputs; skipped with a note when `FREETVC_MULTICART_DIR` lacks it), the register and its reset-on-read latch, the RAM, the SST39SF040's commands and status, snapshots, the image builder |
 | `core.sddual` | `sddual_test` | the SD card's SPI protocol (CRCs, initialisation, CSD and CID, single and multiple block reads and writes), the board's registers and windows, its flash with and without the jumper, snapshots and copies, the image builder |
 | `core.serial` | `serial_test` | the printer port's flip-flops, the 8251A's timing on TXRXCLK, the handshake, copies and snapshots |
+| `core.tvcnet` | `tvcnet_test` | TVCnet: PING and ECHO through the sockets at 2400 baud (3 % fast and slow) and 9600 baud, the 2 ms turnaround, the deck in the other socket, a framing error, GET without a network, a clock restart |
 | `core.sid_card` | `sid_card_test` | the ports with and without the card; OSC3, ENV3 and the fading data bus; a 440 Hz sawtooth on the 6581 and the 8580; identical samples from a copy and from differently sliced runs; an 8580 snapshot that continues sample for sample and saves again byte-identical; reset |
 | `z80.sst_subset` (`z80`) | `sst_test` | the 97-file SingleStepTests subset: final registers (Q included), RAM, length, refresh addresses, and each bus access's order, address, data and T-state offset. Known deviations of `z80.h` go into a strict expected-fail table, where a deviation that disappears fails the test too; the table is empty. Data `FREETVC_SST_DIR` |
 | `z80.zexdoc`, `z80.zexall` (`z80`, `slow`) | `zex_test` | the CP/M originals on a flat 64 KiB RAM with BDOS functions 2 and 9 trapped at 0005h; passes on 67 × "OK", no "ERROR" and "Tests complete". Each takes 46 734 975 919 T. Data `FREETVC_ZEX_DIR` |
@@ -384,6 +393,7 @@ Some behaviour can only be checked through the real programs. The scripts are in
 - Sound: `tools/sound/` records the GUI's audio while typing into it, and analyses WAV cycles and dropouts ([tools/sound/README.md](../../tools/sound/README.md)). The GUI's `SOUND PITCH 3950,VOLUME 15,DURATION 50` gives one burst of 1010–1020 ms with every cycle 35.83–35.91 samples (1337.76 Hz), the same as the headless WAV; with `--no-audio` the sink gets exact silence.
 - MCP: `tools/mcp/inspector_check.sh` with the official MCP Inspector, and `tools/mcp/stress_check.py` ([tools/mcp/README.md](../../tools/mcp/README.md)).
 - DZRP and the GDB stub: `tools/dezog/` (DeZog built from source with a patch) and `tools/gdb/gdb_check.sh` (GNU gdb built for the Z80).
+- TVCnet: `tools/tvcnet/run_checks.sh` assembles the TVC programs of the TVCnet firmware repository (`tvc/`) with sjasmplus and runs them on the headless runner against a local HTTP server and a TCP echo server: PING and ECHO, GET, OPEN/SEND/NEXT/CLOSE and a scripted Hayes session ([media.md](media.md#checks-tvcnet)).
 - `tools/z80eval/`: the stand-alone CPU harnesses used to choose the Z80 core ([z80-core.md](z80-core.md)).
 
 There is no CI configuration.

@@ -156,18 +156,18 @@ int main() {
     // The deck: the tape moves only while PLAY is down and the motor is on
     TapeDeck deck;
     deck.insert(signal);
-    deck.tape_motor(0, true);
+    deck.tape_motor(0, 0x80);
     check(!deck.tape_input(1000) && deck.position() == 0, "stopped: no movement");
     deck.play();
     deck.tape_input(1000);
     check(deck.position() == 0, "PLAY counts from the next tick on");
     deck.tape_input(5000);
     check(deck.position() == 4000, "moving with the motor on");
-    deck.tape_motor(6000, false);
+    deck.tape_motor(6000, 0);
     deck.tape_input(9000);
     check(deck.position() == 5000, "the motor stops the tape");
     // Silence for 2 s, then the leader's high half
-    deck.tape_motor(9000, true);
+    deck.tape_motor(9000, 0x80);
     deck.tape_input(9000 + 2 * kTapeTicksPerSecond - 5000 + 10);
     check(deck.tape_input(9000 + 2 * kTapeTicksPerSecond - 5000 + 10), "the first leader cycle starts high after 2 s");
     deck.tape_input(10'000'000'000ULL);
@@ -177,7 +177,7 @@ int main() {
     TapeDeck recorder;
     recorder.insert_blank();
     recorder.record();
-    recorder.tape_motor(100, true);
+    recorder.tape_motor(100, 0x80);
     std::uint64_t t = 100;
     bool level = false;
     for (int i = 0; i < 6; ++i) {
@@ -185,7 +185,7 @@ int main() {
         level = !level;
         recorder.tape_output(t, level);
     }
-    recorder.tape_motor(t + 500, false);
+    recorder.tape_motor(t + 500, 0);
     recorder.stop();
     const auto& rec = recorder.signal();
     check(rec.runs.size() == 7 && rec.runs[0] == 1000 && rec.runs[5] == 1050 && rec.runs[6] == 500, "recorded runs");

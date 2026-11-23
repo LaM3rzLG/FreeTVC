@@ -15,9 +15,11 @@
 #include "core/cards/floppy.hpp"
 #include "core/cards/nanosd.hpp"
 #include "core/media/media_control.hpp"
+#include "core/media/tape_sockets.hpp"
 #include "frontend/common/printer_host.hpp"
 #include "frontend/common/serial_host.hpp"
 #include "frontend/common/card256_host.hpp"
+#include "frontend/common/tvcnet_network.hpp"
 #include "frontend/common/presets.hpp"
 #include "frontend/common/sd_image.hpp"
 
@@ -244,6 +246,10 @@ public:
     bool serial_capture(const std::string& path, std::string& error) override { return serial_.set_capture(path, error); }
     std::string serial_take() override { return serial_.take(); }
     std::string serial_describe() const override;
+    void set_tvcnet(const TvcnetSettings& settings) override;
+    TvcnetSettings tvcnet() const override { return tvcnet_settings_; }
+    std::vector<std::string> tvcnet_log() override { return tvcnet_.take_log(); }
+    std::string tvcnet_describe() const override;
 
 private:
     bool save_disk(unsigned drive, std::string& error);
@@ -268,6 +274,10 @@ private:
 
     Machine& machine_;
     Media media_;
+    TapeTvcnet tvcnet_;
+    TvcnetNetwork tvcnet_network_;
+    TvcnetSettings tvcnet_settings_;
+    TapeSockets sockets_{media_.deck()};
     std::string program_name_;
     std::filesystem::path save_root_;
     std::filesystem::path tape_path_;    // the file in the deck

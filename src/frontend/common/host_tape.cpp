@@ -156,7 +156,8 @@ bool CasFolder::write(std::string_view name, std::span<const std::uint8_t> cas, 
 
 HostTape::HostTape(Machine& machine) : machine_(machine) {
     machine_.set_os_call_handler(&media_);
-    machine_.set_tape_port(&media_.deck());
+    tvcnet_.set_network(&tvcnet_network_);
+    machine_.set_tape_port(&sockets_);
     machine_.set_floppy_drives(&drives_);
     machine_.set_card256_media(&card256_host_.media());
     machine_.set_nanosd_media(&nanosd_media_);
@@ -186,6 +187,30 @@ HostTape::~HostTape() {
     machine_.set_nanosd_media(nullptr);
     machine_.set_printer(nullptr);
     machine_.set_serial_line(nullptr);
+}
+
+void HostTape::set_tvcnet(const TvcnetSettings& settings) {
+    tvcnet_settings_ = settings;
+    tvcnet_.set_socket(settings.socket == TapeTvcnet::kSocketCh13 ? TapeTvcnet::kSocketCh13 : TapeTvcnet::kSocketCh12);
+    tvcnet_.set_baud(settings.baud);
+    tvcnet::LineCode code = tvcnet_.line_code();
+    code.t_us = settings.t_us ? settings.t_us : tvcnet::LineCode{}.t_us;
+    tvcnet_.set_line_code(code);
+    tvcnet_network_.set_online(settings.network);
+    sockets_.plug(settings.plugged ? &tvcnet_ : nullptr);
+}
+
+std::string HostTape::tvcnet_describe() const {
+    if (!tvcnet_settings_.plugged) {
+        return "TVCnet unplugged; " + tvcnet_network_.describe();
+    }
+    const TapeTvcnet::Counters counters = tvcnet_.counters();
+    const tvcnet::ModemStats stats = tvcnet_.stats();
+    return std::string("TVCnet in ") + (tvcnet_.socket() == TapeTvcnet::kSocketCh13 ? "CH13 (05h b6)" : "CH12 (05h b7)") +
+           ", " + std::to_string(tvcnet_.baud()) + " baud, T " + std::to_string(tvcnet_.line_code().t_us) + " us; " +
+           tvcnet_network_.describe() + "; " + std::to_string(counters.bytes) + " bytes, " +
+           std::to_string(counters.framing_errors) + " framing errors, " + std::to_string(stats.requests) + " requests, " +
+           std::to_string(stats.repeats) + " repeats, " + std::to_string(stats.bad_frames) + " bad frames";
 }
 
 bool HostTape::set_folder(const std::string& dir, std::string& error) {

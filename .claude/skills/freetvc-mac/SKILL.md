@@ -28,6 +28,9 @@ bash tools/mac/build_mac.sh        # brew cmake+ninja if missing; Release; ROMs 
 ```
 Output: `build/mac-release/src/freetvc` and `freetvc-headless`, with `roms/ fonts/ skins/ keymaps/ pictures/ lang/
 about/` beside them (move the whole folder, never the binary alone). The CMake presets are Linux/Windows only.
+- TVCnet's firmware code is fetched from a pinned commit of https://github.com/Deybacsi/TVCnet. A configure warning
+  "TVCnet: the firmware repository's main is at ..." is only information: the build still uses the pin and works. Do not
+  move the pin unless the user asks (`tools/tvcnet/update_pin.sh`, then build); `TVCNET_DIR=<checkout>` builds a local copy.
 
 ## Run
 - GUI: `build/mac-release/src/freetvc` (run in the background). Bring it forward:

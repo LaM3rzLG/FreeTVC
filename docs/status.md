@@ -14,6 +14,7 @@ What freeTVC emulates today, how its accuracy was checked, and what is still mis
 | Printer port | the Centronics port; output to raw or UTF-8 text files | [machine.md](design/machine.md#printer-port) |
 | Program loading | a host cassette serving the ROM's own `LOAD`/`SAVE` from CAS files and folders, fast autostart | [media.md](design/media.md) |
 | Tape deck | the real tape signal through the ROM's tape routines: CAS as tape, TTP, WAV in and out | [media.md](design/media.md#tape-deck) |
+| TVCnet, tape-port WiFi module | an ESP32 modem on a tape socket: UART on the motor line, half-period code on the tape input, the TVCnet firmware's own protocol code; the host's network stands for WiFi (HTTP and HTTPS GET, TCP connections, the Hayes AT commands of TERM) | [media.md](design/media.md#tape-port-tvcnet) |
 | Cartridges | plain (with bank switches), KiloCart, MegaCart, MultiCart v2, SD Dual | [media.md](design/media.md#cartridges), [cards.md](design/cards.md) |
 | Snapshots and rewind | freeTVC's own TVCS (byte-exact), WinTVC `.tvs` import, 60 s rewind | [media.md](design/media.md#snapshots), [file-formats.md](hardware/file-formats.md#wintvc-tvs) |
 | Expansion cards | HBF disk card (WD1793, four drives, VT-DOS 1.1 / 1.2), GameCard, TVC256k++ (memory, overlay, storage, mouse, vSID), Multichip sound card, NanoSD, SID card, serial card, 2dfx graphics card (the creator's library) | [cards.md](design/cards.md) |
@@ -44,6 +45,7 @@ What freeTVC emulates today, how its accuracy was checked, and what is still mis
 - **Releases:** a Windows zip, a Linux tarball (glibc 2.39 or newer) and two macOS zips; GitHub Actions builds the Windows and Linux ones with `tools/release/make_release.sh` (no tests there), the macOS ones are built on a Mac; no AppImage, no installer, no code signing or notarization.
 - **Hardware questions:** the open ❓ items in [tvc-hardware.md](hardware/tvc-hardware.md) and [cards.md](design/cards.md) need a real machine: for example the disk card's READY, disk-change and reset wiring.
 - **Tape:** one real recording (Space Sapper, third file) does not load: a sync half-wave of 3 counts falls under the ROM's 4-count threshold.
+- **TVCnet:** the timing limits of a real TVC's tape input (shortest half-period, comparator delays) are not measured yet; the emulated input is ideal.
 - **Printer and serial:** no host serial port (COM, `/dev/tty*`) and no Epson ESC/P rendering; printer output is a byte or text file.
 - **Debugger:** monitor checkpoint commands (VICE `command`), MCP resources, progress notifications and cancelling a running call are not built; DZRP `SET_SLOT` is not built.
 - **ROM documentation:** the BASIC function list, operator dispatch, RST 18h operation meanings and SYS 2.1 differences are not fully documented in [rom.md](hardware/rom.md).

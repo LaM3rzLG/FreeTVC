@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "core/media/media.hpp"
+#include "core/media/tape_tvcnet.hpp"
 
 namespace freetvc {
 
@@ -201,6 +202,13 @@ public:
     // What the TVC sent since the last call
     virtual std::string serial_take() = 0;
     virtual std::string serial_describe() const = 0;
+
+    // TVCnet: plugged in or out, its socket, speeds and network.
+    virtual void set_tvcnet(const TvcnetSettings& settings) = 0;
+    virtual TvcnetSettings tvcnet() const = 0;
+    // The frames and line errors since the last call
+    virtual std::vector<std::string> tvcnet_log() = 0;
+    virtual std::string tvcnet_describe() const = 0;
 };
 
 }  // namespace freetvc

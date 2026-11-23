@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.4 — 2026-11-19
+
+### Fixed
+
+- **The window grew while it was dragged**: on Linux (seen under Cinnamon) moving the window by its title bar made it taller and taller, until its bottom left the screen. The window now keeps its size when moved.
+- **The `deck` skin's strip was smaller** than the `bronze` one's (30 points high instead of 45, with smaller text): the built-in skin values, which every skin starts from, now match `bronze.skin`.
+- **Hungarian UI**: the video recording's ffmpeg messages are translated.
+
 ## 1.3.3 — 2026-11-09
 
 ### Changed

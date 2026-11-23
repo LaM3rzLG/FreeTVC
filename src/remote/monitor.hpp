@@ -149,6 +149,7 @@ private:
     std::string cmd_nanosd(Args& a);
     std::string cmd_printer(Args& a);
     std::string cmd_serial(Args& a);
+    std::string cmd_tvcnet(Args& a);
     std::string cmd_sddual(Args& a);
     std::string cmd_card256(Args& a);
     // "on [slot] | off" for a card that needs only its image (the GameCard, the Multichip card)
