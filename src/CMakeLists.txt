@@ -44,6 +44,8 @@ add_library(freetvc_core STATIC
     core/media/host_cassette.cpp
     core/media/media.cpp
     core/media/tape_deck.cpp
+    core/media/tape_tvcnet.cpp
+    core/media/tape_sockets.cpp
     core/media/tape_signal.cpp
     core/snapshot/snapshot.cpp
     core/snapshot/machine_state.cpp
@@ -52,7 +54,7 @@ target_include_directories(freetvc_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/generated)
 target_link_libraries(freetvc_core PRIVATE freetvc_z80h)
-target_link_libraries(freetvc_core PUBLIC freetvc_fatfs freetvc_littlefs)
+target_link_libraries(freetvc_core PUBLIC freetvc_fatfs freetvc_littlefs tvcnet_common)
 target_link_libraries(freetvc_core PRIVATE freetvc_ymfm freetvc_resid freetvc_twodfx)
 freetvc_warnings(freetvc_core)
 
@@ -107,7 +109,7 @@ add_custom_command(OUTPUT ${rom_list_cpp}
     DEPENDS ${PROJECT_SOURCE_DIR}/data/roms.txt ${PROJECT_SOURCE_DIR}/cmake/EmbedText.cmake
     VERBATIM)
 add_library(freetvc_frontend_common STATIC frontend/common/presets.cpp frontend/common/settings.cpp frontend/common/wav.cpp frontend/common/video_recorder.cpp
-    frontend/common/host_tape.cpp frontend/common/card256_host.cpp frontend/common/rom_fetch.cpp frontend/common/unzip.cpp
+    frontend/common/host_tape.cpp frontend/common/card256_host.cpp frontend/common/tvcnet_network.cpp frontend/common/rom_fetch.cpp frontend/common/unzip.cpp
     frontend/common/multicart_image.cpp frontend/common/game_saves.cpp
     frontend/common/sd_image.cpp frontend/common/printer_host.cpp frontend/common/serial_host.cpp ${rom_list_cpp})
 target_link_libraries(freetvc_frontend_common PUBLIC freetvc_core PRIVATE freetvc_debug freetvc_remote)

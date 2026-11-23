@@ -6,6 +6,7 @@
 #include <iterator>
 #include <system_error>
 
+#include "core/media/tape_tvcnet.hpp"
 #include "core/message.hpp"
 
 namespace freetvc {
@@ -18,7 +19,7 @@ constexpr std::string_view kHeader =
     "; change; on exit freeTVC rewrites preset, skin, keymap, language, the cards and their media. Command-line options are\n"
     "; not saved. Keys: rom_dir, preset, skin, keymap, language, audio, volume, fullscreen, full_raster, disk_card, disk_rom,\n"
     "; disk_a, disk_b, disk_c, disk_d, gamecard, multichip, sid_card, card256, card256_usb, card256_flash, twodfx, nanosd, nanosd_sd, nanosd_menu, nanosd_sort,\n"
-    "; printer, serial_card, serial_line, serial_flow, video_dir, screenshot_dir, save_dir, monitor, mcp, mcp_allow_monitor, dzrp, dzrp_banks, gdb, renderer,\n"
+    "; printer, serial_card, serial_line, serial_flow, tvcnet, tvcnet_baud, tvcnet_t, tvcnet_network, video_dir, screenshot_dir, save_dir, monitor, mcp, mcp_allow_monitor, dzrp, dzrp_banks, gdb, renderer,\n"
     "; picture, colour_switch, frame_blend, blend_sharpness, keys, recent, ui_font_size, strip_size.\n";
 
 std::string_view trim(std::string_view s) {
@@ -115,6 +116,22 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
                 s.serial_flow = value;
             } else {
                 fail(msg("serial_flow is rts or none"));
+            }
+        } else if (key == "tvcnet") {
+            if (value == "no" || parse_tvcnet_socket(value)) {
+                s.tvcnet = value;
+            } else {
+                fail(msg("tvcnet is no, ch12 or ch13"));
+            }
+        } else if (key == "tvcnet_baud" || key == "tvcnet_t") {
+            const bool digits = !value.empty() && value.size() <= 6 && std::all_of(value.begin(), value.end(), [](char c) { return c >= '0' && c <= '9'; });
+            const unsigned amount = digits ? static_cast<unsigned>(std::stoul(value)) : 0;
+            if (key == "tvcnet_baud" && amount >= 300 && amount <= 115200) {
+                s.tvcnet_baud = amount;
+            } else if (key == "tvcnet_t" && amount >= 20 && amount <= 10000) {
+                s.tvcnet_t = amount;
+            } else {
+                fail(key == "tvcnet_baud" ? msg("tvcnet_baud is 300 to 115200") : msg("tvcnet_t is 20 to 10000"));
             }
         } else if (key == "sid_card") {
             if (value == "off" || value == "6581" || value == "8580") {
@@ -222,7 +239,7 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
                                   : s.serial_slot) = slot;
         } else if (key == "audio" || key == "full_raster" || key == "disk_card" || key == "gamecard" || key == "multichip" ||
                    key == "card256" || key == "twodfx" || key == "nanosd" || key == "nanosd_menu" || key == "serial_card" || key == "fullscreen" ||
-                   key == "dzrp_banks" || key == "mcp_allow_monitor") {
+                   key == "dzrp_banks" || key == "mcp_allow_monitor" || key == "tvcnet_network") {
             const auto flag = parse_flag(value);
             if (!flag) {
                 fail(msg("%s is yes or no", std::string(key).c_str()));
@@ -239,6 +256,7 @@ Settings parse_settings(std::string_view text, const std::filesystem::path& base
                  : key == "fullscreen"  ? s.fullscreen
                  : key == "dzrp_banks"  ? s.dzrp_banks
                  : key == "mcp_allow_monitor" ? s.mcp_allow_monitor
+                 : key == "tvcnet_network" ? s.tvcnet_network
                                         : s.card256) = flag;
             }
         } else {

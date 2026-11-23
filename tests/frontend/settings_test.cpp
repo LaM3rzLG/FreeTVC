@@ -98,6 +98,13 @@ int main(int argc, char** argv) {
     check(d48.printer == (program / "out.prn").lexically_normal().string() && d48.serial_card == true && d48.serial_line == "listen:7000" &&
               d48.serial_flow == "none" && d48_errors.size() == 2,
           "printer (a relative file against the file's folder), serial_card, serial_line and serial_flow; bad values reported");
+    std::vector<std::string> tvcnet_errors;
+    const freetvc::Settings tvcnet = freetvc::parse_settings(
+        "tvcnet = ch13\ntvcnet_baud = 9600\ntvcnet_t = 180\ntvcnet_network = no\ntvcnet = ch14\ntvcnet_baud = 50\ntvcnet_t = x\n", program,
+        tvcnet_errors);
+    check(tvcnet.tvcnet == "ch13" && tvcnet.tvcnet_baud == 9600u && tvcnet.tvcnet_t == 180u && tvcnet.tvcnet_network == false &&
+              tvcnet_errors.size() == 3,
+          "tvcnet, tvcnet_baud, tvcnet_t and tvcnet_network; bad values reported");
     check(freetvc::parse_settings("printer = off\n", program, d48_errors).printer == "off", "printer off stays off");
     check(s.rom_dir == (program / "roms").lexically_normal().string(), "a relative rom_dir is read against the file's folder",
           s.rom_dir.value_or(""));

@@ -168,6 +168,45 @@ Five files: headers at 5.3, 17.5, 53.1, 70.2 and 98.7 s (the last three unnamed)
 - **Left** ⚑: the high half just before every sync is 11–12 samples, about 3 counts over its kind's average in real time, against the sync threshold of 4. On file 3's data block (56.35 s) it reaches 4, the sync is taken one half early, the block is read with the wrong pairing (phase register C = 20h at E837h instead of 00h), and the program crashes into a striped screen. This is deterministic (24 runs with `LOAD` typed at frames 450–473 all fail the same way: the tape starts with the motor, so the timing moves with it). Re-renderings of the same edges at 441 kHz load all five files, so it is a matter of a microsecond or two.
 - **Why WinTVC loads it**: WinTVC 1.4.1's tape input reads at most one WAV sample per `IN (59h)` and stalls while the CPU is halted (static analysis, confirmed by a run under Wine), so the ROM ends up counting samples, not time: the leader jitters by 1 count and the stretched half is +2, under both thresholds. A real TVC samples a live signal in real time, so freeTVC keeps real time. Whether a real TVC loads this recording is unknown.
 
+## TVCnet, the tape-port WiFi module
+
+A WiFi modem for a tape socket: an ESP32-S3 board on the DIN plug, powered from pin 4. The TVC sends requests on the socket's motor line and receives the replies on the tape input; TVCnet does WiFi, DNS, HTTP and HTTPS. Its hardware, protocol and firmware live in TVCnet's own firmware repository. freeTVC builds that firmware's hardware-independent part (`common/`: frames, the alternating bit, the commands and the reply line code) into the core, so the emulated TVCnet runs the same code as the real one.
+
+### The two lines
+
+- **TVC → TVCnet, the motor line (DIN pin 5).** Port 05h b7 drives CH12's line, b6 CH13's, through a 75451 open collector: a set bit pulls the line low ✓ (HBA schematic sheet 5: no pull-up on the TVC side, nothing between the 75451 and pin 5; [tvc-hardware.md](../hardware/tvc-hardware.md)). TVCnet pulls the line up, so a clear bit (also the state after reset) is high, the UART's idle level. The TVC bit-bangs 8N1, LSB first; TVCnet's UART runs at 2400 baud by default.
+- **TVCnet → TVC, the tape input (DIN pin 3, 59h b5).** The input is AC coupled (100 nF) into a µA741 comparator with hysteresis ✓ (same sheet), so only edges get through and the comparator holds the level between them. TVCnet sends a half-period code: every half-period between two edges is one bit, T long for 1 and 2T for 0, LSB first, after a preamble of 32 ones and before 4 trailing ones; T is 250 µs by default. A reply frame starts with 6Ah.
+- Modelled: the input flips at every edge and holds between them. Not modelled ❓: the comparator's delay and any difference between its rising and falling edges, and its polarity (the code does not depend on it). ⚑ The shortest T and the highest baud rate that work on a real TVC are still to be measured.
+
+### Where it sits
+
+- `core/media/tape_tvcnet.*`: the physical layer. The UART receiver takes a falling edge as a start bit and samples the middle of each bit on the machine's half-T ticks; a low stop bit is a framing error and no byte. Each byte goes to the modem stamped with the time of its stop bit's middle, in microseconds of machine time. The modem's reply becomes a queue of edge times, played on 59h b5.
+- `core/media/tape_sockets.*`: the machine's `TapePort`. The two sockets share their input and output lines, and each has its own motor bit (`TapePort::tape_motor` gets both bits). While TVCnet is plugged in, it drives the shared input and the deck sits in the other socket: the deck no longer sees TVCnet's motor bit, so TVCnet's traffic does not move the tape or trigger fast tape. Unplugged, either bit moves the deck as before.
+- The modem (`tvcnet::Modem`, from the firmware): frames from the TVC (A5h, LEN, CTRL, data, an 8-bit sum), the alternating bit with the last reply kept for repeats, a 2 ms turnaround before the reply's first edge, and the commands PING, ECHO, STATUS, WIFI, GET, NEXT and CLOSE. Everything runs on machine time, so a run is deterministic apart from the network itself.
+- TVCnet is outside the machine state, like a serial peer: it is not in snapshots, and a restart of the machine's clock (power-on, a restored state, rewind) resets its line state and drops a reply still waiting.
+
+### Network
+
+`frontend/common/tvcnet_network.*` stands in for TVCnet's WiFi with the host's network:
+- GET runs the system curl in a thread: http and https only, also after redirects, at most 60 s and 16 MiB. NEXT answers BUSY until the whole body is in, then DATA in pieces of up to 255 bytes, the last one END. curl's exit codes become TVCnet's status codes (6 DNS, 7 connection, others lost), an HTTP status of 400 or more becomes the HTTP error with the status code.
+- WIFI keeps the network name and changes nothing; STATUS reports the WiFi as up and 127.0.0.1.
+- "Without a network" (`--tvcnet-offline`, the menu, `tvcnet_network = no`): every network command answers as TVCnet with no WiFi.
+
+### Controls
+
+- GUI: the Tape menu (no TVCnet, in CH12, in CH13; on the network or not). The choice is saved in `freetvc.ini`.
+- Command line (both programs): `--tvcnet [ch12|ch13]`, `--tvcnet-baud N`, `--tvcnet-t US`, `--tvcnet-offline`.
+- `freetvc.ini`: `tvcnet` (no, ch12, ch13), `tvcnet_baud`, `tvcnet_t`, `tvcnet_network`.
+- Monitor `tvcnet [on [ch12|ch13] | off | baud n | t us | network on|off | log]`; `log` lists the frames both ways and the line errors.
+- MCP `media`: `tvcnet_on` (`tvcnet_socket`, `baud`, `t_us`, `network`), `tvcnet_off`, `tvcnet_log`; `status` describes TVCnet.
+
+### Checks: TVCnet
+
+- `core.tvcnet`: PING through the sockets with the reply's start 2 ms after the stop bit; ECHO with a UART 3 % slow and 3 % fast; the other socket's motor line is not TVCnet's and moves the deck; a low stop bit is a framing error; GET without a network; a clock restart drops the waiting reply; 9600 baud.
+- `tools/tvcnet/run_checks.sh` (outside CTest: it needs sjasmplus and a local HTTP server): Z80 programs on the headless runner bit-bang PING and ECHO and decode the replies; a GET of a 680-byte file from 127.0.0.1 answers BUSY three times, then DATA 255, DATA 255 and END 170, and the bytes arrive unchanged.
+- The same PING and ECHO program ran in the GUI with TVCnet chosen in the Tape menu, driven over the text monitor; the choice came back after a restart.
+- The firmware's own host tests cover the frames, the line code and the commands with a fake network.
+
 ## Cartridges
 
 The cartridge sits in page 0 (02h page-0 field `01`) or page 3 (field `00`, the reset value); the ROM boots one that starts with `MOPS` at C004h ([tvc-hardware.md](../hardware/tvc-hardware.md) §3). The boards are `CartType` in `core/machine/config.hpp`, decoded by `MemoryMap` (`core/bus/`).

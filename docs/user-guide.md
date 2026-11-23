@@ -153,7 +153,7 @@ A menu opens upward from its key. Clicking another key while a menu is open swit
 
 **Disk menu** (the floppy): *Load a program directly...*: a disk image goes into the first empty drive (A: when all are full; the disk card goes in if needed) and its first program starts; then for each drive A: to D: "insert disk..." or "eject NAME", and Fast disk.
 
-**Tape menu** (the cassette): Insert tape..., Run the tape, Play, Stop, Rewind, Record to WAV..., Eject tape, Fast tape.
+**Tape menu** (the cassette): Insert tape..., Run the tape, Play, Stop, Rewind, Record to WAV..., Eject tape, Fast tape; below them TVCnet: No TVCnet, TVCnet in CH12 (05h b7), TVCnet in CH13 (05h b6), TVCnet on the network ([4.9](#49-the-tape-port-wifi-tvcnet)).
 
 **Printer menu**: Printer to a file..., No printer ([section 5](#5-expansion-cards)).
 
@@ -311,6 +311,14 @@ The TV picture (the 650 × 287 TV area at the PAL aspect: every line 4 times, th
 
 In the GUI the REC key starts and stops a recording ([section 3](#the-status-strip)). `freetvc-headless --video FILE` records the whole run; after `--autostart` it starts when the program runs.
 
+### 4.9 TVCnet, the tape-port WiFi module
+
+A WiFi modem that plugs into a tape socket: the TVC sends requests as a UART on the socket's motor line (port 05h b7 for CH12, b6 for CH13; a set bit pulls the line low) and reads the replies from the tape input (59h b5). TVCnet's commands fetch web pages (HTTP and HTTPS) for programs written for it. freeTVC runs the TVCnet firmware's own protocol code and uses the computer's network as TVCnet's WiFi.
+
+- Plug it in: the cassette's menu → TVCnet in CH12 or CH13, `--tvcnet [ch12|ch13]`, or `tvcnet = ch12` in `freetvc.ini`. The tape deck then sits in the other socket.
+- `--tvcnet-baud N` (default 2400) and `--tvcnet-t US` (default 250) must match the TVC program; `--tvcnet-offline` or *TVCnet on the network* switched off makes TVCnet answer as if it had no WiFi.
+- The text monitor's `tvcnet log` lists the frames both ways and any line errors, which helps when writing the TVC side.
+
 ## 5. Expansion cards
 
 The TVC has four card slots (0–3), each with 16 I/O ports at 10h + 10h·n and an 8 KiB memory window at C000h–DFFFh. Putting a card in or taking it out powers the machine on. Two cards cannot share a slot. The GUI starts with the cards that were in when it closed, in the same slots (the `freetvc.ini` keys below). In the Cards menu each slot lists the cards; choosing one puts it into that slot ([section 3](#the-status-strip)). Settings → Machine has the same choice as slot buttons 0–3 beside each card. Details of each card are in [cards.md](design/cards.md).
@@ -397,6 +405,10 @@ Main menu → **Settings...** opens a sheet at the right of the window, its text
 | `serial_card` | flag or a slot 0–3 | no | `yes` = slot 1 |
 | `serial_line` | `off`, `on`, `listen[:PORT]`, `connect:PORT` | `off` | `on` is saved as `off` (its files are not saved) |
 | `serial_flow` | `rts`, `none` | `rts` | |
+| `tvcnet` | `no`, `ch12`, `ch13` | `no` | TVCnet's socket |
+| `tvcnet_baud` | 300–115200 | 2400 | |
+| `tvcnet_t` | 20–10000 (µs) | 250 | |
+| `tvcnet_network` | flag | yes | |
 | `monitor`, `mcp`, `dzrp`, `gdb` | `off`, `on` (default port) or a port 1–65535 | `off` | the remote servers at start |
 | `mcp_allow_monitor` | flag | no | |
 | `dzrp_banks` | flag | no | |
@@ -532,6 +544,7 @@ nc 127.0.0.1 6580
 | `nanosd [on [slot] \| off \| sd "folder"\|none]` | the NanoSD and its SD card |
 | `printer [on \| off \| "file" ["file"] \| read]` | the printer; `read` shows what it printed since the last read |
 | `serial [on [slot] \| off \| line ... \| flow rts\|none \| send "text" \| file "file" \| capture "file"\|none \| read]` | the serial card and its cable |
+| `tvcnet [on [ch12\|ch13] \| off \| baud n \| t us \| network on\|off \| log]` | TVCnet |
 | `sddual [on [gm] \| off \| insert 0\|1 "file" \| eject 0\|1 \| build "out" mib "path"...]` | the SD Dual cartridge and its cards |
 | `card256 [on [slot] \| off \| usb "folder"\|mouse\|none \| flash "file" \| mouse dx dy [buttons]]` | the TVC256k++ |
 | `radix [h\|d]` | default number base |
@@ -581,7 +594,7 @@ Example client configuration (the `mcpServers` shape most clients use; paths are
 | `io_state` | video, CRTC, sound, IRQ, paging |
 | `evaluate` | a monitor expression |
 | `load_binary` | a host file into memory, optionally jump there |
-| `media` | cassette, autostart, tape, cartridges, MultiCart and SD images, disks, every card, printer, serial line |
+| `media` | cassette, autostart, tape, cartridges, MultiCart and SD images, disks, every card, printer, serial line, TVCnet |
 | `card256` | the TVC256k++ card without side effects: `registers` (all 256, decoded), `sprites` (position, colour, phase, flags, data address; pixels as 24 × 21 rows of hex colours), `tiles` (the overlay's 32 × 30 screen codes and colours), `ram` (fast RAM or PSRAM) |
 | `monitor_command` | one text monitor command; refused unless `--mcp-allow-monitor` (or `mcp_allow_monitor = yes`) |
 
@@ -654,6 +667,7 @@ Exit codes: 0 success; 1 an error (a missing file, a failed autostart, an output
 | `--disk-card`, `--disk-rom ROM`, `--disk [A-D:]FILE` | the disk card ([4.5](#45-disks-and-the-disk-card)) |
 | `--gamecard [SLOT]`, `--gamecard-rom FILE`, `--multichip [SLOT]`, `--multichip-rom F`, `--sid-card [MODEL]`, `--sid-clock HZ`, `--nanosd [SLOT]`, `--nanosd-rom FILE`, `--nanosd-sd DIR`, `--card256 [SLOT]`, `--card256-rom FILE`, `--card256-usb WHAT`, `--card256-flash F` | expansion cards ([section 5](#5-expansion-cards)) |
 | `--printer FILE`, `--serial-card [SLOT]`, `--serial PEER`, `--serial-flow F`, `--serial-send FILE`, `--serial-capture FILE` | printer and serial card |
+| `--tvcnet [ch12\|ch13]`, `--tvcnet-baud N`, `--tvcnet-t US`, `--tvcnet-offline` | TVCnet |
 | `--screenshot FILE` | write the last complete frame as a binary PPM (800 × 314, the full raster) |
 | `--snapshot FILE` | start from a TVCS snapshot; its board and ROM set win over `--preset`; budgets count from there |
 | `--save-snapshot FILE` | write a TVCS snapshot at the end |
@@ -716,6 +730,7 @@ freetvc-headless --preset 64k+-2.2 --mcp-stdio
 | `--nanosd [SLOT]`, `--nanosd-rom FILE`, `--nanosd-sd DIR` | the NanoSD |
 | `--printer FILE\|on` | a printer |
 | `--serial-card [SLOT]`, `--serial PEER`, `--serial-flow rts\|none`, `--serial-send FILE`, `--serial-capture FILE` | the serial card |
+| `--tvcnet [ch12\|ch13]`, `--tvcnet-baud N`, `--tvcnet-t US`, `--tvcnet-offline` | TVCnet |
 | `--card256 [SLOT]`, `--card256-rom FILE`, `--card256-usb DIR\|mouse\|none`, `--card256-flash FILE\|DIR` | the TVC256k++ |
 | `--keymap symbolic\|positional` | the keyboard mapping |
 | `--keys NAME\|FILE` | the key layout |

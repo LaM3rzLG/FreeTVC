@@ -443,6 +443,19 @@ void draw_tape_menu(const PlayStatus& status, PlayActions& actions) {
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("%s", tr("Run at full speed while the tape moves"));
     }
+    // design/media.md "TVCnet": it sits in the other socket than the deck and drives the shared input
+    ImGui::Separator();
+    actions.tvcnet_socket = ImGui::MenuItem(tr("No TVCnet"), nullptr, status.tvcnet_socket == 0) ? 0 : actions.tvcnet_socket;
+    actions.tvcnet_socket = ImGui::MenuItem(tr("TVCnet in CH12 (05h b7)"), nullptr, status.tvcnet_socket == 0x80) ? 0x80 : actions.tvcnet_socket;
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("A UART on this socket's motor line goes to TVCnet; its replies arrive on the tape input. "
+                                   "The deck stays in the other socket"));
+    }
+    actions.tvcnet_socket = ImGui::MenuItem(tr("TVCnet in CH13 (05h b6)"), nullptr, status.tvcnet_socket == 0x40) ? 0x40 : actions.tvcnet_socket;
+    actions.toggle_tvcnet_network |= ImGui::MenuItem(tr("TVCnet on the network"), nullptr, status.tvcnet_network, status.tvcnet_socket != 0);
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tr("The host's network stands for TVCnet's WiFi; off, it answers as if it had none"));
+    }
 }
 
 void draw_disk_menu(const PlayStatus& status, PlayActions& actions) {

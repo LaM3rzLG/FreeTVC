@@ -75,6 +75,8 @@ struct PlayStatus {
     std::span<const float> tape_wave;  // the signal before the head while it moves (DeckRow::tape_wave)
     bool tape_recording = false;
     bool fast_tape = true;
+    std::uint8_t tvcnet_socket = 0;    // TVCnet's motor bit (80h CH12, 40h CH13), 0 = unplugged
+    bool tvcnet_network = true;        // the host's network stands for its WiFi
     std::string_view cartridge;  // file name of the cartridge; empty = none
     bool quick_snapshot = false;  // the program running has a game save
     bool game_saved = false;      // a game save was just made: its key is lit
@@ -150,6 +152,8 @@ struct PlayActions {
     bool tape_eject = false;
     bool tape_record = false;     // save dialog, then a blank tape recording into that WAV
     bool toggle_fast_tape = false;
+    int tvcnet_socket = -1;          // TVCnet: 0 unplugged, else the motor bit of its socket
+    bool toggle_tvcnet_network = false;
     bool cart_insert = false;  // file dialog, then the cartridge goes in and the machine powers on
     bool cart_remove = false;
     bool multicart_new = false;  // file dialog for its programs, a save dialog for the image, then it goes in

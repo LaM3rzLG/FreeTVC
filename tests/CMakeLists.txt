@@ -70,6 +70,8 @@ set_tests_properties(core.sddual PROPERTIES LABELS "core")
 
 freetvc_test_program(serial_test core/serial_test.cpp)
 add_test(NAME core.serial COMMAND serial_test)
+freetvc_test_program(tvcnet_test core/tvcnet_test.cpp)
+add_test(NAME core.tvcnet COMMAND tvcnet_test)
 set_tests_properties(core.serial PROPERTIES LABELS "core")
 freetvc_test_program(nanosd_test core/nanosd_test.cpp)
 add_test(NAME core.nanosd COMMAND nanosd_test)

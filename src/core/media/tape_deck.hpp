@@ -41,7 +41,8 @@ public:
 
     bool tape_input(std::uint64_t tick) override;
     void tape_output(std::uint64_t tick, bool level) override;
-    void tape_motor(std::uint64_t tick, bool on) override;
+    // Either motor bit moves the deck.
+    void tape_motor(std::uint64_t tick, std::uint8_t motors) override;
 
 private:
     void advance(std::uint64_t tick);

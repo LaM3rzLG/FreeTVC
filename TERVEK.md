@@ -21,6 +21,18 @@ Közös (Windows + Mac), nem platformfüggő fejlesztések. A Mac-es fordítás/
   a felhasználó döntse el, átállítsuk-e.
 - Nyitott (nem PC): Mac `.app` csomag (Finder-ikon); teljes képernyős tearing-ellenőrzés Macen; Linuxon a sima megjelenítés nincs kipróbálva.
 
+## TVCnet, magnóportos WiFi modul (1.3.4, `tape-wifi-dongle` ág; 2026-11-19)
+A TVCnet hardvere, protokollja és firmware-je: `~/tvc-wifi/firmware` (`HARDVER.md`, `PROTOKOLL.md`); belső jegyzetek: `~/tvc-wifi`.
+- KÉSZ: a firmware közös része (`common/`: keret, vonali kód, modem) a freeTVC magjába fordul (FetchContent, mint az SDL3);
+  `TapePort::tape_motor` mindkét motorbitet kapja; `TapeSockets` (a magnó a másik aljzatban), `TapeTvcnet` (UART a motorvonalon,
+  impulzusszélesség-kód a 59h b5-ön), hálózat curl-lel (`TvcnetNetwork`); `--tvcnet*`, ini kulcsok, Tape menü, monitor `tvcnet`, MCP;
+  `core.tvcnet` teszt, `tools/tvcnet/run_checks.sh` (PING, ECHO, GET 680 byte), GUI-ban is kipróbálva. Leírás: `docs/design/media.md`.
+- HÁTRA a push / kiadás előtt: a firmware repó GitHubra (`Deybacsi/TVCnet`, nyilvános), egy tag, és annak tarballja + SHA256 a
+  `FREETVC_TVCNET_URL` / `_SHA256` alapértékébe (`third_party/CMakeLists.txt`); addig a freeTVC csak
+  `-DFETCHCONTENT_SOURCE_DIR_TVCNET=~/tvc-wifi/firmware`-rel konfigurálható (a Mac-es `build_mac.sh` is).
+- HÁTRA: az ESP32-S3 firmware (`esp32s3/`, PlatformIO) még nincs lefordítva és kipróbálva; HTTPS tanúsítvány-ellenőrzés nélkül.
+- Később: OPEN/SEND (TCP), a valódi TVC időzítési határainak mérése (PROTOKOLL 9. fejezet).
+
 ## Játékmentések (megbeszélve 2026-11-07; alap kész az 1.3.0-ban)
 A megbeszélt működés:
 - **Mentés:** memóriakép és konfiguráció (melyik kártya melyik slotban, EPROM-mal és állapottal), a felcsatolt útvonalakkal

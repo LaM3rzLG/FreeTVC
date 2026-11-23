@@ -52,6 +52,25 @@ if(NOT WIN32 OR MINGW)
     endif()
 endif()
 
+# TVCnet's shared firmware code (GPL-3.0-or-later): a pinned tarball, or a local checkout through
+# FETCHCONTENT_SOURCE_DIR_TVCNET while the firmware and the emulator are developed together
+set(FREETVC_TVCNET_URL "" CACHE STRING "Tarball of the TVCnet firmware repository; may be a file:// URL")
+set(FREETVC_TVCNET_SHA256 "" CACHE STRING "SHA256 of FREETVC_TVCNET_URL")
+if(NOT FETCHCONTENT_SOURCE_DIR_TVCNET AND FREETVC_TVCNET_URL STREQUAL "")
+    message(FATAL_ERROR "The TVCnet firmware source is not set: pass -DFETCHCONTENT_SOURCE_DIR_TVCNET=<firmware checkout> "
+                        "or -DFREETVC_TVCNET_URL=<tarball> with -DFREETVC_TVCNET_SHA256")
+endif()
+include(FetchContent)
+if(FREETVC_TVCNET_URL STREQUAL "")
+    FetchContent_Declare(tvcnet URL "file:///nonexistent")
+else()
+    FetchContent_Declare(tvcnet
+        URL ${FREETVC_TVCNET_URL}
+        URL_HASH SHA256=${FREETVC_TVCNET_SHA256}
+        DOWNLOAD_EXTRACT_TIMESTAMP ON)
+endif()
+FetchContent_MakeAvailable(tvcnet)
+
 if(NOT FREETVC_BUILD_GUI)
     return()
 endif()

@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <functional>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -47,6 +48,10 @@ struct CurlCheck {
     std::string problem;            // why it cannot be used, with what to do
     bool ok() const { return !program.empty() && problem.empty(); }
 };
+
+// Runs `program` with `args`, its output and errors into `log`; the exit code, or nothing if it could not start.
+std::optional<int> run_program(const std::filesystem::path& program, const std::vector<std::string>& args,
+                                const std::filesystem::path& log);
 
 // Looks for curl on PATH (and in the Windows system folder) and runs `curl --version`.
 CurlCheck find_curl();

@@ -84,7 +84,7 @@ void Machine::reset_ports() {
     port05_ = 0;
     sound_.set_control(0, ticks_, audio_);
     if (tape_.ptr) {
-        tape_.ptr->tape_motor(ticks_, false);
+        tape_.ptr->tape_motor(ticks_, 0);
     }
     keyboard_row_ = 0;
     irq_flipflop_ = false;
@@ -205,7 +205,7 @@ void Machine::io_write(std::uint8_t port, std::uint8_t value) {
             break;
         case 0x05:
             if (tape_.ptr && ((port05_ ^ value) & 0xC0) != 0) {
-                tape_.ptr->tape_motor(ticks_, (value & 0xC0) != 0);
+                tape_.ptr->tape_motor(ticks_, value & 0xC0);
             }
             port05_ = value;
             sound_.set_control(value, ticks_, audio_);

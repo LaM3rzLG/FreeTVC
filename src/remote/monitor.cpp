@@ -312,6 +312,10 @@ const std::vector<Monitor::Command>& Monitor::commands() {
          "or a TCP peer on 127.0.0.1; flow rts: the peer sends only while the TVC's RTS is on; send queues bytes for the TVC "
          "(\\r \\n \\t \\xNN), file queues a file's bytes, capture appends what the TVC sends to a file, read shows what it "
          "sent since the last read; no argument: show the card and the line", &Monitor::cmd_serial},
+        {"tvcnet", "tvcnet [on [ch12|ch13] | off | baud n | t us | network on|off | log]",
+         "TVCnet in tape socket ch12 (05h b7) or ch13 (05h b6), or out: its UART on the motor line at n "
+         "baud (decimal), its replies line-coded with T = us microseconds (decimal), the host's network as its WiFi or none; "
+         "log shows its frames and line errors since the last log; no argument: show it", &Monitor::cmd_tvcnet},
         {"sddual", "sddual [on [gm] | off | insert 0|1 \"file\" | eject 0|1 | build \"out\" mib \"path\"...]",
          "Sebestyén Pál's SD Dual cartridge in the cartridge port (gm: its gamer-mode firmware) or out (powers on); a raw SD "
          "card image into socket 0 (microSD) or 1 (SD) or out of it (the cartridge notices); build writes a new FAT card image "
@@ -1768,6 +1772,51 @@ std::string Monitor::cmd_serial(Args& a) {
     return switch_card(a, "serial on [slot] | off | line off|on|listen[:port]|connect:port | flow rts|none | send \"text\" | file \"file\" | "
                           "capture \"file\"|none | read",
                        kSerialSlot, &MediaControl::serial_card, &MediaControl::serial_describe);
+}
+
+std::string Monitor::cmd_tvcnet(Args& a) {
+    if (!media_) {
+        fail("this front end has no program media");
+    }
+    const char* usage = "tvcnet on [ch12|ch13] | off | baud n | t us | network on|off | log";
+    TvcnetSettings settings = media_->tvcnet();
+    const std::string verb = a.size() > 0 ? lower(a[0]) : std::string();
+    if (a.size() == 0) {
+        return media_->tvcnet_describe() + "\n";
+    }
+    if (verb == "log" && a.size() == 1) {
+        std::string text;
+        for (const std::string& line : media_->tvcnet_log()) {
+            text += line + "\n";
+        }
+        return text.empty() ? "nothing since the last log\n" : text;
+    }
+    if (verb == "on" && a.size() <= 2) {
+        settings.plugged = true;
+        if (a.size() == 2) {
+            const auto socket = parse_tvcnet_socket(lower(a[1]));
+            if (!socket) {
+                fail(usage);
+            }
+            settings.socket = *socket;
+        }
+    } else if (verb == "off" && a.size() == 1) {
+        settings.plugged = false;
+    } else if ((verb == "baud" || verb == "t") && a.size() == 2) {
+        const std::string value = a[1];
+        const bool digits = !value.empty() && value.size() <= 6 && value.find_first_not_of("0123456789") == std::string::npos;
+        const unsigned amount = digits ? static_cast<unsigned>(std::stoul(value)) : 0;
+        if (verb == "baud" ? amount < 300 || amount > 115200 : amount < 20 || amount > 10000) {
+            fail(verb == "baud" ? "tvcnet baud: 300 to 115200" : "tvcnet t: 20 to 10000");
+        }
+        (verb == "baud" ? settings.baud : settings.t_us) = amount;
+    } else if (verb == "network" && a.size() == 2 && (lower(a[1]) == "on" || lower(a[1]) == "off")) {
+        settings.network = lower(a[1]) == "on";
+    } else {
+        fail(usage);
+    }
+    media_->set_tvcnet(settings);
+    return media_->tvcnet_describe() + "\n";
 }
 
 std::string Monitor::cmd_sddual(Args& a) {

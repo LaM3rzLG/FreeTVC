@@ -116,6 +116,10 @@ void print_usage(std::FILE* out) {
                  "                      or none\n"
                  "  --serial-send FILE  queue FILE's bytes for the TVC to receive (--serial on unless given)\n"
                  "  --serial-capture FILE  append everything the TVC sends to FILE (--serial on unless given)\n"
+                 "  --tvcnet [SOCKET]   TVCnet in tape socket ch12 (05h b7, default) or ch13 (05h b6)\n"
+                 "  --tvcnet-baud N     its UART on the motor line (default 2400)\n"
+                 "  --tvcnet-t US       its reply line code's T in microseconds (default 250)\n"
+                 "  --tvcnet-offline    TVCnet without WiFi (by default the host's network stands for it)\n"
                  "  --card256 [SLOT]    dikdom's TVC256k++ (fast RAM over U2/U3, PSRAM, registers) in SLOT 0-3 (default 0,\n"
                  "                      else the first free slot); its ROM card256.rom is found like the system ROMs\n"
                  "  --card256-rom FILE  the TVC256k++ with this 12 KiB ROM image\n"
@@ -393,6 +397,7 @@ int main(int argc, char** argv) {
     bool printer_on = false;
     std::optional<unsigned> serial_slot;
     std::string serial_peer, serial_flow, serial_send, serial_capture;
+    freetvc::TvcnetSettings tvcnet;
     std::string nanosd_rom_path;
     std::string nanosd_sd;
     std::optional<unsigned> card256_slot;  // kCardSlots: the default slot
@@ -608,6 +613,27 @@ int main(int argc, char** argv) {
             if (!serial_slot) {
                 serial_slot = freetvc::kSerialSlot;
             }
+        } else if (arg == "--tvcnet") {
+            tvcnet.plugged = true;
+            if (has_value) {
+                if (const auto socket = freetvc::parse_tvcnet_socket(argv[i + 1])) {
+                    tvcnet.socket = *socket;
+                    ++i;
+                }
+            }
+        } else if ((arg == "--tvcnet-baud" || arg == "--tvcnet-t") && has_value) {
+            const std::string value = argv[++i];
+            const bool digits = !value.empty() && value.size() <= 6 && value.find_first_not_of("0123456789") == std::string::npos;
+            const unsigned number = digits ? static_cast<unsigned>(std::stoul(value)) : 0;
+            if (arg == "--tvcnet-baud" ? number < 300 || number > 115200 : number < 20 || number > 10000) {
+                std::fprintf(stderr, "freetvc-headless: %s: %s\n", std::string(arg).c_str(), arg == "--tvcnet-baud" ? "300 to 115200" : "20 to 10000");
+                return kExitUsage;
+            }
+            (arg == "--tvcnet-baud" ? tvcnet.baud : tvcnet.t_us) = number;
+            tvcnet.plugged = true;
+        } else if (arg == "--tvcnet-offline") {
+            tvcnet.network = false;
+            tvcnet.plugged = true;
         } else if (arg == "--2dfx") {
             twodfx_slot = 2u;
             if (has_value && std::string_view(argv[i + 1]).size() == 1 && argv[i + 1][0] >= '0' && argv[i + 1][0] <= '3') {
@@ -1081,6 +1107,7 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "freetvc-headless: --serial-capture: %s\n", error.c_str());
         return kExitError;
     }
+    tape.set_tvcnet(tvcnet);
     if (!nanosd_sd.empty() && !tape.nanosd_sd(nanosd_sd, error)) {
         std::fprintf(stderr, "freetvc-headless: --nanosd-sd: %s\n", error.c_str());
         return kExitError;

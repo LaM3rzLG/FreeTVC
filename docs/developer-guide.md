@@ -150,6 +150,8 @@ The first prints `freeTVC 1.0.1` (the project version in `CMakeLists.txt`).
 | `FREETVC_USE_SYSTEM_SDL3` | `OFF` | use an installed SDL3 (`find_package(SDL3 3.2 CONFIG)`) instead of fetching it. Ubuntu 24.04 has no SDL3 package ❓ |
 | `FREETVC_SDL3_URL` | the GitHub release tarball | where to fetch SDL3 from; may be a `file://` URL |
 | `FREETVC_FONT_DIR` | empty | a local folder with the font files instead of downloading them |
+| `FREETVC_TVCNET_URL`, `FREETVC_TVCNET_SHA256` | empty | TVCnet firmware's tarball and its SHA-256; may be a `file://` URL |
+| `FETCHCONTENT_SOURCE_DIR_TVCNET` | empty | a local checkout of the TVCnet firmware repository instead of the tarball |
 
 Pass them at configure time, for example `cmake --preset gcc-release -DFREETVC_WERROR=ON`.
 
@@ -158,6 +160,7 @@ Pass them at configure time, for example `cmake --preset gcc-release -DFREETVC_W
 - **SDL3 3.4.18** (zlib licence): `https://github.com/libsdl-org/SDL/releases/download/release-3.4.18/SDL3-3.4.18.tar.gz`, SHA-256 `9c75cf16330322c217dedd2e0609f1124f1b54b8633e763467b4684d0f4334a3`, through CMake's `FetchContent` into `build/<preset>/_deps/`, built as a static library (`third_party/CMakeLists.txt`). Only with the GUI.
 - **Fonts**: Atkinson Hyperlegible Next (Regular, Medium) and Atkinson Hyperlegible Mono (Regular) with their SIL OFL 1.1 texts, from pinned commits of `googlefonts/atkinson-hyperlegible-next` and `googlefonts/atkinson-hyperlegible-next-mono` on `raw.githubusercontent.com`, each checked by SHA-256 (`cmake/FreeTVCFonts.cmake`), into `build/<preset>/fonts/`. Only with the GUI.
 - **ROMs**, only with `-DFREETVC_FETCH_ROMS=ON`.
+- **TVCnet's shared firmware code** (GPL-3.0-or-later), the `common/` library of the TVCnet firmware repository, through `FetchContent` (`third_party/CMakeLists.txt`), in every build, headless too: a tarball named by `FREETVC_TVCNET_URL` and checked against `FREETVC_TVCNET_SHA256`, or a local checkout of the repository given with CMake's own `-DFETCHCONTENT_SOURCE_DIR_TVCNET=<dir>`, which is how the firmware and the emulator are developed together. Configure stops with a message when neither is set; the pinned tarball's address and hash go into the cache variables' defaults when the firmware repository is published.
 
 Nothing else is downloaded. Dear ImGui, nlohmann/json, FatFs, littlefs, ymfm, reSID and floooh's `z80.h` are vendored in `third_party/` ([THIRD_PARTY.md](../THIRD_PARTY.md)).
 
@@ -171,7 +174,8 @@ Nothing else is downloaded. Dear ImGui, nlohmann/json, FatFs, littlefs, ymfm, re
 
   Alternatively `-DFREETVC_USE_SYSTEM_SDL3=ON` with an installed SDL3 3.2 or newer, or CMake's own `-DFETCHCONTENT_SOURCE_DIR_SDL3=<unpacked SDL3 source>`.
 - Fonts: `-DFREETVC_FONT_DIR=<dir>`, where `<dir>` holds exactly `AtkinsonHyperlegibleNext-Regular.ttf`, `AtkinsonHyperlegibleNext-Medium.ttf`, `AtkinsonHyperlegibleMono-Regular.ttf`, `OFL-Next.txt` and `OFL-Mono.txt` (the two upstream `OFL.txt` files renamed). The SHA-256 of each is checked. The easiest copy is `build/<preset>/fonts/` of an earlier online configure; the URLs and hashes are in `cmake/FreeTVCFonts.cmake`.
-- Or configure with `-DFREETVC_BUILD_GUI=OFF`, which needs no download at all.
+- The TVCnet firmware: `-DFETCHCONTENT_SOURCE_DIR_TVCNET=<checkout>`, or its tarball as a `file://` URL in `FREETVC_TVCNET_URL`.
+- Or configure with `-DFREETVC_BUILD_GUI=OFF`, which needs no download apart from the TVCnet firmware.
 
 A later configure of the same build tree does not download again: the SDL3 source stays in `_deps/`, and font files whose hash matches are kept.
 

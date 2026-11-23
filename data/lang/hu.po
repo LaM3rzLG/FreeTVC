@@ -3778,3 +3778,40 @@ msgstr "egy képkocka sem került a felvételbe"
 #, c-format
 msgid "ffmpeg failed: %s"
 msgstr "az ffmpeg hibát jelzett: %s"
+
+msgid "TVCnet on the network"
+msgstr "TVCnet a hálózaton"
+
+msgid "TVCnet without a network"
+msgstr "TVCnet hálózat nélkül"
+
+msgid "TVCnet unplugged"
+msgstr "TVCnet kihúzva"
+
+#, c-format
+msgid "TVCnet in %s"
+msgstr "TVCnet a(z) %s aljzatban"
+
+msgid "No TVCnet"
+msgstr "Nincs TVCnet"
+
+msgid "TVCnet in CH12 (05h b7)"
+msgstr "TVCnet a CH12 aljzatban (05h b7)"
+
+msgid "A UART on this socket's motor line goes to TVCnet; its replies arrive on the tape input. The deck stays in the other socket"
+msgstr "Az aljzat motorvezérlő vonalán UART megy a TVCnet-nek, a válaszai a magnó bemenetén érkeznek. A magnó a másik aljzatban marad"
+
+msgid "TVCnet in CH13 (05h b6)"
+msgstr "TVCnet a CH13 aljzatban (05h b6)"
+
+msgid "The host's network stands for TVCnet's WiFi; off, it answers as if it had none"
+msgstr "A gép hálózata helyettesíti a TVCnet WiFi-jét; kikapcsolva úgy válaszol, mintha nem volna WiFi-je"
+
+msgid "tvcnet is no, ch12 or ch13"
+msgstr "a tvcnet értéke no, ch12 vagy ch13"
+
+msgid "tvcnet_baud is 300 to 115200"
+msgstr "a tvcnet_baud értéke 300 és 115200 között"
+
+msgid "tvcnet_t is 20 to 10000"
+msgstr "a tvcnet_t értéke 20 és 10000 között"

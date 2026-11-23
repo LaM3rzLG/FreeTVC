@@ -46,6 +46,10 @@ struct Settings {
     std::optional<bool> serial_card;           // the serial card in slot 1
     std::optional<std::string> serial_line;    // its cable: off, on, listen[:PORT] or connect:PORT
     std::optional<std::string> serial_flow;    // rts or none
+    std::optional<std::string> tvcnet;         // TVCnet: no, ch12 or ch13 (the socket)
+    std::optional<unsigned> tvcnet_baud;       // its UART on the motor line, 300-115200
+    std::optional<unsigned> tvcnet_t;          // its reply line code's T in microseconds, 20-10000
+    std::optional<bool> tvcnet_network;        // the host's network stands for its WiFi
     std::optional<unsigned> gamecard_slot;     // the slot those keys name, when a number
     std::optional<unsigned> multichip_slot;
     std::optional<unsigned> card256_slot;
