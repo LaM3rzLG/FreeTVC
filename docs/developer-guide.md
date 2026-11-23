@@ -30,7 +30,7 @@ All commands run from the repository root unless a step says otherwise. Commands
 | Ninja | any recent | every preset uses the Ninja generator |
 | C and C++ compiler | C11 and C++20 | `CMAKE_C_STANDARD 11`, `CMAKE_CXX_STANDARD 20`, extensions off |
 | Python 3 | 3.x, standard library only | tests `remote.png` and `ui.translation_coverage` (skipped from the test list when CMake finds no interpreter) |
-| Network at the first configure | | SDL3 source tarball and the GUI fonts (see [Offline builds](#offline-builds)); the optional ROM autofetch |
+| Network at the first configure | | TVCnet's firmware code (every build), the SDL3 source tarball and the GUI fonts (see [Offline builds](#offline-builds)); the optional ROM autofetch |
 
 The tested combination is an Ubuntu 24.04-based Linux with GCC 13.3, Clang 18.1, CMake 3.28.3, Ninja 1.11.1 and Python 3.12. Older compilers are not tested ❓: Ubuntu 22.04's CMake 3.22 is too old for the presets.
 
@@ -143,7 +143,7 @@ The first prints `freeTVC 1.0.1` (the project version in `CMakeLists.txt`).
 
 | Option | Default | Effect |
 |---|---|---|
-| `FREETVC_BUILD_GUI` | `ON` | the SDL3 + Dear ImGui GUI. `OFF` builds the headless runner and the tests only: no SDL3, no fonts, no network at configure, and no `ui.*` or `input.host` tests |
+| `FREETVC_BUILD_GUI` | `ON` | the SDL3 + Dear ImGui GUI. `OFF` builds the headless runner and the tests only: no SDL3, no fonts, no network at configure apart from TVCnet's firmware code, and no `ui.*` or `input.host` tests |
 | `FREETVC_BUILD_TESTS` | `ON` | the test programs and CTest registration |
 | `FREETVC_WERROR` | `OFF` | warnings in freeTVC's own targets become errors (`-Werror`, `/WX`) |
 | `FREETVC_FETCH_ROMS` | `OFF` | the ROM autofetch at configure time ([ROMs](#roms)) |

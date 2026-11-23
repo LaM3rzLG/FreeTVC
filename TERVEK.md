@@ -22,7 +22,7 @@ Közös (Windows + Mac), nem platformfüggő fejlesztések. A Mac-es fordítás/
 - Nyitott (nem PC): Mac `.app` csomag (Finder-ikon); teljes képernyős tearing-ellenőrzés Macen; Linuxon a sima megjelenítés nincs kipróbálva.
 
 ## TVCnet, magnóportos WiFi modul (1.3.4, `tape-wifi-dongle` ág; 2026-11-19)
-A TVCnet hardvere, protokollja és firmware-je: `~/tvc-wifi/firmware` (`HARDVER.md`, `PROTOKOLL.md`); belső jegyzetek: `~/tvc-wifi`.
+A TVCnet hardvere, protokollja és firmware-je: https://github.com/Deybacsi/TVCnet (`HARDVER.md`, `PROTOKOLL.md`).
 - KÉSZ: a firmware közös része (`common/`: keret, vonali kód, modem) a freeTVC magjába fordul (FetchContent, mint az SDL3);
   `TapePort::tape_motor` mindkét motorbitet kapja; `TapeSockets` (a magnó a másik aljzatban), `TapeTvcnet` (UART a motorvonalon,
   impulzusszélesség-kód a 59h b5-ön), hálózat curl-lel (`TvcnetNetwork`); `--tvcnet*`, ini kulcsok, Tape menü, monitor `tvcnet`, MCP;
@@ -30,7 +30,7 @@ A TVCnet hardvere, protokollja és firmware-je: `~/tvc-wifi/firmware` (`HARDVER.
 - KÉSZ (2026-11-23): a freeTVC a https://github.com/Deybacsi/TVCnet egy rögzített commitját húzza le (`third_party/CMakeLists.txt`,
   `FREETVC_TVCNET_COMMIT` + SHA256). Minden configure megnézi (`git ls-remote`), van-e újabb a `main`-en, és ha igen,
   figyelmeztet; `tools/tvcnet/update_pin.sh` állítja a rögzítést a legfrissebbre (utána fordítás és tesztek). Fejlesztéshez
-  `-DFETCHCONTENT_SOURCE_DIR_TVCNET=~/tvc-wifi/firmware` (Macen `TVCNET_DIR=... tools/mac/build_mac.sh`).
+  `-DFETCHCONTENT_SOURCE_DIR_TVCNET=<helyi TVCnet checkout>` (Macen `TVCNET_DIR=<checkout> tools/mac/build_mac.sh`).
 - HÁTRA: az ESP32-S3 firmware (`esp32s3/`, PlatformIO) lefordul, de valódi hardveren még nincs kipróbálva; HTTPS tanúsítvány-ellenőrzés nélkül.
 - KÉSZ (2026-11-23): TCP (`OPEN`/`SEND`, a gépen saját socket-szállal) és a Hayes modem (`TERM`, 30h: AT parancsok,
   `ATD`, `+++`, `ATO`, `ATH`, `AT&G`); protokoll verzió 2. A TVC oldali tesztprogramok a firmware repó `tvc/` mappájában
