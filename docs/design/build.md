@@ -65,7 +65,7 @@ The module boundaries are described in [architecture.md](architecture.md).
   - SDL 3.4 fails at configure when an enabled extension is missing: install `libxtst-dev`, or configure with `-DSDL_X11_XTEST=OFF` (freeTVC does not use XTest).
   - With `libpipewire-0.3-dev` installed, SDL3 also builds its PipeWire audio backend.
 - **First configure with the GUI:** network access for the SDL3 tarball and the fonts, or local copies (`FREETVC_SDL3_URL`, `FREETVC_FONT_DIR`, below).
-- **Every first configure:** TVCnet's firmware code, from its tarball or a local checkout (below).
+- **Every first configure:** TVCnet's firmware code, from its pinned GitHub tarball or a local checkout (below).
 - **Optional:** Python 3 (tests `remote.png` and `ui.translation_coverage`), sjasmplus (test `debug.disasm_sjasmplus`), curl at run time (the programs' ROM download), MinGW-w64 and Wine (the Windows cross build and its tests).
 
 ## Presets
@@ -99,8 +99,9 @@ Every test preset excludes the label `slow`; `gcc-release-slow` runs only it. Al
 | `FREETVC_USE_SYSTEM_SDL3` | OFF | use an installed SDL3 (`find_package(SDL3 3.2 CONFIG)`) instead of fetching it |
 | `FREETVC_SDL3_URL` | the SDL 3.4.18 release tarball on GitHub | another location of the same tarball, also `file:///path/SDL3-3.4.18.tar.gz`; its SHA-256 is checked either way |
 | `FREETVC_FONT_DIR` | empty | a local folder with the font files instead of downloading them; their SHA-256 is checked either way |
-| `FREETVC_TVCNET_URL`, `FREETVC_TVCNET_SHA256` | empty | TVCnet firmware's tarball and its SHA-256, also a `file://` URL |
-| `FETCHCONTENT_SOURCE_DIR_TVCNET` | empty | CMake's own override: a local checkout of the TVCnet firmware repository instead of the tarball |
+| `FREETVC_TVCNET_URL`, `FREETVC_TVCNET_SHA256` | empty: the pinned commit | another tarball of the TVCnet firmware and its SHA-256, also a `file://` URL |
+| `FREETVC_TVCNET_CHECK` | `ON` | warn at configure time when the TVCnet repository's `main` is not the pinned commit |
+| `FETCHCONTENT_SOURCE_DIR_TVCNET` | empty | CMake's own override: a local checkout of the TVCnet firmware repository instead of the pinned tarball |
 | `FREETVC_TEST_DATA` and the other test-data variables | `testdata/` | [Test data](#test-data) |
 
 Warnings: GCC and Clang get `-Wall -Wextra -Wpedantic -Wshadow`; MSVC gets `/W4 /utf-8` and, for C++, `/permissive- /Zc:__cplusplus` (`cmake/FreeTVCWarnings.cmake`). Third-party targets keep their defaults; two vendored libraries get one warning switched off each (ymfm `-Wno-stringop-overflow` on GCC, reSID `-Wno-deprecated-enum-float-conversion` on GCC and Clang, both explained in `third_party/CMakeLists.txt`).
@@ -121,7 +122,7 @@ Vendored in `third_party/` (versions, hashes and changes in `THIRD_PARTY.md`):
 
 Fetched at configure time, in every build:
 
-- **TVCnet's shared firmware code** (GPL-3.0-or-later), the `common/` library of the TVCnet firmware repository, through `FetchContent` (`third_party/CMakeLists.txt`), in every build, headless too: a tarball named by `FREETVC_TVCNET_URL` and checked against `FREETVC_TVCNET_SHA256`, or a local checkout of the repository given with CMake's own `-DFETCHCONTENT_SOURCE_DIR_TVCNET=<dir>`, which is how the firmware and the emulator are developed together. Configure stops with a message when neither is set; the pinned tarball's address and hash go into the cache variables' defaults when the firmware repository is published.
+- **TVCnet's shared firmware code** (GPL-3.0-or-later), the `common/` library of the [TVCnet firmware repository](https://github.com/Deybacsi/TVCnet), through `FetchContent` (`third_party/CMakeLists.txt`), in every build, headless too: GitHub's tarball of a pinned commit (`FREETVC_TVCNET_COMMIT`), checked against its SHA-256 (`FREETVC_TVCNET_PIN_SHA256`). The firmware's `common/` is an interface both sides implement, so freeTVC follows it by moving the pin, not by building whatever is newest: `tools/tvcnet/update_pin.sh [commit]` sets the commit (default: the repository's `main`) and its hash, then the build and the tests show whether freeTVC needs changes. Every configure that uses the pin asks the repository (`git ls-remote`, at most 10 s, `cmake/TvcnetCheck.cmake`) and warns when `main` is at another commit; without git or a network it stays silent, and `-DFREETVC_TVCNET_CHECK=OFF` turns it off. `FREETVC_TVCNET_URL` with `FREETVC_TVCNET_SHA256` names another tarball, and CMake's own `-DFETCHCONTENT_SOURCE_DIR_TVCNET=<checkout>` uses a local copy of the repository, which is how the firmware and the emulator are developed together (no check then).
 
 Fetched at configure time (GUI builds only):
 

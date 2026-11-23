@@ -27,9 +27,10 @@ A TVCnet hardvere, protokollja és firmware-je: `~/tvc-wifi/firmware` (`HARDVER.
   `TapePort::tape_motor` mindkét motorbitet kapja; `TapeSockets` (a magnó a másik aljzatban), `TapeTvcnet` (UART a motorvonalon,
   impulzusszélesség-kód a 59h b5-ön), hálózat curl-lel (`TvcnetNetwork`); `--tvcnet*`, ini kulcsok, Tape menü, monitor `tvcnet`, MCP;
   `core.tvcnet` teszt, `tools/tvcnet/run_checks.sh`, GUI-ban is kipróbálva. Leírás: `docs/design/media.md`.
-- HÁTRA a push / kiadás előtt: a firmware repó GitHubra (`Deybacsi/TVCnet`, nyilvános), egy tag, és annak tarballja + SHA256 a
-  `FREETVC_TVCNET_URL` / `_SHA256` alapértékébe (`third_party/CMakeLists.txt`); addig a freeTVC csak
-  `-DFETCHCONTENT_SOURCE_DIR_TVCNET=~/tvc-wifi/firmware`-rel konfigurálható (a Mac-es `build_mac.sh` is).
+- KÉSZ (2026-11-23): a freeTVC a https://github.com/Deybacsi/TVCnet egy rögzített commitját húzza le (`third_party/CMakeLists.txt`,
+  `FREETVC_TVCNET_COMMIT` + SHA256). Minden configure megnézi (`git ls-remote`), van-e újabb a `main`-en, és ha igen,
+  figyelmeztet; `tools/tvcnet/update_pin.sh` állítja a rögzítést a legfrissebbre (utána fordítás és tesztek). Fejlesztéshez
+  `-DFETCHCONTENT_SOURCE_DIR_TVCNET=~/tvc-wifi/firmware` (Macen `TVCNET_DIR=... tools/mac/build_mac.sh`).
 - HÁTRA: az ESP32-S3 firmware (`esp32s3/`, PlatformIO) lefordul, de valódi hardveren még nincs kipróbálva; HTTPS tanúsítvány-ellenőrzés nélkül.
 - KÉSZ (2026-11-23): TCP (`OPEN`/`SEND`, a gépen saját socket-szállal) és a Hayes modem (`TERM`, 30h: AT parancsok,
   `ATD`, `+++`, `ATO`, `ATH`, `AT&G`); protokoll verzió 2. A TVC oldali tesztprogramok a firmware repó `tvc/` mappájában

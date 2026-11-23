@@ -170,7 +170,7 @@ Five files: headers at 5.3, 17.5, 53.1, 70.2 and 98.7 s (the last three unnamed)
 
 ## TVCnet, the tape-port WiFi module
 
-A WiFi modem for a tape socket: an ESP32-S3 board on the DIN plug, powered from pin 4. The TVC sends requests on the socket's motor line and receives the replies on the tape input; TVCnet does WiFi, DNS, HTTP and HTTPS GETs, TCP connections and a Hayes modem's AT commands. Its hardware, protocol and firmware live in TVCnet's own firmware repository. freeTVC builds that firmware's hardware-independent part (`common/`: frames, the alternating bit, the commands and the reply line code) into the core, so the emulated TVCnet runs the same code as the real one.
+A WiFi modem for a tape socket: an ESP32-S3 board on the DIN plug, powered from pin 4. The TVC sends requests on the socket's motor line and receives the replies on the tape input; TVCnet does WiFi, DNS, HTTP and HTTPS GETs, TCP connections and a Hayes modem's AT commands. Its hardware, protocol and firmware live in TVCnet's own firmware repository, https://github.com/Deybacsi/TVCnet; freeTVC builds a pinned commit of it ([build.md](build.md)). freeTVC builds that firmware's hardware-independent part (`common/`: frames, the alternating bit, the commands and the reply line code) into the core, so the emulated TVCnet runs the same code as the real one.
 
 ### The two lines
 
